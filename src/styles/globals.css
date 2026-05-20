@@ -1,0 +1,329 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Curve newspaper edition styles.
+ *
+ * Paper is the brand. Type is the voice. Color is one stamp of red.
+ */
+@layer base {
+  :root {
+    /* Surfaces */
+    --paper: 43 42% 90%;
+    --paper-warm: 39 38% 86%;
+    --paper-soft: 44 40% 93%;
+
+    /* Ink */
+    --ink: 28 12% 9%;
+    --ink-strong: 28 16% 5%;
+    --ink-body: 28 12% 17%;
+    --ink-muted: 28 9% 31%;
+    --ink-faded: 28 7% 43%;
+
+    /* Rules */
+    --rule: 28 14% 14%;
+    --rule-soft: 28 9% 28%;
+
+    /* Stamp red */
+    --stamp: 5 68% 36%;
+    --stamp-soft: 5 60% 92%;
+
+    color-scheme: light;
+  }
+
+  .dark {}
+
+  * { border-color: hsl(var(--rule-soft) / 0.48); }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
+    font-optical-sizing: auto;
+  }
+
+  body {
+    background-color: hsl(var(--paper));
+    color: hsl(var(--ink-body));
+    font-family: theme("fontFamily.serif");
+    font-size: 17px;
+    line-height: 1.75;
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.035) calc(50% - 1px),
+        hsl(var(--ink) / 0.035) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(var(--paper-soft)) 0%,
+        hsl(var(--paper)) 14%,
+        hsl(var(--paper)) 86%,
+        hsl(var(--paper-warm)) 100%
+      ),
+      radial-gradient(hsl(var(--ink) / 0.014) 1px, transparent 1px),
+      radial-gradient(hsl(var(--ink) / 0.01) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 18px 18px, 30px 30px;
+    background-position: center top, 0 0, 0 0, 9px 9px;
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--paper-warm) / 0.2),
+      inset 0 18px 48px hsl(var(--ink) / 0.018);
+  }
+
+  ::selection {
+    background: hsl(var(--stamp) / 0.18);
+    color: hsl(var(--ink-strong));
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--rule-soft) / 0.4);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--rule-soft) / 0.7);
+    background-clip: padding-box;
+  }
+
+  a { color: inherit; text-decoration: none; }
+}
+
+@layer components {
+  .prose-news {
+    color: hsl(var(--ink-body));
+    font-family: theme("fontFamily.serif");
+    font-size: 18px;
+    line-height: 1.95;
+    text-align: left;
+    text-justify: inter-ideograph;
+    hyphens: auto;
+    word-break: break-word;
+  }
+  .prose-news > :first-child { margin-top: 0; }
+  .prose-news > :last-child { margin-bottom: 0; }
+  .prose-news > * + * { margin-top: 1.15em; }
+  .prose-news p,
+  .prose-news li { text-wrap: pretty; }
+  .prose-news p { hanging-punctuation: first last; }
+
+  .prose-news-article > p:first-of-type {
+    font-size: 19px;
+    line-height: 2;
+    color: hsl(var(--ink-strong));
+  }
+  .prose-news-article > p:first-of-type::first-letter {
+    float: left;
+    margin-right: 0.12em;
+    font-family: theme("fontFamily.display");
+    font-size: 3.4em;
+    font-weight: 700;
+    line-height: 0.9;
+    color: hsl(var(--stamp));
+  }
+
+  .prose-news h1,
+  .prose-news h2,
+  .prose-news h3,
+  .prose-news h4 {
+    font-family: theme("fontFamily.display");
+    color: hsl(var(--ink-strong));
+    font-weight: 600;
+    text-align: left;
+    scroll-margin-top: 6rem;
+  }
+  .prose-news h1 {
+    font-size: 34px;
+    line-height: 1.2;
+    margin-top: 1.7em;
+    letter-spacing: 0;
+  }
+  .prose-news h2 {
+    font-size: 28px;
+    line-height: 1.3;
+    margin-top: 2em;
+    padding-bottom: 0.45em;
+    border-bottom: 1px solid hsl(var(--rule));
+    letter-spacing: 0;
+  }
+  .prose-news h3 {
+    font-size: 22px;
+    line-height: 1.42;
+    margin-top: 1.7em;
+  }
+  .prose-news h4 {
+    font-size: 18px;
+    line-height: 1.5;
+    margin-top: 1.35em;
+    font-weight: 700;
+  }
+
+  .prose-news a {
+    color: hsl(var(--ink-strong));
+    border-bottom: 1px solid hsl(var(--ink-strong));
+    padding-bottom: 1px;
+    transition: color 150ms ease, border-color 150ms ease;
+  }
+  .prose-news a:hover {
+    color: hsl(var(--stamp));
+    border-bottom-color: hsl(var(--stamp));
+  }
+
+  .prose-news strong {
+    color: hsl(var(--ink-strong));
+    font-weight: 700;
+  }
+  .prose-news em { font-style: italic; }
+
+  .prose-news ul,
+  .prose-news ol { padding-left: 1.35em; }
+  .prose-news ul { list-style: disc; }
+  .prose-news ol { list-style: decimal; }
+  .prose-news ul li::marker,
+  .prose-news ol li::marker {
+    color: hsl(var(--stamp));
+    font-family: theme("fontFamily.mono");
+    font-size: 0.9em;
+  }
+  .prose-news li {
+    margin-top: 0.45em;
+    padding-left: 0.15em;
+    text-align: left;
+  }
+
+  .prose-news blockquote {
+    margin: 1.8em 0;
+    padding: 1em 1.1em 1em 1.25em;
+    border-left: 4px solid hsl(var(--stamp));
+    background: hsl(var(--paper-soft) / 0.85);
+    font-family: theme("fontFamily.serif");
+    font-size: 18px;
+    line-height: 1.85;
+    font-style: normal;
+    color: hsl(var(--ink-strong));
+    text-align: left;
+  }
+  .prose-news blockquote > :first-child { margin-top: 0; }
+  .prose-news blockquote > :last-child { margin-bottom: 0; }
+
+  .prose-news code:not(pre code) {
+    font-family: theme("fontFamily.mono");
+    font-size: 0.88em;
+    background: hsl(var(--paper-warm) / 0.8);
+    color: hsl(var(--ink-strong));
+    padding: 0.14em 0.42em;
+    border: 1px solid hsl(var(--rule-soft) / 0.34);
+    border-radius: 0;
+  }
+
+  .prose-news figure[data-rehype-pretty-code-figure] { margin: 1.8em 0; }
+  .prose-news pre {
+    background: hsl(var(--ink-strong));
+    color: hsl(var(--paper-soft));
+    padding: 1.05rem 1.15rem;
+    overflow-x: auto;
+    font-family: theme("fontFamily.mono");
+    font-size: 14px;
+    line-height: 1.7;
+    border: 1px solid hsl(var(--rule) / 0.22);
+    border-radius: 0;
+    text-align: left;
+  }
+  .prose-news figure[data-rehype-pretty-code-figure] pre { margin: 0; }
+  .prose-news pre code {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    padding: 0;
+  }
+
+  .prose-news img {
+    border: 1px solid hsl(var(--rule));
+    margin: 1.5em auto;
+    border-radius: 0;
+    filter: contrast(0.96) saturate(0.92);
+  }
+
+  .prose-news hr {
+    margin: 2.5em 0;
+    border: 0;
+    border-top: 1px solid hsl(var(--rule));
+    position: relative;
+  }
+  .prose-news hr::after {
+    content: "* * *";
+    position: absolute;
+    top: -0.8em;
+    left: 50%;
+    transform: translateX(-50%);
+    background: hsl(var(--paper));
+    padding: 0 0.4em;
+    color: hsl(var(--stamp));
+    font-size: 12px;
+  }
+
+  .prose-news table {
+    display: block;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    margin: 1.5em 0;
+    border-top: 2px solid hsl(var(--rule));
+    border-bottom: 2px solid hsl(var(--rule));
+    overflow-x: auto;
+  }
+  .prose-news th,
+  .prose-news td {
+    border-bottom: 1px solid hsl(var(--rule-soft) / 0.4);
+    padding: 0.7em 0.8em;
+    text-align: left;
+  }
+  .prose-news th {
+    color: hsl(var(--ink));
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+  }
+}
+
+@layer utilities {
+  .font-masthead { font-family: theme("fontFamily.masthead"); }
+  .font-display { font-family: theme("fontFamily.display"); }
+  .font-serif { font-family: theme("fontFamily.serif"); }
+  .font-ui { font-family: theme("fontFamily.sans"); }
+
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  .rule-double {
+    border-top: 1px solid hsl(var(--rule));
+    border-bottom: 1px solid hsl(var(--rule));
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .rule-double-thick {
+    border-top: 3px solid hsl(var(--rule));
+    border-bottom: 1px solid hsl(var(--rule));
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  .text-justify-news {
+    text-align: justify;
+    text-justify: inter-ideograph;
+  }
+}

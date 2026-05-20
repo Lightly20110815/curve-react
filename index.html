@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#e3d3ab" />
+    <title>The Curve Times · 曲線時報</title>
+    <meta name="description" content="一份个人早报。一个用代码与文字搭起来的家。" />
+
+    <!--
+      Fonts:
+      - Playfair Display → masthead + headlines (dramatic serif)
+      - Noto Serif SC → readable mixed Chinese/Latin headlines + prose
+      - Inter + Noto Sans SC → UI sans (buttons, nav)
+      - JetBrains Mono → dates, classifieds, code
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      Cream is the only mode. Strip any legacy theme preference that may
+      have been written by older builds so users don't get stuck in dark.
+    -->
+    <script>
+      (function () {
+        try {
+          localStorage.removeItem("curve-theme");
+        } catch (_) {}
+        document.documentElement.classList.remove("dark");
+        document.documentElement.style.colorScheme = "light";
+      })();
+    </script>
+
+    <style>
+      html { background-color: #e3d3ab; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

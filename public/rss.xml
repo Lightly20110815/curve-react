@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>The Curve Times</title>
+  <link>https://chiyu.it</link>
+  <description>A quiet corner built with code and words.</description>
+  <language>zh-CN</language>
+  <atom:link href="https://chiyu.it/rss.xml" rel="self" type="application/rss+xml" />
+  <lastBuildDate>Sat, 25 Apr 2026 00:00:00 GMT</lastBuildDate>
+  <ttl>60</ttl>
+  <item>
+    <title>依恋的形状</title>
+    <link>https://chiyu.it/posts/attachment</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/attachment</guid>
+    <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>焦虑型依恋的自我解构——从成长裂痕到关系死循环，一份写给自己的病理报告。</description>
+    <category>随笔</category>
+    <category>依恋</category>
+    <category>心理</category>
+    <category>自我剖析</category>
+    <category>情绪</category>
+  </item>
+  <item>
+    <title>关于“芜湖市德智拓展训练有限公司”以及“芜湖市无为市德智青少年成长中心”的维权报告</title>
+    <link>https://chiyu.it/posts/dzgc</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/dzgc</guid>
+    <pubDate>Sun, 22 Mar 2026 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>关于这些所谓的“矫正机构”的报告</description>
+    <category>权益维护</category>
+    <category>报告</category>
+  </item>
+  <item>
+    <title>给你的 Curve 主题通过调起 DeepSeek 添加一个侧边栏温柔问候语</title>
+    <link>https://chiyu.it/posts/deepseek</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/deepseek</guid>
+    <pubDate>Mon, 20 Oct 2025 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>Curve 主题：DeepSeek 首页问候组件</description>
+    <category>开发教程</category>
+    <category>开发</category>
+  </item>
+  <item>
+    <title>给你的 Curve 主题添加一个 DeepSeek 代理</title>
+    <link>https://chiyu.it/posts/dpsk</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/dpsk</guid>
+    <pubDate>Sun, 19 Oct 2025 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>用两种方式部署 DeepSeek API 代理：Vercel Edge 函数与本地/服务器 Node 代理（支持 SSE 流式）</description>
+    <category>部署</category>
+    <category>开发</category>
+  </item>
+  <item>
+    <title>给你的 Curve 主题添加一个首页提示弹窗</title>
+    <link>https://chiyu.it/posts/tips</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/tips</guid>
+    <pubDate>Tue, 05 Aug 2025 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>Curve 主题：提示弹窗</description>
+    <category>开发教程</category>
+    <category>开发</category>
+  </item>
+  <item>
+    <title>给你的 Curve 主题添加一个出生天数的侧边栏</title>
+    <link>https://chiyu.it/posts/bt</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/bt</guid>
+    <pubDate>Mon, 04 Aug 2025 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>Curve 主题：出生天数侧边栏</description>
+    <category>开发教程</category>
+    <category>开发</category>
+  </item>
+  <item>
+    <title>VPS:一个脚本搞定常用工具</title>
+    <link>https://chiyu.it/posts/hy2</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/hy2</guid>
+    <pubDate>Thu, 24 Jul 2025 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>一个新VPS搭建代理工具+测速+流媒体+Hy2/Xui的小工具</description>
+    <category>工具箱</category>
+    <category>工具</category>
+    <category>教程</category>
+  </item>
+  <item>
+    <title>你好，世界？</title>
+    <link>https://chiyu.it/posts/hello-world</link>
+    <guid isPermaLink="true">https://chiyu.it/posts/hello-world</guid>
+    <pubDate>Thu, 24 Jul 2025 00:00:00 GMT</pubDate>
+    <author>swanyang7@gmail.com (Sy)</author>
+    <description>这里是一个小小的角落，一个勉强算是&quot;家&quot;的地方。</description>
+    <category>随笔</category>
+    <category>你好世界</category>
+    <category>建站</category>
+    <category>心情</category>
+  </item>
+</channel>
+</rss>
