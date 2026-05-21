@@ -333,8 +333,8 @@ export function DailyPoetry() {
   }
 
   return (
-    <section className="border-y-[3px] border-double border-rule py-5 md:py-6" aria-label="每日诗词">
-      <div>
+    <section className="py-6 md:py-7" aria-label="每日诗词">
+      <div className="mx-auto max-w-2xl">
         <div
           className={`min-h-[6.75rem] transition-all duration-500 ease-out ${
             show ? "translate-y-0 opacity-100" : "translate-y-1.5 opacity-0"

@@ -4,13 +4,13 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { to: "/", label: "FRONT", subLabel: "头版", end: true },
-  { to: "/archives", label: "ARCHIVES", subLabel: "存档" },
-  { to: "/categories", label: "SECTIONS", subLabel: "版块" },
-  { to: "/tags", label: "INDEX", subLabel: "索引" },
-  { to: "/notes", label: "OPINION", subLabel: "随笔" },
-  { to: "/about", label: "MASTHEAD", subLabel: "编者" },
-];
+  { to: "/", label: "FRONT", subLabel: "头版", end: true, width: "min-w-[68px]" },
+  { to: "/archives", label: "ARCHIVES", subLabel: "存档", end: false, width: "min-w-[82px]" },
+  { to: "/categories", label: "SECTIONS", subLabel: "版块", end: false, width: "min-w-[74px]" },
+  { to: "/tags", label: "INDEX", subLabel: "索引", end: false, width: "min-w-[72px]" },
+  { to: "/notes", label: "OPINION", subLabel: "随笔", end: false, width: "min-w-[78px]" },
+  { to: "/about", label: "MASTHEAD", subLabel: "编者", end: false, width: "min-w-[70px]" },
+] as const;
 
 /**
  * Sub-navigation strip — sits under the masthead.
@@ -41,14 +41,14 @@ export function Nav() {
         scrolled && "shadow-[0_2px_0_0_hsl(var(--rule)/0.3)]",
       )}
     >
-      <div className="container flex items-center justify-between">
+      <div className="container flex items-center justify-between gap-4">
         {/* Tiny sticky title when scrolled */}
-        <Link to="/" className="font-masthead text-[18px] font-bold text-ink hover:text-stamp">
-          The Curve Times
+        <Link to="/" className="font-masthead text-[16px] font-bold tracking-tight text-ink transition-colors hover:text-stamp">
+          Curve
         </Link>
 
         {/* Desktop links */}
-        <ul className="hidden divide-x divide-rule-soft/35 md:flex">
+        <ul className="hidden items-end gap-2 md:flex">
           {links.map((l) => (
             <li key={l.to}>
               <NavLink
@@ -56,23 +56,31 @@ export function Nav() {
                 end={l.end}
                 className={({ isActive }) =>
                   cn(
-                    "group flex flex-col items-center px-3 py-3 transition-colors",
-                    isActive ? "text-stamp" : "text-ink hover:text-stamp",
+                    "group flex flex-col items-center border-b-[4px] border-transparent px-2 pb-2 pt-1.5 transition-colors",
+                    l.width,
+                    isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <span className="font-ui text-[12px] font-semibold uppercase">
-                      {l.label}
-                    </span>
                     <span
                       className={cn(
-                        "mt-0.5 font-ui text-[12px] font-medium",
-                        isActive ? "text-stamp" : "text-ink-muted group-hover:text-stamp",
+                        "font-ui text-[13px] tracking-[0.08em]",
+                        isActive
+                          ? "font-black text-stamp"
+                          : "font-semibold text-ink-strong group-hover:text-stamp",
                       )}
                     >
                       {l.subLabel}
+                    </span>
+                    <span
+                      className={cn(
+                        "mt-1 font-ui text-[9px] font-medium uppercase tracking-[0.18em]",
+                        isActive ? "text-stamp/85" : "text-ink-muted group-hover:text-stamp/70",
+                      )}
+                    >
+                      {l.label}
                     </span>
                   </>
                 )}
@@ -104,16 +112,16 @@ export function Nav() {
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     cn(
-                      "flex items-baseline justify-between py-3 transition-colors",
-                      isActive ? "text-stamp" : "text-ink hover:text-stamp",
+                      "flex items-baseline justify-between border-l-2 border-transparent py-3 pl-2 transition-colors",
+                      isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
                     )
                   }
                 >
-                  <span className="font-ui text-[13px] font-semibold uppercase">
-                    {l.label}
-                  </span>
-                  <span className="font-ui text-[13px] font-medium text-ink-muted">
+                  <span className="font-ui text-[13px] font-semibold">
                     {l.subLabel}
+                  </span>
+                  <span className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
+                    {l.label}
                   </span>
                 </NavLink>
               </li>

@@ -30,8 +30,8 @@ export function Footer() {
   const today = new Date();
 
   return (
-    <footer className="mt-section border-t-[3px] border-rule">
-      <div className="border-b border-rule">
+    <footer className="mt-section border-t border-rule-soft/60">
+      <div className="border-b border-rule-soft/55">
         <div className="container py-3">
           <p className="text-center font-serif text-[14px] text-ink-muted">
             <span aria-hidden className="mr-2 text-stamp">✦</span>
@@ -43,7 +43,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="container grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="container grid gap-10 py-10 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Link to="/" className="font-masthead text-[28px] font-black leading-none text-ink-strong">
             The Curve Times
@@ -59,7 +59,7 @@ export function Footer() {
 
         {sections.map((section) => (
           <div key={section.title}>
-            <p className="border-b border-rule pb-2 font-ui text-[12px] font-semibold uppercase text-ink-muted">
+            <p className="border-b border-rule-soft/55 pb-2 font-ui text-[12px] font-semibold uppercase text-ink-muted">
               {section.title}
             </p>
             <ul className="mt-4 space-y-2.5">
@@ -90,8 +90,8 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-rule bg-paper-warm/40">
-        <div className="container flex flex-col items-center justify-between gap-2 py-5 text-center font-ui text-[12px] font-medium uppercase text-ink-muted md:flex-row md:text-left">
+      <div className="border-t border-rule-soft/40 bg-paper">
+        <div className="container flex flex-col items-center justify-between gap-2 py-2.5 text-center font-ui text-[10px] font-medium uppercase text-ink-muted md:flex-row md:text-left">
           <p>© {today.getFullYear()} The Curve Times · All wrongs reserved</p>
           <p>Printed in 赛博空间 · Press: Vite + React</p>
         </div>

@@ -225,12 +225,12 @@ export function MusicPlayer() {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="inline-flex h-10 items-center gap-2 border-2 border-ink bg-paper px-4 font-ui text-[12px] font-semibold uppercase text-ink shadow-[0_4px_0_0_hsl(var(--ink))] transition-all hover:translate-y-0.5 hover:bg-ink hover:text-paper hover:shadow-[0_2px_0_0_hsl(var(--ink))]"
+          className="inline-flex h-9 items-center gap-2 border border-rule bg-paper/95 px-3.5 font-ui text-[11px] font-semibold uppercase text-ink shadow-[0_6px_16px_-12px_rgba(20,16,12,0.45)] transition-all hover:border-stamp/50 hover:bg-paper-warm hover:text-stamp"
           aria-label="打开音乐播放器"
         >
           <span
             className={cn(
-              "inline-flex h-5 w-5 items-center justify-center bg-stamp text-paper",
+              "inline-flex h-[18px] w-[18px] items-center justify-center bg-stamp text-paper",
               isPlaying && "animate-pulse",
             )}
           >
