@@ -1,11 +1,21 @@
+import { useState } from "react";
 import { Pin } from "lucide-react";
+import { TwikooCommentsPanel } from "@/components/TwikooComments";
 import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Kicker, Ornament } from "@/components/editorial";
 import { notes } from "@/content/notes";
 import { formatArticleDateline } from "@/lib/han-date";
+import { comments } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 export default function NotesPage() {
+  const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+
+  function toggleComments(noteSlug: string) {
+    setOpenComments((prev) => ({ ...prev, [noteSlug]: !prev[noteSlug] }));
+  }
+
   return (
     <div className="container py-10 md:py-14">
       <PageHeader
@@ -53,6 +63,29 @@ export default function NotesPage() {
                   ))}
                 </div>
               )}
+
+              {comments.enabled && comments.twikoo.envId ? (
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => toggleComments(n.slug)}
+                    className={cn(
+                      "inline-flex items-center gap-2 border-b border-rule pb-1 font-ui text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-muted transition-colors hover:border-stamp hover:text-stamp",
+                      openComments[n.slug] ? "border-stamp text-stamp" : "",
+                    )}
+                  >
+                    {openComments[n.slug] ? "收起评论" : "展开评论"}
+                  </button>
+
+                  {openComments[n.slug] ? (
+                    <TwikooCommentsPanel
+                      key={n.slug}
+                      pageKey={`/notes/${n.slug}`}
+                      variant="note"
+                    />
+                  ) : null}
+                </div>
+              ) : null}
             </article>
             {i < notes.length - 1 && <Ornament className="mt-12" />}
           </li>

@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Kicker, Ornament } from "@/components/editorial";
+import { TwikooComments } from "@/components/TwikooComments";
 import { buttonVariants } from "@/components/ui/button";
 import { getPostBySlug, posts } from "@/content/posts";
 import { formatArticleDateline } from "@/lib/han-date";
@@ -104,6 +105,8 @@ export default function PostPage() {
             <p className="mt-4 text-center font-ui text-[12px] font-medium uppercase text-ink-faded">
               End of Article · 完
             </p>
+
+            <TwikooComments key={post.slug} pageKey={`/posts/${post.slug}`} />
           </div>
         </div>
       </div>
