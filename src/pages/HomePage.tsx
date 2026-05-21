@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { DailyPoetry } from "@/components/DailyPoetry";
 import { PostCard } from "@/components/PostCard";
 import { Kicker, Ornament } from "@/components/editorial";
 import { buttonVariants } from "@/components/ui/button";
@@ -26,6 +27,10 @@ export default function HomePage() {
     <div className="container py-10 md:py-14">
       {/* LEAD STORY — front page hero */}
       {lead && <PostCard post={lead} variant="lead" />}
+
+      <section className="mt-8">
+        <DailyPoetry />
+      </section>
 
       {/* ABOVE-THE-FOLD GRID — 3 columns of articles */}
       <section className="mt-12">
