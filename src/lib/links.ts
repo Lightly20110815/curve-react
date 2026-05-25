@@ -20,7 +20,7 @@ const linkData: LinkGroup[] = [
     typeList: [
       {
         name: "Sy's Digital Garden",
-        avatar: "https://api.ddnsy.fun/clogo.webp",
+        avatar: "/images/logo/logo.webp",
         desc: "重构时间线，再次重逢",
         url: "https://404yann.com",
       },
@@ -45,7 +45,7 @@ const linkData: LinkGroup[] = [
       },
       {
         name: "寻亦见北",
-        avatar: "https://www.xyjb.org/img/favicon.png",
+        avatar: "https://xyjb.org/favicon.svg",
         desc: "寻褶·见熵·北纬·柒文",
         url: "https://xyjb.org",
       },
@@ -63,7 +63,7 @@ const linkData: LinkGroup[] = [
       },
       {
         name: "𝑬𝒑𝒉𝒆𝒊𝒂's Think",
-        avatar: "https://api.ddnsy.fun/ehpiea.jpg",
+        avatar: "https://resource.epheia.moe/pic/desuwa/icon/favicon.png",
         desc: "她的聊天角",
         url: "https://watakushi.desuwa.org/",
       },
