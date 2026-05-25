@@ -128,7 +128,7 @@ export function MusicPlayer() {
       <audio ref={audioRef} src={track.url} preload="metadata" />
 
       {isOpen ? (
-        <div className="w-[320px] overflow-hidden border-2 border-ink bg-paper shadow-[0_8px_24px_-8px_rgba(20,16,12,0.25)] animate-fade-in">
+        <div className="w-[320px] overflow-hidden border-2 border-ink bg-paper shadow-[0_8px_24px_-8px_rgba(20,16,12,0.25)] animate-fade-in dark:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)]">
           <div className="flex items-center gap-3 border-b-2 border-ink bg-ink p-3 text-paper">
             <div className="relative h-12 w-12 flex-none overflow-hidden border border-paper/30 bg-ink-strong">
               {track.pic && (
@@ -229,7 +229,7 @@ export function MusicPlayer() {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="inline-flex h-9 items-center gap-2 border border-rule bg-paper/95 px-3.5 font-ui text-[11px] font-semibold uppercase text-ink shadow-[0_6px_16px_-12px_rgba(20,16,12,0.45)] transition-all hover:border-stamp/50 hover:bg-paper-warm hover:text-stamp"
+          className="inline-flex h-9 items-center gap-2 border border-rule bg-paper/95 px-3.5 font-ui text-[11px] font-semibold uppercase text-ink shadow-[0_6px_16px_-12px_rgba(20,16,12,0.45)] transition-all hover:border-stamp/50 hover:bg-paper-warm hover:text-stamp dark:shadow-[0_6px_16px_-12px_rgba(0,0,0,0.55)]"
           aria-label="打开音乐播放器"
         >
           <span

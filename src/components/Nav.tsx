@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -90,15 +91,23 @@ export function Nav() {
           ))}
         </ul>
 
+        {/* Theme toggle (desktop) */}
+        <div className="hidden md:block">
+          <ThemeToggle />
+        </div>
+
         {/* Mobile toggle */}
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center text-ink md:hidden"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label="切换菜单"
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center text-ink"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="切换菜单"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile sheet */}

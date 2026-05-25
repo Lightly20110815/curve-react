@@ -22,22 +22,30 @@
       rel="stylesheet"
     />
 
-    <!--
-      Cream is the only mode. Strip any legacy theme preference that may
-      have been written by older builds so users don't get stuck in dark.
-    -->
+    <!-- Theme initializer — runs before React hydrates to prevent flash -->
     <script>
       (function () {
         try {
-          localStorage.removeItem("curve-theme");
-        } catch (_) {}
-        document.documentElement.classList.remove("dark");
-        document.documentElement.style.colorScheme = "light";
+          var stored = localStorage.getItem("curve-theme");
+          var dark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) {
+            document.documentElement.classList.add("dark");
+            document.documentElement.style.colorScheme = "dark";
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#1a1a1a");
+          } else {
+            document.documentElement.classList.remove("dark");
+            document.documentElement.style.colorScheme = "light";
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#e3d3ab");
+          }
+        } catch (_) {
+          document.documentElement.style.colorScheme = "light";
+        }
       })();
     </script>
 
     <style>
       html { background-color: #e3d3ab; }
+      html.dark { background-color: #1a1a1a; }
     </style>
   </head>
   <body>

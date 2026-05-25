@@ -6,6 +6,9 @@
  * Curve newspaper edition styles.
  *
  * Paper is the brand. Type is the voice. Color is one stamp of red.
+ *
+ * Dark mode: "暗房显影" — deep ink-green background with aged-paper-yellow text.
+ * Like developing photographs in a darkroom, or the inside of a vinyl sleeve.
  */
 @layer base {
   :root {
@@ -32,7 +35,29 @@
     color-scheme: light;
   }
 
-  .dark {}
+  .dark {
+    /* Surfaces — neutral dark grey, like darkroom walls or a vinyl record */
+    --paper: 0 0% 10%;
+    --paper-warm: 0 0% 13%;
+    --paper-soft: 0 0% 8%;
+
+    /* Ink — clean warm white, high contrast for readability */
+    --ink: 40 15% 88%;
+    --ink-strong: 40 15% 93%;
+    --ink-body: 40 8% 80%;
+    --ink-muted: 0 0% 55%;
+    --ink-faded: 0 0% 40%;
+
+    /* Rules — subtle grey lines */
+    --rule: 0 0% 24%;
+    --rule-soft: 0 0% 18%;
+
+    /* Stamp — warm amber gold, replacing red which doesn't work on dark */
+    --stamp: 42 55% 58%;
+    --stamp-soft: 42 40% 20%;
+
+    color-scheme: dark;
+  }
 
   * { border-color: hsl(var(--rule-soft) / 0.48); }
 
@@ -76,8 +101,32 @@
       inset 0 18px 48px hsl(var(--ink) / 0.018);
   }
 
+  /* Dark mode body adjustments — strip paper-grain noise, keep a clean vignette */
+  .dark body {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      radial-gradient(ellipse at 50% 0%, hsl(var(--paper-warm)) 0%, transparent 70%);
+    background-size: 100% 100%, 100% 60%;
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--paper-warm) / 0.12),
+      inset 0 18px 48px hsl(var(--ink-strong) / 0.08);
+  }
+
   ::selection {
     background: hsl(var(--stamp) / 0.18);
+    color: hsl(var(--ink-strong));
+  }
+
+  .dark ::selection {
+    background: hsl(var(--stamp) / 0.25);
     color: hsl(var(--ink-strong));
   }
 
@@ -214,6 +263,12 @@
     color: hsl(var(--ink-strong));
     text-align: left;
   }
+
+  /* Dark mode: blockquote becomes a slightly lifted panel */
+  .dark .prose-news blockquote {
+    background: hsl(var(--paper-warm) / 0.6);
+  }
+
   .prose-news blockquote > :first-child { margin-top: 0; }
   .prose-news blockquote > :last-child { margin-bottom: 0; }
 
@@ -225,6 +280,11 @@
     padding: 0.14em 0.42em;
     border: 1px solid hsl(var(--rule-soft) / 0.34);
     border-radius: 0;
+  }
+
+  .dark .prose-news code:not(pre code) {
+    background: hsl(var(--paper-warm) / 0.5);
+    border-color: hsl(var(--rule-soft) / 0.5);
   }
 
   .prose-news figure[data-rehype-pretty-code-figure] { margin: 1.8em 0; }
@@ -253,6 +313,11 @@
     margin: 1.5em auto;
     border-radius: 0;
     filter: contrast(0.96) saturate(0.92);
+  }
+
+  /* Dark mode: images get a subtle warmth lift */
+  .dark .prose-news img {
+    filter: contrast(0.92) saturate(0.85) brightness(0.92);
   }
 
   .prose-news hr {

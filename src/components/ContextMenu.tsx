@@ -13,6 +13,7 @@ import { siteContactMailHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { NowPlaying } from "@/components/NowPlaying";
 import { AnalogClock } from "@/components/AnalogClock";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Position {
   x: number;
@@ -123,6 +124,10 @@ export function ContextMenu() {
         <Item icon={RotateCw} onSelect={reload} label="重新印刷" hint="Reload" />
         <Divider />
         <Item icon={Mail} onSelect={sendMail} label="写信给编辑" hint="Mail" />
+        <Divider />
+        <li role="none" onClick={(e) => e.stopPropagation()}>
+          <ThemeToggle variant="menu" />
+        </li>
       </ul>
 
       <p className="border-t border-rule bg-paper-warm/50 px-3 py-1.5 text-center font-ui text-[11px] font-medium uppercase text-ink-faded">
