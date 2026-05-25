@@ -109,7 +109,7 @@ function DynamicMastheadTitle() {
             messages: [
               {
                 role: "system",
-                content: "你是一个文艺博客的报头（Masthead）名字生成器。请生成一个富有诗意或哲理的短标题（中英文皆可，2到8个字符）。不需要标点符号结尾。不要包含任何解释。",
+                content: "You are generating a masthead title for a literary/coding blog. Generate a short, poetic English phrase (exactly 3 to 5 words). Do not use Chinese. Do not use punctuation at the end. Do not explain.",
               },
             ],
             stream: false,
