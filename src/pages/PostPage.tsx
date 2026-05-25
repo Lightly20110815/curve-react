@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ArticleAiSummary } from "@/components/ArticleAiSummary";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { TwikooComments } from "@/components/TwikooComments";
 import { buttonVariants } from "@/components/ui/button";
@@ -83,6 +84,8 @@ export default function PostPage() {
                 <MetaChip>{post.wordCount} 字</MetaChip>
               </div>
             </div>
+
+            {post.articleGPT ? <ArticleAiSummary post={post} /> : null}
           </div>
 
           <div className="px-4 pb-12 pt-8 md:px-5 md:pb-16 lg:px-8">

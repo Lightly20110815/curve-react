@@ -1,12 +1,9 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { DailyPoetry } from "@/components/DailyPoetry";
 import { PostCard } from "@/components/PostCard";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { Badge } from "@/components/ui/badge";
-import { NowPlaying } from "@/components/NowPlaying";
-import { AnalogClock } from "@/components/AnalogClock";
 import { posts, getAllCategories, getAllTags } from "@/content/posts";
 import { notes } from "@/content/notes";
 import { formatArticleDateline, hanNumber } from "@/lib/han-date";

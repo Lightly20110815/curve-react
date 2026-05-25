@@ -9,6 +9,7 @@ export interface Post {
   categories: string[];
   tags: string[];
   cover?: string;
+  articleGPT: boolean;
   html: string;
   readingMinutes: number;
   wordCount: number;
