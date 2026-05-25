@@ -122,11 +122,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mt-10 flex justify-center">
-            <AnalogClock />
-          </div>
-
-          <dl className="mt-10 grid grid-cols-3 gap-6 py-2 text-center">
+          <dl className="mt-9 grid grid-cols-3 gap-6 py-2 text-center">
             <Stat label="累计" value={hanNumber(posts.length)} suffix="篇" />
             <Stat label="字数" value={fmtK(totalWords)} suffix="字" />
             <Stat label="今年" value={hanNumber(postsThisYear)} suffix="篇" />
@@ -341,5 +337,8 @@ function Stat({ label, value, suffix }: { label: string; value: string; suffix: 
 function fmtK(n: number): string {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}w`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+/ 1000).toFixed(1)}k`;
   return String(n);
 }
