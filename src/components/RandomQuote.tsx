@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-const API_URL = import.meta.env.DEV
-  ? "http://localhost:3000/api/deepseek"
-  : "/api/deepseek";
+import { streamDeepSeekText } from "@/lib/deepseek";
 
 /**
  * AI random greeting widget.
@@ -32,14 +29,11 @@ export function RandomQuote() {
     abortRef.current = new AbortController();
 
     try {
-      const resp = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: abortRef.current.signal,
-        body: JSON.stringify({
+      await streamDeepSeekText(
+        {
           model: "deepseek-chat",
           temperature: 1.1,
-          stream: true,
+          signal: abortRef.current.signal,
           messages: [
             {
               role: "system",
@@ -64,46 +58,11 @@ export function RandomQuote() {
               content: "请写一句新的打招呼句子，谢谢你，抱抱qwq~",
             },
           ],
-        }),
-      });
-
-      if (!resp.ok || !resp.body) {
-        const errMsg = `DeepSeek API 请求失败：HTTP ${resp.status}`;
-        console.error(errMsg);
-        setHidden(true);
-        throw new Error(errMsg);
-      }
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let buffer = "";
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const raw of lines) {
-          const line = raw.trim();
-          if (!line.startsWith("data:")) continue;
-          const data = line.slice(5).trim();
-          if (!data) continue;
-          if (data === "[DONE]") {
-            setIsStreaming(false);
-            return;
-          }
-          try {
-            const json = JSON.parse(data) as {
-              choices?: [{ delta?: { content?: string } }];
-            };
-            const delta = json?.choices?.[0]?.delta?.content ?? "";
-            if (delta) setText((prev) => prev + delta);
-          } catch (e) {
-            console.warn("DeepSeek SSE 解析异常：", e);
-          }
-        }
-      }
+        },
+        (delta) => {
+          setText((prev) => prev + delta);
+        },
+      );
     } catch (err) {
       console.error("DeepSeek 加载失败：", err);
       setHidden(true);

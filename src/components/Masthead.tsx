@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getDeepSeekText, trimGeneratedText } from "@/lib/deepseek";
 import { cn } from "@/lib/utils";
 import { formatMastheadDate, formatIssueSeason } from "@/lib/han-date";
 
@@ -33,33 +34,19 @@ function DeepSeekTagline() {
 
     async function fetchTagline() {
       try {
-        const endpoint = import.meta.env.DEV
-          ? "http://localhost:3000/api/deepseek"
-          : "/api/deepseek";
-
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: [
-              {
-                role: "system",
-                content: "你是一个文艺网站的副标题生成器。请写一句简短、优美、有文艺气息的句子，适合作为博客的副标题。字数控制在15字以内。不需要标点符号结尾。不要包含任何解释。",
-              },
-            ],
-            stream: false,
-            temperature: 0.8,
-            max_tokens: 30,
-          }),
+        const content = await getDeepSeekText({
+          messages: [
+            {
+              role: "system",
+              content: "你是一个文艺网站的副标题生成器。请写一句简短、优美、有文艺气息的句子，适合作为博客的副标题。字数控制在15字以内。不需要标点符号结尾。不要包含任何解释。",
+            },
+          ],
+          temperature: 0.8,
+          max_tokens: 30,
         });
 
-        if (!res.ok) throw new Error("DeepSeek request failed");
-
-        const data = await res.json();
-        const content = data?.choices?.[0]?.message?.content;
-        
-        if (content && typeof content === "string" && content.trim() && !cancelled) {
-          setFullText(content.trim().replace(/[。！？”’]+$/, "")); // Strip trailing punctuation
+        if (content && !cancelled) {
+          setFullText(trimGeneratedText(content));
         } else if (!cancelled) {
           setFullText("用代码与文字搭起来的家");
         }
@@ -98,33 +85,19 @@ function DynamicMastheadTitle() {
 
     async function fetchTitle() {
       try {
-        const endpoint = import.meta.env.DEV
-          ? "http://localhost:3000/api/deepseek"
-          : "/api/deepseek";
-
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: [
-              {
-                role: "system",
-                content: "You are generating a masthead title for a literary/coding blog. Generate a short, poetic English phrase (exactly 3 to 5 words). Do not use Chinese. Do not use punctuation at the end. Do not explain.",
-              },
-            ],
-            stream: false,
-            temperature: 0.9,
-            max_tokens: 15,
-          }),
+        const content = await getDeepSeekText({
+          messages: [
+            {
+              role: "system",
+              content: "You are generating a masthead title for a literary/coding blog. Generate a short, poetic English phrase (exactly 3 to 5 words). Do not use Chinese. Do not use punctuation at the end. Do not explain.",
+            },
+          ],
+          temperature: 0.9,
+          max_tokens: 15,
         });
 
-        if (!res.ok) throw new Error("DeepSeek request failed");
-
-        const data = await res.json();
-        const content = data?.choices?.[0]?.message?.content;
-        
-        if (content && typeof content === "string" && content.trim() && !cancelled) {
-          setTargetText(content.trim().replace(/[。！？”’]+$/, ""));
+        if (content && !cancelled) {
+          setTargetText(trimGeneratedText(content));
         } else if (!cancelled) {
           setTargetText(INITIAL_TITLE);
         }

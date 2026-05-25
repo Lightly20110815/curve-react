@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-const API_URL = import.meta.env.DEV
-  ? "http://localhost:3000/api/deepseek"
-  : "/api/deepseek";
+import { streamDeepSeekText, type DeepSeekMessage } from "@/lib/deepseek";
 const ORIGINAL_POETRY_API_URL = "https://v1.jinrishici.com/all.json";
 
 const HISTORY_KEY = "daily-poetry-history-v2";
@@ -19,15 +16,6 @@ interface PoetryApiData {
   content?: string;
   origin?: string;
   author?: string;
-}
-
-interface StreamChunk {
-  choices?: Array<{
-    delta?: {
-      content?: string;
-      reasoning_content?: string;
-    };
-  }>;
 }
 
 function normalizeQuote(value: string): string {
@@ -100,7 +88,7 @@ function parseDraft(raw: string): QuoteData {
   return { content, origin, author };
 }
 
-function buildMessages(history: QuoteData[], retryNote?: string) {
+function buildMessages(history: QuoteData[], retryNote?: string): DeepSeekMessage[] {
   const recentList = history
     .slice(0, 16)
     .map((item, index) => `${index + 1}. ${item.content}`)
@@ -245,55 +233,19 @@ export function DailyPoetry() {
     const history = loadHistory();
 
     try {
-      const resp = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal,
-        body: JSON.stringify({
+      await streamDeepSeekText(
+        {
           model: "deepseek-v4-flash",
-          stream: true,
+          signal,
           thinking: { type: "disabled" },
           temperature: 1.05,
           max_tokens: 120,
           messages: buildMessages(history, retryNote),
-        }),
-      });
-
-      if (!resp.ok || !resp.body) {
-        throw new Error(`DeepSeek API 请求失败：HTTP ${resp.status}`);
-      }
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let buffer = "";
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-
-        for (const rawLine of lines) {
-          const line = rawLine.trim();
-          if (!line.startsWith("data:")) continue;
-
-          const data = line.slice(5).trim();
-          if (!data) continue;
-          if (data === "[DONE]") break;
-
-          try {
-            const json = JSON.parse(data) as StreamChunk;
-            const delta = json.choices?.[0]?.delta?.content ?? "";
-            if (!delta) continue;
-
-            applyDraft(draftRef.current + delta);
-          } catch (error) {
-            console.warn("DailyPoetry SSE 解析异常：", error);
-          }
-        }
-      }
+        },
+        (delta) => {
+          applyDraft(draftRef.current + delta);
+        },
+      );
 
       const parsed = parseDraft(draftRef.current);
       const normalized = normalizeQuote(parsed.content);

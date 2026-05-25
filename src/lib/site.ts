@@ -3,7 +3,7 @@ export const site = {
   url: "https://chiyu.it",
   description: "A quiet corner built with code and words.",
   author: "Sy",
-  githubUrl: "http://github.com/lightly20110815/",
+  githubUrl: "https://github.com/lightly20110815/",
   email: "swanyang7@gmail.com",
   rssPath: "/rss.xml",
 } as const;

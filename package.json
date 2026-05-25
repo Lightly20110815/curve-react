@@ -8,6 +8,7 @@
     "content": "tsx scripts/build-content.ts",
     "dev": "pnpm run content && vite",
     "build": "pnpm run content && vite build",
+    "check": "pnpm run typecheck && pnpm run build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },

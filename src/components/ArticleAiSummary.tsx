@@ -3,10 +3,7 @@ import { RefreshCw } from "lucide-react";
 import { Kicker } from "@/components/Editorial";
 import { Button } from "@/components/ui/button";
 import type { Post } from "@/content/posts";
-
-const API_URL = import.meta.env.DEV
-  ? "http://localhost:3000/api/deepseek"
-  : "/api/deepseek";
+import { getDeepSeekText, type DeepSeekMessage } from "@/lib/deepseek";
 const CACHE_VERSION = "v1";
 const MAX_SOURCE_CHARS = 3200;
 
@@ -66,32 +63,15 @@ export function ArticleAiSummary({ post }: Props) {
     setErrorMessage("");
 
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
-        body: JSON.stringify({
+      const nextSummary = normalizeSummary(
+        await getDeepSeekText({
           model: "deepseek-chat",
-          stream: false,
+          signal: controller.signal,
           temperature: 0.65,
           max_tokens: 180,
           messages: buildMessages(post, articleSource),
         }),
-      });
-
-      if (!response.ok) {
-        const raw = await response.text().catch(() => "");
-        throw new Error(raw || `HTTP ${response.status}`);
-      }
-
-      const payload = (await response.json()) as {
-        choices?: Array<{
-          message?: {
-            content?: string;
-          };
-        }>;
-      };
-      const nextSummary = normalizeSummary(payload.choices?.[0]?.message?.content ?? "");
+      );
 
       if (!nextSummary) {
         throw new Error("EMPTY_SUMMARY");
@@ -186,7 +166,7 @@ export function ArticleAiSummary({ post }: Props) {
 function buildMessages(
   post: Pick<Post, "title" | "description" | "categories" | "tags">,
   articleSource: string,
-) {
+): DeepSeekMessage[] {
   return [
     {
       role: "system",
