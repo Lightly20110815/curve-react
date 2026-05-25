@@ -6,6 +6,7 @@ import { PostCard } from "@/components/PostCard";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { Badge } from "@/components/ui/badge";
 import { NowPlaying } from "@/components/NowPlaying";
+import { AnalogClock } from "@/components/AnalogClock";
 import { posts, getAllCategories, getAllTags } from "@/content/posts";
 import { notes } from "@/content/notes";
 import { formatArticleDateline, hanNumber } from "@/lib/han-date";
@@ -341,48 +342,4 @@ function fmtK(n: number): string {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}w`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
   return String(n);
-}
-
-function AnalogClock() {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const secondsDegrees = time.getSeconds() * 6;
-  const minsDegrees = time.getMinutes() * 6 + time.getSeconds() * 0.1;
-  const hoursDegrees = (time.getHours() % 12) * 30 + time.getMinutes() * 0.5;
-
-  return (
-    <div className="relative mx-auto flex h-28 w-28 items-center justify-center rounded-full border-[3px] border-ink bg-paper shadow-sm">
-      <div className="absolute z-10 h-2 w-2 rounded-full bg-stamp" />
-      
-      <div 
-        className="absolute bottom-1/2 left-1/2 w-1.5 origin-bottom -translate-x-1/2 rounded-full bg-ink"
-        style={{ height: '30%', transform: `translateX(-50%) rotate(${hoursDegrees}deg)` }}
-      />
-      
-      <div 
-        className="absolute bottom-1/2 left-1/2 w-1 origin-bottom -translate-x-1/2 rounded-full bg-ink/80"
-        style={{ height: '40%', transform: `translateX(-50%) rotate(${minsDegrees}deg)` }}
-      />
-      
-      <div 
-        className="absolute bottom-1/2 left-1/2 w-[2px] origin-bottom -translate-x-1/2 rounded-full bg-stamp"
-        style={{ height: '45%', transform: `translateX(-50%) rotate(${secondsDegrees}deg)` }}
-      />
-
-      {[0, 90, 180, 270].map(deg => (
-        <div 
-          key={deg}
-          className="absolute h-full w-full py-1.5"
-          style={{ transform: `rotate(${deg}deg)` }}
-        >
-          <div className="mx-auto h-1.5 w-1 bg-ink/40" />
-        </div>
-      ))}
-    </div>
-  );
 }

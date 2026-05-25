@@ -12,6 +12,7 @@ import {
 import { siteContactMailHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { NowPlaying } from "@/components/NowPlaying";
+import { AnalogClock } from "@/components/AnalogClock";
 
 interface Position {
   x: number;
@@ -103,6 +104,11 @@ export function ContextMenu() {
         <p className="mt-1 font-ui text-[11px] font-medium uppercase text-paper/60">
           Editor's toolbox · 编报工具
         </p>
+      </div>
+
+      {/* Clock */}
+      <div className="border-b border-rule bg-paper-warm/40 py-3" onClick={(e) => e.stopPropagation()}>
+        <AnalogClock className="h-16 w-16" />
       </div>
 
       <div className="border-b border-rule" onClick={(e) => e.stopPropagation()}>
