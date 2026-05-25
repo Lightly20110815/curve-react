@@ -86,6 +86,106 @@ function DeepSeekTagline() {
   );
 }
 
+function DynamicMastheadTitle() {
+  const INITIAL_TITLE = "The Curve Times";
+  const [targetText, setTargetText] = useState("");
+  const [displayText, setDisplayText] = useState(INITIAL_TITLE);
+  const [phase, setPhase] = useState<"waiting" | "deleting" | "typing" | "done">("waiting");
+
+  // Fetch AI title
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchTitle() {
+      try {
+        const endpoint = import.meta.env.DEV
+          ? "http://localhost:3000/api/deepseek"
+          : "/api/deepseek";
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "system",
+                content: "你是一个文艺博客的报头（Masthead）名字生成器。请生成一个富有诗意或哲理的短标题（中英文皆可，2到8个字符）。不需要标点符号结尾。不要包含任何解释。",
+              },
+            ],
+            stream: false,
+            temperature: 0.9,
+            max_tokens: 15,
+          }),
+        });
+
+        if (!res.ok) throw new Error("DeepSeek request failed");
+
+        const data = await res.json();
+        const content = data?.choices?.[0]?.message?.content;
+        
+        if (content && typeof content === "string" && content.trim() && !cancelled) {
+          setTargetText(content.trim().replace(/[。！？”’]+$/, ""));
+        } else if (!cancelled) {
+          setTargetText(INITIAL_TITLE);
+        }
+      } catch (e) {
+        console.warn("Failed to fetch DeepSeek title, using fallback.", e);
+        if (!cancelled) {
+          setTargetText(INITIAL_TITLE);
+        }
+      }
+    }
+
+    fetchTitle();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Animation sequence
+  useEffect(() => {
+    if (!targetText) return; // Wait until fetch completes
+
+    if (targetText === INITIAL_TITLE && phase === "waiting") {
+      setPhase("done"); // Skip animation if fallback is identical
+      return;
+    }
+
+    let timer: number;
+
+    if (phase === "waiting") {
+      // Pause 1.5 seconds before starting to delete
+      timer = window.setTimeout(() => setPhase("deleting"), 1500);
+    } else if (phase === "deleting") {
+      if (displayText.length > 0) {
+        timer = window.setTimeout(() => setDisplayText((prev) => prev.slice(0, -1)), 60); // fast delete
+      } else {
+        timer = window.setTimeout(() => setPhase("typing"), 300); // pause slightly when empty
+      }
+    } else if (phase === "typing") {
+      if (displayText.length < targetText.length) {
+        timer = window.setTimeout(() => {
+          setDisplayText(targetText.slice(0, displayText.length + 1));
+        }, 120); // typing speed
+      } else {
+        setPhase("done");
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [targetText, phase, displayText]);
+
+  return (
+    <span className="inline-flex items-center">
+      {displayText}
+      {phase !== "done" && (
+        <span className="ml-[2px] inline-block h-[0.7em] w-[clamp(4px,0.6vw,8px)] animate-[pulse_1s_ease-in-out_infinite] bg-ink-strong align-middle" />
+      )}
+    </span>
+  );
+}
+
 /**
  * The Curve Times masthead.
  *
@@ -124,7 +224,7 @@ export function Masthead({ issueNo, totalIssues, className }: Props) {
           {/* Title — non-interactive */}
           <div className="text-center">
             <h1 className="whitespace-nowrap font-masthead text-[clamp(34px,6vw,78px)] font-black leading-[0.98] text-ink-strong">
-              The Curve Times
+              <DynamicMastheadTitle />
             </h1>
             <p className="mt-1.5 font-serif text-[clamp(15px,1.6vw,18px)] font-medium text-stamp">
               曲線時報
