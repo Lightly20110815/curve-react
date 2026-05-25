@@ -9,8 +9,25 @@ interface Props {
 }
 
 function DeepSeekTagline() {
-  const [tagline, setTagline] = useState("用代码与文字搭起来的家");
+  const [fullText, setFullText] = useState("");
+  const [displayText, setDisplayText] = useState("");
 
+  // Typewriter effect
+  useEffect(() => {
+    if (!fullText) return;
+    let i = 0;
+    setDisplayText("");
+    const timer = setInterval(() => {
+      setDisplayText(fullText.substring(0, i + 1));
+      i++;
+      if (i >= fullText.length) {
+        clearInterval(timer);
+      }
+    }, 150); // 150ms delay per character
+    return () => clearInterval(timer);
+  }, [fullText]);
+
+  // Fetch AI text
   useEffect(() => {
     let cancelled = false;
 
@@ -30,7 +47,7 @@ function DeepSeekTagline() {
                 content: "你是一个文艺网站的副标题生成器。请写一句简短、优美、有文艺气息的句子，适合作为博客的副标题。字数控制在15字以内。不需要标点符号结尾。不要包含任何解释。",
               },
             ],
-            stream: false, // For a single short sentence, non-streaming is simpler.
+            stream: false,
             temperature: 0.8,
             max_tokens: 30,
           }),
@@ -42,10 +59,15 @@ function DeepSeekTagline() {
         const content = data?.choices?.[0]?.message?.content;
         
         if (content && typeof content === "string" && content.trim() && !cancelled) {
-          setTagline(content.trim().replace(/[。！？”’]+$/, "")); // Strip trailing punctuation
+          setFullText(content.trim().replace(/[。！？”’]+$/, "")); // Strip trailing punctuation
+        } else if (!cancelled) {
+          setFullText("用代码与文字搭起来的家");
         }
       } catch (e) {
         console.warn("Failed to fetch DeepSeek tagline, using fallback.", e);
+        if (!cancelled) {
+          setFullText("用代码与文字搭起来的家");
+        }
       }
     }
 
@@ -56,7 +78,12 @@ function DeepSeekTagline() {
     };
   }, []);
 
-  return <>{tagline}</>;
+  return (
+    <span className="inline-flex items-center gap-[2px]">
+      {displayText}
+      <span className="inline-block h-[1em] w-[1.5px] animate-[pulse_1s_ease-in-out_infinite] bg-stamp/80 align-middle opacity-80" />
+    </span>
+  );
 }
 
 /**
