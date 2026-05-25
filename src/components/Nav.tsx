@@ -45,7 +45,7 @@ export function Nav() {
     >
       <div className="container flex items-center justify-between gap-4">
         {/* Tiny sticky title when scrolled */}
-        <Link to="/" className="font-masthead text-[16px] font-bold tracking-tight text-ink transition-colors hover:text-stamp">
+        <Link to="/" className="font-masthead text-[16px] font-bold tracking-tight text-ink transition-colors hover:text-stamp text-glow-sub">
           Curve
         </Link>
 

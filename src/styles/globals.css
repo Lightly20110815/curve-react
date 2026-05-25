@@ -372,6 +372,18 @@
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
 
+  /* Dark-mode masthead: warm gold glow, like a nocturnal newsstand sign */
+  .dark .text-glow-masthead {
+    text-shadow:
+      0 0 24px hsl(var(--stamp) / 0.28),
+      0 0 64px hsl(var(--stamp) / 0.14),
+      0 0 120px hsl(var(--stamp) / 0.06);
+  }
+
+  .dark .text-glow-sub {
+    text-shadow: 0 0 18px hsl(var(--stamp) / 0.18);
+  }
+
   .rule-double {
     border-top: 1px solid hsl(var(--rule));
     border-bottom: 1px solid hsl(var(--rule));
