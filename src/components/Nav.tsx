@@ -13,34 +13,6 @@ const links = [
   { to: "/about", label: "MASTHEAD", subLabel: "编者", end: false, width: "min-w-[70px]" },
 ] as const;
 
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const hh = time.getHours().toString().padStart(2, "0");
-  const mm = time.getMinutes().toString().padStart(2, "0");
-  const ss = time.getSeconds().toString().padStart(2, "0");
-
-  return (
-    <div className="ml-4 flex flex-col items-end justify-center py-2 pb-[12px]">
-      <span className="font-ui text-[14px] font-black tracking-[0.05em] text-ink-strong">
-        {hh}
-        <span className="animate-[pulse_1s_ease-in-out_infinite] text-stamp opacity-80">:</span>
-        {mm}
-        <span className="animate-[pulse_1s_ease-in-out_infinite] text-stamp opacity-80">:</span>
-        {ss}
-      </span>
-      <span className="mt-1 font-ui text-[10px] font-medium uppercase tracking-[0.14em] text-ink-muted">
-        Local Time
-      </span>
-    </div>
-  );
-}
-
 /**
  * Sub-navigation strip — sits under the masthead.
  * Sticky on scroll. Newspaper section labels with Chinese sub-labels.
@@ -77,50 +49,46 @@ export function Nav() {
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden items-end md:flex">
-          <ul className="flex items-end gap-2">
-            {links.map((l) => (
-              <li key={l.to}>
-                <NavLink
-                  to={l.to}
-                  end={l.end}
-                  className={({ isActive }) =>
-                    cn(
-                      "group flex flex-col items-center border-b-[4px] border-transparent px-3 py-2 transition-colors",
-                      l.width,
-                      isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
-                    )
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      <span
-                        className={cn(
-                          "font-ui text-[13px] tracking-[0.1em]",
-                          isActive
-                            ? "font-black text-stamp"
-                            : "font-semibold text-ink-strong group-hover:text-stamp",
-                        )}
-                      >
-                        {l.subLabel}
-                      </span>
-                      <span
-                        className={cn(
-                          "mt-1 font-ui text-[11px] font-medium uppercase tracking-[0.14em]",
-                          isActive ? "text-stamp/85" : "text-ink-muted group-hover:text-stamp/70",
-                        )}
-                      >
-                        {l.label}
-                      </span>
-                    </>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-          
-          <LiveClock />
-        </div>
+        <ul className="hidden items-end gap-2 md:flex">
+          {links.map((l) => (
+            <li key={l.to}>
+              <NavLink
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) =>
+                  cn(
+                    "group flex flex-col items-center border-b-[4px] border-transparent px-3 py-2 transition-colors",
+                    l.width,
+                    isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={cn(
+                        "font-ui text-[13px] tracking-[0.1em]",
+                        isActive
+                          ? "font-black text-stamp"
+                          : "font-semibold text-ink-strong group-hover:text-stamp",
+                      )}
+                    >
+                      {l.subLabel}
+                    </span>
+                    <span
+                      className={cn(
+                        "mt-1 font-ui text-[11px] font-medium uppercase tracking-[0.14em]",
+                        isActive ? "text-stamp/85" : "text-ink-muted group-hover:text-stamp/70",
+                      )}
+                    >
+                      {l.label}
+                    </span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
 
         {/* Mobile toggle */}
         <button
