@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { DailyPoetry } from "@/components/DailyPoetry";
@@ -120,7 +121,11 @@ export default function HomePage() {
             </p>
           </div>
 
-          <dl className="mt-9 grid grid-cols-3 gap-6 py-2 text-center">
+          <div className="mt-10 flex justify-center">
+            <AnalogClock />
+          </div>
+
+          <dl className="mt-10 grid grid-cols-3 gap-6 py-2 text-center">
             <Stat label="累计" value={hanNumber(posts.length)} suffix="篇" />
             <Stat label="字数" value={fmtK(totalWords)} suffix="字" />
             <Stat label="今年" value={hanNumber(postsThisYear)} suffix="篇" />
@@ -336,4 +341,48 @@ function fmtK(n: number): string {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}w`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
   return String(n);
+}
+
+function AnalogClock() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const secondsDegrees = time.getSeconds() * 6;
+  const minsDegrees = time.getMinutes() * 6 + time.getSeconds() * 0.1;
+  const hoursDegrees = (time.getHours() % 12) * 30 + time.getMinutes() * 0.5;
+
+  return (
+    <div className="relative mx-auto flex h-28 w-28 items-center justify-center rounded-full border-[3px] border-ink bg-paper shadow-sm">
+      <div className="absolute z-10 h-2 w-2 rounded-full bg-stamp" />
+      
+      <div 
+        className="absolute bottom-1/2 left-1/2 w-1.5 origin-bottom -translate-x-1/2 rounded-full bg-ink"
+        style={{ height: '30%', transform: `translateX(-50%) rotate(${hoursDegrees}deg)` }}
+      />
+      
+      <div 
+        className="absolute bottom-1/2 left-1/2 w-1 origin-bottom -translate-x-1/2 rounded-full bg-ink/80"
+        style={{ height: '40%', transform: `translateX(-50%) rotate(${minsDegrees}deg)` }}
+      />
+      
+      <div 
+        className="absolute bottom-1/2 left-1/2 w-[2px] origin-bottom -translate-x-1/2 rounded-full bg-stamp"
+        style={{ height: '45%', transform: `translateX(-50%) rotate(${secondsDegrees}deg)` }}
+      />
+
+      {[0, 90, 180, 270].map(deg => (
+        <div 
+          key={deg}
+          className="absolute h-full w-full py-1.5"
+          style={{ transform: `rotate(${deg}deg)` }}
+        >
+          <div className="mx-auto h-1.5 w-1 bg-ink/40" />
+        </div>
+      ))}
+    </div>
+  );
 }
