@@ -3,7 +3,7 @@ import { Pin } from "lucide-react";
 import { TwikooCommentsPanel } from "@/components/TwikooComments";
 import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
-import { Kicker, Ornament } from "@/components/editorial";
+import { Kicker, Ornament } from "@/components/Editorial";
 import { notes } from "@/content/notes";
 import { formatArticleDateline } from "@/lib/han-date";
 import { comments } from "@/lib/site";

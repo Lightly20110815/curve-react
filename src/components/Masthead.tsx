@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { formatMastheadDate, formatIssueSeason } from "@/lib/han-date";
 
@@ -5,6 +6,57 @@ interface Props {
   issueNo: number;
   totalIssues?: number;
   className?: string;
+}
+
+function DeepSeekTagline() {
+  const [tagline, setTagline] = useState("用代码与文字搭起来的家");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchTagline() {
+      try {
+        const endpoint = import.meta.env.DEV
+          ? "http://localhost:3000/api/deepseek"
+          : "/api/deepseek";
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "system",
+                content: "你是一个文艺网站的副标题生成器。请写一句简短、优美、有文艺气息的句子，适合作为博客的副标题。字数控制在15字以内。不需要标点符号结尾。不要包含任何解释。",
+              },
+            ],
+            stream: false, // For a single short sentence, non-streaming is simpler.
+            temperature: 0.8,
+            max_tokens: 30,
+          }),
+        });
+
+        if (!res.ok) throw new Error("DeepSeek request failed");
+
+        const data = await res.json();
+        const content = data?.choices?.[0]?.message?.content;
+        
+        if (content && typeof content === "string" && content.trim() && !cancelled) {
+          setTagline(content.trim().replace(/[。！？”’]+$/, "")); // Strip trailing punctuation
+        }
+      } catch (e) {
+        console.warn("Failed to fetch DeepSeek tagline, using fallback.", e);
+      }
+    }
+
+    fetchTagline();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return <>{tagline}</>;
 }
 
 /**
@@ -21,7 +73,7 @@ export function Masthead({ issueNo, totalIssues, className }: Props) {
     <header className={cn("border-b-2 border-rule/85", className)}>
       {/* Edition strip */}
       <div className="border-b border-rule-soft/55">
-        <div className="container flex flex-wrap items-center justify-between gap-x-4 py-1.5 font-ui text-[10px] font-medium uppercase tracking-[0.12em] text-ink-muted md:text-[11px]">
+        <div className="container flex flex-wrap items-center justify-between gap-x-4 py-1.5 font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted md:text-[12px]">
           <span>VOL. I · No. {String(issueNo).padStart(3, "0")}</span>
           <span className="hidden font-serif text-[13px] font-medium normal-case text-ink-body md:block">
             {formatMastheadDate(today)}
@@ -67,8 +119,8 @@ export function Masthead({ issueNo, totalIssues, className }: Props) {
 
       {/* Tagline strap */}
       <div className="border-t border-rule-soft/55">
-        <div className="container py-1.5 text-center font-serif text-[12px] text-ink-muted md:text-[13px]">
-          用代码与文字搭起来的家
+        <div className="container py-1.5 text-center font-serif text-[12px] text-ink-muted transition-opacity duration-1000 md:text-[13px]">
+          <DeepSeekTagline />
         </div>
       </div>
     </header>

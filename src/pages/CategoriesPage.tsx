@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { Kicker } from "@/components/editorial";
+import { Kicker } from "@/components/Editorial";
 import { getAllCategories } from "@/content/posts";
 import { hanNumber } from "@/lib/han-date";
 

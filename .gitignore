@@ -9,3 +9,4 @@ dist-ssr
 .vercel
 *-check.png
 src/content/generated/
+public/rss.xml

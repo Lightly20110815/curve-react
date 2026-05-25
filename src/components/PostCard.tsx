@@ -82,13 +82,13 @@ export function PostCard({ post, variant = "default", className }: PostCardProps
       <article className={cn("group", className)}>
         <Link to={`/posts/${post.slug}`} className="block py-4">
           <div className="grid gap-1.5 md:grid-cols-[116px_minmax(0,1fr)_72px] md:items-start md:gap-4">
-            <p className="font-mono text-[10px] tracking-[0.12em] text-ink-muted md:pt-1">
+            <p className="font-mono text-[11px] tracking-[0.12em] text-ink-muted md:pt-1">
               {formatArticleDateline(post.date)}
             </p>
             <p className="font-display text-[20px] leading-[1.38] text-ink-strong transition-colors group-hover:text-stamp">
               {post.title}
             </p>
-            <p className="font-ui text-[10px] font-medium tracking-[0.14em] text-ink-muted transition-colors group-hover:text-stamp md:justify-self-end md:pt-1">
+            <p className="font-ui text-[11px] font-medium tracking-[0.12em] text-ink-muted transition-colors group-hover:text-stamp md:justify-self-end md:pt-1">
               {section}
             </p>
           </div>

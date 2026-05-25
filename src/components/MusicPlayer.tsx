@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   ChevronDown,
   Music2,
@@ -24,6 +25,9 @@ const PERCENT_MAX = 100;
  *   of rendering an empty/broken control panel.
  */
 export function MusicPlayer() {
+  const { pathname } = useLocation();
+  const isPostPage = pathname.startsWith("/posts/");
+
   const [tracks, setTracks] = useState<MetingTrack[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -91,7 +95,7 @@ export function MusicPlayer() {
     }
   }, [isPlaying, trackIndex, tracks]);
 
-  if (!musicConfig.enable || loadFailed || !tracks || tracks.length === 0) {
+  if (isPostPage || !musicConfig.enable || loadFailed || !tracks || tracks.length === 0) {
     return null;
   }
 

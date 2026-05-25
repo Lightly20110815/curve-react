@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
-import { Kicker } from "@/components/editorial";
+import { Kicker } from "@/components/Editorial";
 import { Pagination } from "@/components/Pagination";
 import { usePageParam } from "@/hooks/usePageParam";
 import { formatArticleDateline, hanDigits } from "@/lib/han-date";

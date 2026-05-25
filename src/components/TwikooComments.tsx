@@ -131,7 +131,7 @@ export function TwikooCommentsPanel({
     <section
       className={cn(
         articleVariant
-          ? "mt-12 border-y-[3px] border-double border-rule bg-paper/92 px-5 py-6 md:px-10 md:py-8 lg:px-14"
+          ? "mt-16 border border-rule bg-paper-warm/40 px-5 py-10 md:px-10 md:py-12 lg:px-14"
           : "mt-5 border-t border-dashed border-rule-soft/60 pt-5",
       )}
     >

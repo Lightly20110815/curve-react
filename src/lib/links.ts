@@ -1,0 +1,92 @@
+export interface LinkItem {
+  name: string;
+  avatar: string;
+  desc: string;
+  url: string;
+}
+
+export interface LinkGroup {
+  type: string;
+  typeName: string;
+  typeDesc: string;
+  typeList: LinkItem[];
+}
+
+const linkData: LinkGroup[] = [
+  {
+    type: "rec",
+    typeName: "本站",
+    typeDesc: "自己的东西",
+    typeList: [
+      {
+        name: "Sy's Digital Garden",
+        avatar: "https://api.ddnsy.fun/clogo.webp",
+        desc: "重构时间线，再次重逢",
+        url: "https://404yann.com",
+      },
+    ],
+  },
+  {
+    type: "friends",
+    typeName: "小伙伴们",
+    typeDesc: "我们在一起，共同进步",
+    typeList: [
+      {
+        name: "池鱼小栈",
+        avatar: "https://chiyu.it/images/logo/logo.webp",
+        desc: "｜д•´)!!",
+        url: "https://chiyu.it",
+      },
+      {
+        name: "Clover Yan",
+        avatar: `https://www.khyan.top/assets/avatar_${Math.floor(Math.random() * 4) + 1}.jpg`,
+        desc: "生命是灰色的，理论之树常青。",
+        url: "https://www.khyan.top/",
+      },
+      {
+        name: "寻亦见北",
+        avatar: "https://www.xyjb.org/img/favicon.png",
+        desc: "寻褶·见熵·北纬·柒文",
+        url: "https://xyjb.org",
+      },
+      {
+        name: "薄荷の小屋",
+        avatar: "https://api.hoshiroko.com/img/avatar.jpg",
+        desc: "越是拼命往前伸手，渴望之物越是渐行渐远",
+        url: "https://www.hoshiroko.com",
+      },
+      {
+        name: "纸月 Paper Moon",
+        avatar: "https://avatars.githubusercontent.com/u/195516213?v=4",
+        desc: "マジやばくね",
+        url: "https://tangyuan0821.com",
+      },
+      {
+        name: "𝑬𝒑𝒉𝒆𝒊𝒂's Think",
+        avatar: "https://api.ddnsy.fun/ehpiea.jpg",
+        desc: "她的聊天角",
+        url: "https://watakushi.desuwa.org/",
+      },
+      {
+        name: "HosinoNeko's Website",
+        avatar: "https://avatars.githubusercontent.com/u/177436503?v=4",
+        desc: "點解我眼角長期都帶住淚？因為我一直被困喺一個暗無天日嘅十月入面",
+        url: "https://hosinoneko.me/",
+      },
+    ],
+  },
+];
+
+export default linkData;
+
+export function getAllFriendLinks(): LinkItem[] {
+  return linkData
+    .filter((g) => g.type === "friends")
+    .flatMap((g) => g.typeList);
+}
+
+export function getRandomFriendLink(): LinkItem | null {
+  const friends = getAllFriendLinks();
+  if (friends.length === 0) return null;
+  return friends[Math.floor(Math.random() * friends.length)];
+}

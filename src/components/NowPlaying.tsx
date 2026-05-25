@@ -9,6 +9,8 @@ import { buildMetingUrl, type MetingTrack } from "@/lib/music-config";
  */
 export function NowPlaying() {
   const [tracks, setTracks] = useState<MetingTrack[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -28,15 +30,24 @@ export function NowPlaying() {
     let cancelled = false;
 
     async function load() {
+      setIsLoading(true);
+      setError(false);
       try {
         const res = await fetch(buildMetingUrl(), { mode: "cors" });
         if (!res.ok) throw new Error(String(res.status));
         const data = (await res.json()) as unknown[];
         if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
-        const list = data.filter(isMetingTrack);
-        if (!cancelled) setTracks(list);
+        const list = data.map(parseMetingTrack).filter((t): t is MetingTrack => t !== null);
+        if (!cancelled) {
+          setTracks(list);
+          setIsLoading(false);
+        }
       } catch (e) {
         console.warn("NowPlaying 加载播放列表失败：", e);
+        if (!cancelled) {
+          setError(true);
+          setIsLoading(false);
+        }
       }
     }
 
@@ -102,7 +113,21 @@ export function NowPlaying() {
     return () => clearTimeout(id);
   }, [track?.name, track?.pic]);
 
-  if (!tracks || tracks.length === 0) return null;
+  if (isLoading) {
+    return (
+      <div className="flex h-[100px] items-center justify-center border border-[hsl(var(--rule-soft)/0.48)] bg-[hsl(var(--paper-soft))] p-3.5 text-[0.8rem] text-[hsl(var(--ink-muted))]">
+        正在加载音乐...
+      </div>
+    );
+  }
+
+  if (error || !tracks || tracks.length === 0) {
+    return (
+      <div className="flex h-[100px] items-center justify-center border border-[hsl(var(--rule-soft)/0.48)] bg-[hsl(var(--paper-soft))] p-3.5 text-[0.8rem] text-[hsl(var(--ink-muted))]">
+        暂无音乐播放
+      </div>
+    );
+  }
 
   const togglePlay = () => setIsPlaying((p) => !p);
   const prevTrack = () => setTrackIndex((i) => (i - 1 + tracks.length) % tracks.length);
@@ -231,15 +256,16 @@ export function NowPlaying() {
   );
 }
 
-function isMetingTrack(value: unknown): value is MetingTrack {
-  if (!value || typeof value !== "object") return false;
-  const t = value as Partial<Record<keyof MetingTrack, unknown>>;
-  return (
-    typeof t.name === "string" &&
-    typeof t.artist === "string" &&
-    typeof t.url === "string" &&
-    typeof t.pic === "string"
-  );
+function parseMetingTrack(value: unknown): MetingTrack | null {
+  if (!value || typeof value !== "object") return null;
+  const t = value as Record<string, unknown>;
+  const name = typeof t.name === "string" ? t.name : (typeof t.title === "string" ? t.title : "");
+  const artist = typeof t.artist === "string" ? t.artist : (typeof t.author === "string" ? t.author : "");
+  const url = typeof t.url === "string" ? t.url : "";
+  const pic = typeof t.pic === "string" ? t.pic : "";
+
+  if (!name || !artist || !url || !pic) return null;
+  return { name, artist, url, pic };
 }
 
 /* Inline SVG icons */

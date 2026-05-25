@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Kicker, Ornament } from "@/components/editorial";
+import { Kicker, Ornament } from "@/components/Editorial";
 import { TwikooComments } from "@/components/TwikooComments";
 import { buttonVariants } from "@/components/ui/button";
 import { getPostBySlug, posts } from "@/content/posts";
@@ -37,9 +37,9 @@ export default function PostPage() {
 
   return (
     <article className="container py-8 md:py-12">
-      <div className="mx-auto max-w-[860px]">
+      <div className="mx-auto max-w-[960px]">
         <div className="overflow-hidden border-y-[3px] border-rule bg-paper/95 shadow-[0_1px_0_hsl(var(--rule-soft)/0.35)]">
-          <div className="px-5 py-4 md:px-10 md:py-6 lg:px-14">
+          <div className="px-4 py-4 md:px-5 md:py-6 lg:px-8">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3">
               <Link
                 to={`/categories/${encodeURIComponent(section)}`}
@@ -85,7 +85,7 @@ export default function PostPage() {
             </div>
           </div>
 
-          <div className="px-5 pb-12 pt-8 md:px-10 md:pb-16 lg:px-14">
+          <div className="px-4 pb-12 pt-8 md:px-5 md:pb-16 lg:px-8">
             <div className="prose-news prose-news-article" dangerouslySetInnerHTML={{ __html: post.html }} />
 
             {post.tags.length > 0 && (

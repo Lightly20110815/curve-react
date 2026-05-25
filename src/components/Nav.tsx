@@ -9,6 +9,7 @@ const links = [
   { to: "/categories", label: "SECTIONS", subLabel: "版块", end: false, width: "min-w-[74px]" },
   { to: "/tags", label: "INDEX", subLabel: "索引", end: false, width: "min-w-[72px]" },
   { to: "/notes", label: "OPINION", subLabel: "随笔", end: false, width: "min-w-[78px]" },
+  { to: "/links", label: "LINKS", subLabel: "友链", end: false, width: "min-w-[68px]" },
   { to: "/about", label: "MASTHEAD", subLabel: "编者", end: false, width: "min-w-[70px]" },
 ] as const;
 
@@ -56,7 +57,7 @@ export function Nav() {
                 end={l.end}
                 className={({ isActive }) =>
                   cn(
-                    "group flex flex-col items-center border-b-[4px] border-transparent px-2 pb-2 pt-1.5 transition-colors",
+                    "group flex flex-col items-center border-b-[4px] border-transparent px-3 py-2 transition-colors",
                     l.width,
                     isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
                   )
@@ -66,7 +67,7 @@ export function Nav() {
                   <>
                     <span
                       className={cn(
-                        "font-ui text-[13px] tracking-[0.08em]",
+                        "font-ui text-[13px] tracking-[0.1em]",
                         isActive
                           ? "font-black text-stamp"
                           : "font-semibold text-ink-strong group-hover:text-stamp",
@@ -76,7 +77,7 @@ export function Nav() {
                     </span>
                     <span
                       className={cn(
-                        "mt-1 font-ui text-[9px] font-medium uppercase tracking-[0.18em]",
+                        "mt-1 font-ui text-[11px] font-medium uppercase tracking-[0.14em]",
                         isActive ? "text-stamp/85" : "text-ink-muted group-hover:text-stamp/70",
                       )}
                     >

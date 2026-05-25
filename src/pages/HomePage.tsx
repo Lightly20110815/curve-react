@@ -2,8 +2,9 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { DailyPoetry } from "@/components/DailyPoetry";
 import { PostCard } from "@/components/PostCard";
-import { Kicker, Ornament } from "@/components/editorial";
+import { Kicker, Ornament } from "@/components/Editorial";
 import { Badge } from "@/components/ui/badge";
+import { NowPlaying } from "@/components/NowPlaying";
 import { posts, getAllCategories, getAllTags } from "@/content/posts";
 import { notes } from "@/content/notes";
 import { formatArticleDateline, hanNumber } from "@/lib/han-date";
@@ -14,7 +15,8 @@ export default function HomePage() {
   const aboveFold = rest.slice(0, 4);
   const moreHeadlines = rest.slice(4, 10);
   const categories = getAllCategories();
-  const tags = getAllTags().slice(0, 16);
+  const allTags = getAllTags();
+  const tags = allTags.slice(0, 16);
   const [latestNote] = notes;
   const leadTags = new Set(lead?.tags ?? []);
   const highlightedTagNames = new Set(
@@ -29,7 +31,30 @@ export default function HomePage() {
     (post) => new Date(post.date).getFullYear() === currentYear,
   ).length;
   const replyLinkClass =
-    "inline-flex h-6 items-center justify-center border border-dashed px-2.5 font-ui text-[9px] font-medium tracking-[0.18em] uppercase transition-colors";
+    "inline-flex h-7 items-center justify-center border border-dashed px-3 font-ui text-[11px] font-medium tracking-[0.14em] uppercase transition-colors";
+  const quickRoutes = [
+    {
+      to: "/archives",
+      eyebrow: "Archive",
+      title: "Read by year",
+      summary: `Browse all ${posts.length} posts from the full archive shelf.`,
+      meta: `${posts.length} posts`,
+    },
+    {
+      to: "/notes",
+      eyebrow: "Desk Note",
+      title: latestNote ? `${latestNote.mood ? `${latestNote.mood} ` : ""}${latestNote.title}` : "Open the notebook",
+      summary: latestNote?.description ?? "Fragments, drafts, and short notes from the desk.",
+      meta: latestNote ? formatArticleDateline(latestNote.date) : "Notes",
+    },
+    {
+      to: "/tags",
+      eyebrow: "Index",
+      title: "Take the lighter route",
+      summary: `Start with ${allTags.length} tags instead of jumping straight into long reads.`,
+      meta: `${allTags.length} tags`,
+    },
+  ] as const;
 
   return (
     <div className="container py-7 md:py-9">
@@ -41,7 +66,15 @@ export default function HomePage() {
       </section>
 
       {/* ABOVE-THE-FOLD GRID — 3 columns of articles */}
-      <section className="mt-11">
+      <section className="mt-7 border-y border-rule-soft/35 py-3 md:py-4">
+        <div className="grid gap-px bg-rule-soft/20 md:grid-cols-3">
+          {quickRoutes.map((route) => (
+            <QuickRouteCard key={route.to} {...route} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10 md:mt-12">
         <SectionTitle title="头版要闻" note="继续往下读" />
         <div className="grid gap-x-8 gap-y-10 divide-y divide-rule-soft/25 md:grid-cols-3 md:divide-y-0 md:[&>article:not(:nth-child(3n+1))]:border-l md:[&>article:not(:nth-child(3n+1))]:border-rule-soft/25 md:[&>article:not(:nth-child(3n+1))]:pl-8">
           {aboveFold.map((p) => (
@@ -127,7 +160,7 @@ export default function HomePage() {
               to={`/categories/${encodeURIComponent(c.name)}`}
               className="group flex min-h-[142px] flex-col justify-between bg-paper p-5 outline outline-1 outline-offset-[-1px] outline-rule transition-colors hover:bg-paper-warm"
             >
-              <div className="flex items-center justify-between font-ui text-[10px] font-medium tracking-[0.14em] text-ink-muted">
+              <div className="flex items-center justify-between font-ui text-[11px] font-medium tracking-[0.12em] text-ink-muted">
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <span className="h-px w-8 bg-rule-soft/45 transition-colors group-hover:bg-stamp/45" />
               </div>
@@ -245,6 +278,41 @@ function SectionTitle({ title, note }: { title: string; note?: string }) {
         {title}
       </h2>
     </div>
+  );
+}
+
+function QuickRouteCard({
+  to,
+  eyebrow,
+  title,
+  summary,
+  meta,
+}: {
+  to: string;
+  eyebrow: string;
+  title: string;
+  summary: string;
+  meta: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="group bg-paper/80 px-4 py-4 transition-colors hover:bg-paper-warm/75 md:min-h-[138px] md:px-5"
+    >
+      <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+        {eyebrow}
+      </p>
+      <p className="mt-3 max-w-[18rem] font-display text-[20px] leading-[1.3] text-ink-strong transition-colors group-hover:text-stamp">
+        {title}
+      </p>
+      <p className="mt-2 line-clamp-2 max-w-[22rem] font-serif text-[14px] leading-[1.7] text-ink-body">
+        {summary}
+      </p>
+      <p className="mt-5 inline-flex items-center gap-1.5 font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-stamp">
+        {meta}
+        <ArrowRight className="h-3 w-3" />
+      </p>
+    </Link>
   );
 }
 

@@ -9,6 +9,7 @@ import CategoryDetailPage from "@/pages/CategoryDetailPage";
 import TagDetailPage from "@/pages/TagDetailPage";
 import NotesPage from "@/pages/NotesPage";
 import AboutPage from "@/pages/AboutPage";
+import LinksPage from "@/pages/LinksPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="tags" element={<TagsPage />} />
         <Route path="tags/:name" element={<TagDetailPage />} />
         <Route path="notes" element={<NotesPage />} />
+        <Route path="links" element={<LinksPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

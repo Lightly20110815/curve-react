@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Kicker, Ornament } from "./editorial";
+import { Kicker, Ornament } from "./Editorial";
 
 interface Props {
   kicker?: string;

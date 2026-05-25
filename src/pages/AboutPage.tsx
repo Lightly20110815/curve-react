@@ -1,6 +1,6 @@
 import { Github, Mail } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { Kicker, Ornament, PullQuote } from "@/components/editorial";
+import { Kicker, Ornament, PullQuote } from "@/components/Editorial";
 import { site, siteEmailHref } from "@/lib/site";
 
 export default function AboutPage() {

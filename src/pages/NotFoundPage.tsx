@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Home } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { Kicker, Ornament } from "@/components/editorial";
+import { Kicker, Ornament } from "@/components/Editorial";
 import { cn } from "@/lib/utils";
 
 export default function NotFoundPage() {
