@@ -106,10 +106,8 @@ export function ContextMenu() {
         </p>
       </div>
 
-      {/* Clock */}
-      <div className="border-b border-rule bg-paper-warm/40 py-3" onClick={(e) => e.stopPropagation()}>
-        <AnalogClock className="h-16 w-16" />
-      </div>
+      {/* Clock widget (Analog + Digital) */}
+      <MenuClock />
 
       <div className="border-b border-rule" onClick={(e) => e.stopPropagation()}>
         <NowPlaying />
@@ -172,5 +170,36 @@ function Item({
 function Divider() {
   return (
     <li role="separator" aria-hidden="true" className="my-1 border-t border-rule-soft/30" />
+  );
+}
+
+function MenuClock() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const hh = time.getHours().toString().padStart(2, "0");
+  const mm = time.getMinutes().toString().padStart(2, "0");
+  const ss = time.getSeconds().toString().padStart(2, "0");
+
+  return (
+    <div className="flex items-center justify-center gap-5 border-b border-rule bg-paper-warm/40 py-3.5" onClick={(e) => e.stopPropagation()}>
+      <AnalogClock className="h-12 w-12 border-2 shadow-none" />
+      <div className="flex flex-col justify-center">
+        <span className="font-ui text-[17px] font-black tracking-[0.05em] text-ink-strong leading-none">
+          {hh}
+          <span className="animate-[pulse_1s_ease-in-out_infinite] text-stamp opacity-80">:</span>
+          {mm}
+          <span className="animate-[pulse_1s_ease-in-out_infinite] text-stamp opacity-80">:</span>
+          {ss}
+        </span>
+        <span className="mt-1 font-ui text-[10px] font-medium uppercase tracking-[0.14em] text-ink-muted">
+          Local Time
+        </span>
+      </div>
+    </div>
   );
 }
