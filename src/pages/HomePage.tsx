@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { DailyPoetry } from "@/components/DailyPoetry";
+import { HomeTerminalEasterEgg } from "@/components/HomeTerminalEasterEgg";
 import { PostCard } from "@/components/PostCard";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +58,8 @@ export default function HomePage() {
 
   return (
     <div className="container py-7 md:py-9">
+      <HomeTerminalEasterEgg />
+
       {/* LEAD STORY — front page hero */}
       {lead && <PostCard post={lead} variant="lead" />}
 

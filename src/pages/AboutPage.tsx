@@ -1,6 +1,13 @@
 import { Github, Mail } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Kicker, Ornament, PullQuote } from "@/components/Editorial";
+import {
+  aboutColophonEntries,
+  aboutContactCopy,
+  aboutIntroHeading,
+  aboutIntroParagraphs,
+  aboutPullQuote,
+} from "@/lib/about-profile";
 import { site, siteEmailHref } from "@/lib/site";
 
 export default function AboutPage() {
@@ -17,28 +24,16 @@ export default function AboutPage() {
         <section>
           <Kicker>About the editor · 关于编者</Kicker>
           <h2 className="mt-3 font-display text-[40px] font-bold leading-[1.05] text-ink-strong">
-            我是 Sy。
+            {aboutIntroHeading}
           </h2>
           <div className="prose-news mt-5">
-            <p>
-              住在某个时区的人类。
-              喜欢把代码当作纸笔，把日子写得轻一点。
-              这里不是教程站，更像一份公开的便签本，
-              写给可能在某个深夜路过的你。
-            </p>
-            <p>
-              我没有发刊周期，也不打算保证更新频率。
-              一切以"想写"为准。<br />
-              所以你看到的每一篇文章，都是某个时刻的我，
-              写给某个时刻的你。
-            </p>
+            {aboutIntroParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
           </div>
         </section>
 
-        <PullQuote attribution="hello-world, 第一篇">
-          这里是一个小小的角落，
-          一个勉强算是"家"的地方。
-        </PullQuote>
+        <PullQuote attribution={aboutPullQuote.attribution}>{aboutPullQuote.content}</PullQuote>
 
         {/* Technical colophon */}
         <section className="mt-12">
@@ -47,12 +42,9 @@ export default function AboutPage() {
             这份报纸是怎么印出来的
           </h2>
           <dl className="mt-5 grid gap-px border border-rule bg-rule sm:grid-cols-2">
-            <ColophonItem label="Press · 排版机" value="Vite + React 18" />
-            <ColophonItem label="Layout · 版式" value="Tailwind CSS" />
-            <ColophonItem label="Type · 字体" value="Playfair Display · Cormorant · Noto Serif SC" />
-            <ColophonItem label="Composing · 排字" value="Markdown → JSON 构建期管线" />
-            <ColophonItem label="Music · 报刊电台" value="Meting API · HTML5 audio" />
-            <ColophonItem label="Hosting · 印厂" value="Static site, anywhere" />
+            {aboutColophonEntries.map((entry) => (
+              <ColophonItem key={entry.label} label={entry.label} value={entry.value} />
+            ))}
           </dl>
         </section>
 
@@ -64,12 +56,10 @@ export default function AboutPage() {
             Reach the desk · 给编辑部
           </p>
           <h2 className="mt-3 font-display text-[36px] font-bold leading-[1.1]">
-            想说点什么？随时来信。
+            {aboutContactCopy.heading}
           </h2>
           <p className="mt-3 max-w-md font-serif text-[16px] leading-[1.65] text-paper/85">
-            邮件、GitHub Issue、随笔评论 — 哪个顺手用哪个。
-            <br />
-            我不一定回得快，但一定会读。
+            {aboutContactCopy.body}
           </p>
           <div className="mt-7 flex flex-wrap gap-2">
             <a
