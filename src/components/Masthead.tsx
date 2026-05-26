@@ -196,7 +196,7 @@ export function Masthead({ issueNo, totalIssues, className }: Props) {
 
           {/* Title — non-interactive */}
           <div className="text-center">
-            <h1 className="whitespace-nowrap font-masthead text-[clamp(34px,6vw,78px)] font-black leading-[0.98] text-ink-strong text-glow-masthead">
+            <h1 className="font-masthead text-[clamp(28px,8vw,78px)] font-black leading-[0.98] text-ink-strong text-glow-masthead sm:whitespace-nowrap">
               <DynamicMastheadTitle />
             </h1>
             <p className="mt-1.5 font-serif text-[clamp(15px,1.6vw,18px)] font-medium text-stamp text-glow-sub">

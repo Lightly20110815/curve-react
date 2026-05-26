@@ -586,9 +586,160 @@
     letter-spacing: 0;
     font-size: 12px;
   }
+
+  /* ───────────────────────────────────────────────────────────────────
+   * Interactive code blocks (decorated at runtime by useCodeBlockEnhancements)
+   * ─────────────────────────────────────────────────────────────────── */
+  .prose-news figure.code-block {
+    position: relative;
+    margin: 1.9em 0;
+    border: 1px solid hsl(var(--rule) / 0.18);
+    background: #16110c;
+    box-shadow: 0 1px 0 hsl(var(--rule-soft) / 0.18);
+  }
+
+  .code-block__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.65em;
+    padding: 0.4em 0.7em 0.4em 0.95em;
+    background: linear-gradient(
+      180deg,
+      hsl(28 14% 14% / 1) 0%,
+      hsl(28 14% 11% / 1) 100%
+    );
+    border-bottom: 1px solid hsl(28 14% 6% / 1);
+    font-family: theme("fontFamily.mono");
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: hsl(38 18% 72%);
+  }
+
+  .code-block__lang {
+    text-transform: lowercase;
+    font-weight: 600;
+    color: hsl(var(--stamp));
+  }
+
+  .dark .code-block__lang {
+    color: hsl(42 70% 70%);
+  }
+
+  .code-block__meta {
+    color: hsl(38 8% 55%);
+    margin-right: auto;
+  }
+
+  .code-block__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.22em 0.65em;
+    border: 1px solid hsl(38 12% 36% / 0.55);
+    background: transparent;
+    color: hsl(38 14% 78%);
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+  }
+
+  .code-block__action:hover {
+    border-color: hsl(var(--stamp));
+    color: hsl(var(--stamp));
+  }
+
+  .code-block__action[data-copied="true"] {
+    border-color: hsl(140 38% 52%);
+    color: hsl(140 38% 70%);
+    background: hsl(140 30% 20% / 0.4);
+  }
+
+  .code-block__body {
+    position: relative;
+    transition: max-height 320ms ease;
+  }
+
+  .code-block__body[data-collapsed="true"] {
+    max-height: 26em;
+    overflow: hidden;
+  }
+
+  .code-block__body[data-collapsed="true"]::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 8em;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      hsl(28 14% 10% / 0.6) 55%,
+      #16110c 100%
+    );
+  }
+
+  .code-block__expand {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55em 1em;
+    background: hsl(28 14% 11% / 1);
+    border: 0;
+    border-top: 1px solid hsl(28 14% 6% / 1);
+    color: hsl(38 16% 75%);
+    font-family: theme("fontFamily.mono");
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: color 150ms ease, background-color 150ms ease;
+  }
+
+  .code-block__expand:hover {
+    color: hsl(var(--stamp));
+    background: hsl(28 14% 14% / 1);
+  }
+
+  .dark .code-block__expand:hover {
+    color: hsl(42 70% 70%);
+  }
+
+  /* The <pre> inside an enhanced figure has its margin reset and rounded
+   * corners disabled — the figure border handles framing. */
+  .prose-news figure.code-block pre {
+    border: 0;
+    margin: 0;
+    border-radius: 0;
+  }
 }
 
 @layer utilities {
+  /* ───────────────────────────────────────────────────────────────────
+   * Zen mode — strip ornamentation, soften background, calm scrollbar.
+   * ─────────────────────────────────────────────────────────────────── */
+  body.zen-mode {
+    background-image: none;
+    background-color: hsl(var(--paper-soft));
+    box-shadow: none;
+  }
+
+  .dark body.zen-mode {
+    background-image: none;
+    background-color: hsl(var(--paper-soft));
+  }
+
+  body.zen-mode .page-impression > * {
+    animation: none;
+    transform: none;
+  }
+
+  body.zen-mode ::-webkit-scrollbar { width: 6px; }
+  body.zen-mode ::-webkit-scrollbar-thumb {
+    background: hsl(var(--rule-soft) / 0.25);
+  }
+
   .font-masthead { font-family: theme("fontFamily.masthead"); }
   .font-display { font-family: theme("fontFamily.display"); }
   .font-serif { font-family: theme("fontFamily.serif"); }

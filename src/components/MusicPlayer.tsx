@@ -128,7 +128,7 @@ export function MusicPlayer() {
       <audio ref={audioRef} src={track.url} preload="metadata" />
 
       {isOpen ? (
-        <div className="w-[320px] overflow-hidden border-2 border-ink bg-paper shadow-[0_8px_24px_-8px_rgba(20,16,12,0.25)] animate-fade-in dark:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)]">
+        <div className="w-[calc(100vw-2.5rem)] sm:w-[320px] max-w-[320px] overflow-hidden border-2 border-ink bg-paper shadow-[0_8px_24px_-8px_rgba(20,16,12,0.25)] animate-fade-in dark:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)]">
           <div className="flex items-center gap-3 border-b-2 border-ink bg-ink p-3 text-paper">
             <div className="relative h-12 w-12 flex-none overflow-hidden border border-paper/30 bg-ink-strong">
               {track.pic && (

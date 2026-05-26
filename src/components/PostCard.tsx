@@ -37,7 +37,7 @@ export function PostCard({ post, variant = "default", className }: PostCardProps
               <span className="font-semibold text-stamp">{section}</span>
               <span className="text-ink-muted">· {formatArticleDateline(post.date)}</span>
             </div>
-            <h2 className="mt-4 font-display text-[clamp(36px,5vw,58px)] font-bold leading-[1.12] text-balance text-ink-strong transition-colors group-hover:text-stamp">
+            <h2 className="mt-4 font-display text-[clamp(28px,7vw,58px)] font-bold leading-[1.12] text-balance text-ink-strong transition-colors group-hover:text-stamp">
               {post.title}
             </h2>
             {post.description && (
