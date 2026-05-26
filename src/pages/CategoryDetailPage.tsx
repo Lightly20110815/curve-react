@@ -1,11 +1,15 @@
 import { useParams } from "react-router-dom";
-import { getPostsByCategory } from "@/content/posts";
+import { getPostsByCategory, posts } from "@/content/posts";
 import { PostCollectionPage } from "@/pages/PostCollectionPage";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
 
 export default function CategoryDetailPage() {
   const { name = "" } = useParams<{ name: string }>();
   const categoryName = decodeURIComponent(name);
-  const categoryPosts = getPostsByCategory(categoryName);
+  const { asOf } = useAsOf();
+  const visiblePosts = filterByAsOf(posts, asOf);
+  const categoryPosts = getPostsByCategory(categoryName, visiblePosts);
 
   return (
     <PostCollectionPage

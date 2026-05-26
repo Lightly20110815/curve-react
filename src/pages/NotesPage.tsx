@@ -5,12 +5,16 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { notes } from "@/content/notes";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
 import { formatArticleDateline } from "@/lib/han-date";
 import { comments } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export default function NotesPage() {
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+  const { asOf } = useAsOf();
+  const visibleNotes = filterByAsOf(notes, asOf);
 
   function toggleComments(noteSlug: string) {
     setOpenComments((prev) => ({ ...prev, [noteSlug]: !prev[noteSlug] }));
@@ -25,7 +29,7 @@ export default function NotesPage() {
       />
 
       <ol className="mx-auto mt-12 max-w-2xl space-y-12">
-        {notes.map((n, i) => (
+        {visibleNotes.map((n, i) => (
           <li key={n.slug}>
             <article className="relative">
               {n.top && (
@@ -87,10 +91,10 @@ export default function NotesPage() {
                 </div>
               ) : null}
             </article>
-            {i < notes.length - 1 && <Ornament className="mt-12" />}
+            {i < visibleNotes.length - 1 && <Ornament className="mt-12" />}
           </li>
         ))}
-        {notes.length === 0 && (
+        {visibleNotes.length === 0 && (
           <p className="text-center font-serif italic text-ink-muted">还没写过随笔。</p>
         )}
       </ol>

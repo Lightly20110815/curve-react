@@ -2,11 +2,15 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Kicker } from "@/components/Editorial";
-import { getAllCategories } from "@/content/posts";
+import { getAllCategories, posts } from "@/content/posts";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
 import { hanNumber } from "@/lib/han-date";
 
 export default function CategoriesPage() {
-  const cats = getAllCategories();
+  const { asOf } = useAsOf();
+  const visiblePosts = filterByAsOf(posts, asOf);
+  const cats = getAllCategories(visiblePosts);
   return (
     <div className="container py-10 md:py-14">
       <PageHeader

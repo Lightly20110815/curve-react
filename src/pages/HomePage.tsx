@@ -7,17 +7,22 @@ import { Kicker, Ornament } from "@/components/Editorial";
 import { Badge } from "@/components/ui/badge";
 import { posts, getAllCategories, getAllTags } from "@/content/posts";
 import { notes } from "@/content/notes";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
 import { formatArticleDateline, hanNumber } from "@/lib/han-date";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
-  const [lead, ...rest] = posts;
+  const { asOf } = useAsOf();
+  const visiblePosts = filterByAsOf(posts, asOf);
+  const visibleNotes = filterByAsOf(notes, asOf);
+  const [lead, ...rest] = visiblePosts;
   const aboveFold = rest.slice(0, 4);
   const moreHeadlines = rest.slice(4, 10);
-  const categories = getAllCategories();
-  const allTags = getAllTags();
+  const categories = getAllCategories(visiblePosts);
+  const allTags = getAllTags(visiblePosts);
   const tags = allTags.slice(0, 16);
-  const [latestNote] = notes;
+  const [latestNote] = visibleNotes;
   const leadTags = new Set(lead?.tags ?? []);
   const highlightedTagNames = new Set(
     tags
@@ -25,10 +30,12 @@ export default function HomePage() {
       .slice(0, 2)
       .map((tag) => tag.name),
   );
-  const currentYear = new Date().getFullYear();
-  const totalWords = posts.reduce((s, p) => s + p.wordCount, 0);
-  const postsThisYear = posts.filter(
-    (post) => new Date(post.date).getFullYear() === currentYear,
+  const referenceYear = asOf
+    ? new Date(`${asOf}T00:00:00`).getFullYear()
+    : new Date().getFullYear();
+  const totalWords = visiblePosts.reduce((s, p) => s + p.wordCount, 0);
+  const postsThisYear = visiblePosts.filter(
+    (post) => new Date(post.date).getFullYear() === referenceYear,
   ).length;
   const replyLinkClass =
     "inline-flex h-7 items-center justify-center border border-dashed px-3 font-ui text-[11px] font-medium tracking-[0.14em] uppercase transition-colors";
@@ -37,8 +44,8 @@ export default function HomePage() {
       to: "/archives",
       eyebrow: "Archive",
       title: "Read by year",
-      summary: `Browse all ${posts.length} posts from the full archive shelf.`,
-      meta: `${posts.length} posts`,
+      summary: `Browse all ${visiblePosts.length} posts from the full archive shelf.`,
+      meta: `${visiblePosts.length} posts`,
     },
     {
       to: "/notes",
@@ -102,7 +109,7 @@ export default function HomePage() {
             to="/archives"
             className="mt-6 inline-flex items-center gap-2 border-b-2 border-ink pb-1 font-ui text-[12px] font-semibold uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
           >
-            完整存档 · {posts.length} 篇
+            完整存档 · {visiblePosts.length} 篇
             <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
@@ -123,7 +130,7 @@ export default function HomePage() {
           </div>
 
           <dl className="mt-9 grid grid-cols-3 gap-6 py-2 text-center">
-            <Stat label="累计" value={hanNumber(posts.length)} suffix="篇" />
+            <Stat label="累计" value={hanNumber(visiblePosts.length)} suffix="篇" />
             <Stat label="字数" value={fmtK(totalWords)} suffix="字" />
             <Stat label="今年" value={hanNumber(postsThisYear)} suffix="篇" />
           </dl>

@@ -1,9 +1,13 @@
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
-import { getAllTags } from "@/content/posts";
+import { getAllTags, posts } from "@/content/posts";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
 
 export default function TagsPage() {
-  const tags = getAllTags();
+  const { asOf } = useAsOf();
+  const visiblePosts = filterByAsOf(posts, asOf);
+  const tags = getAllTags(visiblePosts);
   const max = Math.max(1, ...tags.map((t) => t.count));
 
   return (

@@ -9,6 +9,8 @@ import { Kicker, Ornament } from "@/components/Editorial";
 import { TwikooComments } from "@/components/TwikooComments";
 import { buttonVariants } from "@/components/ui/button";
 import { getPostBySlug, posts } from "@/content/posts";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf, isBeforeAsOf } from "@/lib/as-of";
 import { buildArticleAiDocument } from "@/lib/article-ai";
 import { formatArticleDateline } from "@/lib/han-date";
 import { cn } from "@/lib/utils";
@@ -16,10 +18,12 @@ import { cn } from "@/lib/utils";
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getPostBySlug(slug) : undefined;
+  const { asOf, exit } = useAsOf();
+  const isHidden = !!(post && asOf && !isBeforeAsOf(post.date, asOf));
   const { setActiveArticle } = useArticleAi();
   const aiArticle = useMemo(
-    () => (post?.articleGPT ? buildArticleAiDocument(post) : null),
-    [post],
+    () => (post?.articleGPT && !isHidden ? buildArticleAiDocument(post) : null),
+    [post, isHidden],
   );
 
   useEffect(() => {
@@ -47,9 +51,42 @@ export default function PostPage() {
     );
   }
 
-  const index = posts.findIndex((item) => item.slug === post.slug);
-  const previousPost = posts[index + 1];
-  const nextPost = index > 0 ? posts[index - 1] : undefined;
+  if (isHidden && asOf) {
+    return (
+      <div className="container py-section text-center">
+        <Kicker variant="stamp">Not Yet In Print · 本期尚未刊登</Kicker>
+        <h1 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-bold leading-[1.15] text-ink-strong">
+          这一篇还没排到这一期
+        </h1>
+        <p className="mt-5 font-serif text-[17px] leading-[1.85] text-ink-body">
+          你正在翻阅 {formatArticleDateline(`${asOf}T00:00:00`)} 的版本，
+          <br />
+          《{post.title}》要等到 {formatArticleDateline(post.date)} 才会刊出。
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={exit}
+            className={cn(buttonVariants({ size: "lg" }))}
+          >
+            回到现在
+          </button>
+          <Link
+            to="/archives"
+            className={cn(buttonVariants({ variant: "secondary", size: "lg" }))}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            翻回存档
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const navPool = asOf ? filterByAsOf(posts, asOf) : posts;
+  const index = navPool.findIndex((item) => item.slug === post.slug);
+  const previousPost = index >= 0 ? navPool[index + 1] : undefined;
+  const nextPost = index > 0 ? navPool[index - 1] : undefined;
   const section = post.categories[0] ?? "随笔";
 
   return (

@@ -1,11 +1,15 @@
 import { useParams } from "react-router-dom";
-import { getPostsByTag } from "@/content/posts";
+import { getPostsByTag, posts } from "@/content/posts";
 import { PostCollectionPage } from "@/pages/PostCollectionPage";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
 
 export default function TagDetailPage() {
   const { name = "" } = useParams<{ name: string }>();
   const tagName = decodeURIComponent(name);
-  const taggedPosts = getPostsByTag(tagName);
+  const { asOf } = useAsOf();
+  const visiblePosts = filterByAsOf(posts, asOf);
+  const taggedPosts = getPostsByTag(tagName, visiblePosts);
 
   return (
     <PostCollectionPage

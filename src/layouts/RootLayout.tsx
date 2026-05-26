@@ -6,12 +6,17 @@ import { Footer } from "@/components/Footer";
 import { MusicPlayer } from "@/components/MusicPlayer";
 import { ContextMenu } from "@/components/ContextMenu";
 import { ArticleAiProvider } from "@/components/ArticleAiProvider";
+import { AsOfBanner } from "@/components/AsOfBanner";
 import { posts } from "@/content/posts";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
 import { ThemeProvider } from "@/hooks/useTheme";
 
 export default function RootLayout() {
   const { pathname } = useLocation();
+  const { asOf } = useAsOf();
   const outletDelay = useMemo(() => Math.round(200 + Math.random() * 800), [pathname]);
+  const visiblePosts = useMemo(() => filterByAsOf(posts, asOf), [asOf]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
@@ -21,8 +26,9 @@ export default function RootLayout() {
     <ThemeProvider>
       <ArticleAiProvider>
         <div className="flex min-h-screen flex-col bg-paper">
+          <AsOfBanner />
           <div key={`header-${pathname}`} className="page-impression-header">
-            <Masthead issueNo={posts.length} totalIssues={posts.length} />
+            <Masthead issueNo={visiblePosts.length} totalIssues={visiblePosts.length} />
             <Nav />
           </div>
           <main className="relative flex-1 overflow-x-clip">
