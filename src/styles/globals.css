@@ -59,6 +59,96 @@
     color-scheme: dark;
   }
 
+  :root[data-time-theme="dawn"] {
+    --paper: 43 54% 92%;
+    --paper-warm: 31 56% 88%;
+    --paper-soft: 45 68% 95%;
+    --ink: 28 13% 9%;
+    --ink-strong: 28 18% 5%;
+    --ink-body: 28 12% 18%;
+    --ink-muted: 24 11% 34%;
+    --ink-faded: 24 9% 46%;
+    --rule: 24 16% 16%;
+    --rule-soft: 24 11% 30%;
+    --stamp: 18 76% 44%;
+    --stamp-soft: 22 82% 93%;
+  }
+
+  :root[data-time-theme="dusk"] {
+    --paper: 37 45% 88%;
+    --paper-warm: 29 48% 83%;
+    --paper-soft: 40 50% 91%;
+    --ink: 25 13% 10%;
+    --ink-strong: 25 18% 6%;
+    --ink-body: 25 12% 18%;
+    --ink-muted: 25 10% 33%;
+    --ink-faded: 25 8% 45%;
+    --rule: 25 15% 15%;
+    --rule-soft: 25 11% 28%;
+    --stamp: 17 67% 40%;
+    --stamp-soft: 21 72% 90%;
+  }
+
+  :root[data-time-theme="deep-night"] {
+    --paper: 205 16% 88%;
+    --paper-warm: 210 15% 84%;
+    --paper-soft: 208 22% 93%;
+    --ink: 214 18% 12%;
+    --ink-strong: 214 24% 8%;
+    --ink-body: 214 14% 20%;
+    --ink-muted: 214 10% 35%;
+    --ink-faded: 214 8% 47%;
+    --rule: 214 16% 18%;
+    --rule-soft: 214 10% 31%;
+    --stamp: 198 44% 38%;
+    --stamp-soft: 198 42% 91%;
+  }
+
+  .dark[data-time-theme="dawn"] {
+    --paper: 31 17% 12%;
+    --paper-warm: 29 21% 15%;
+    --paper-soft: 31 15% 9%;
+    --ink: 40 17% 88%;
+    --ink-strong: 42 19% 93%;
+    --ink-body: 38 10% 80%;
+    --ink-muted: 33 9% 59%;
+    --ink-faded: 32 8% 44%;
+    --rule: 29 12% 25%;
+    --rule-soft: 29 11% 18%;
+    --stamp: 28 72% 62%;
+    --stamp-soft: 25 38% 20%;
+  }
+
+  .dark[data-time-theme="dusk"] {
+    --paper: 24 18% 11%;
+    --paper-warm: 22 21% 14%;
+    --paper-soft: 24 15% 8%;
+    --ink: 39 16% 88%;
+    --ink-strong: 40 19% 93%;
+    --ink-body: 37 10% 80%;
+    --ink-muted: 28 8% 58%;
+    --ink-faded: 28 7% 43%;
+    --rule: 22 12% 24%;
+    --rule-soft: 22 12% 17%;
+    --stamp: 18 74% 61%;
+    --stamp-soft: 18 34% 19%;
+  }
+
+  .dark[data-time-theme="deep-night"] {
+    --paper: 210 28% 10%;
+    --paper-warm: 212 24% 13%;
+    --paper-soft: 210 30% 8%;
+    --ink: 44 16% 88%;
+    --ink-strong: 48 20% 93%;
+    --ink-body: 42 10% 80%;
+    --ink-muted: 34 8% 58%;
+    --ink-faded: 34 7% 42%;
+    --rule: 210 16% 24%;
+    --rule-soft: 210 18% 17%;
+    --stamp: 195 50% 68%;
+    --stamp-soft: 198 34% 19%;
+  }
+
   * { border-color: hsl(var(--rule-soft) / 0.48); }
 
   html {
@@ -99,6 +189,11 @@
     box-shadow:
       inset 0 0 0 1px hsl(var(--paper-warm) / 0.2),
       inset 0 18px 48px hsl(var(--ink) / 0.018);
+    transition:
+      background-color 900ms ease,
+      background-image 900ms ease,
+      box-shadow 900ms ease,
+      color 220ms ease;
   }
 
   /* Dark mode body adjustments — strip paper-grain noise, keep a clean vignette */
@@ -118,6 +213,136 @@
     box-shadow:
       inset 0 0 0 1px hsl(var(--paper-warm) / 0.12),
       inset 0 18px 48px hsl(var(--ink-strong) / 0.08);
+  }
+
+  :root[data-time-theme="dawn"] body {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.035) calc(50% - 1px),
+        hsl(var(--ink) / 0.035) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      radial-gradient(circle at 50% 0%, hsl(33 92% 85% / 0.72) 0%, transparent 42%),
+      linear-gradient(
+        180deg,
+        hsl(var(--paper-soft)) 0%,
+        hsl(var(--paper)) 18%,
+        hsl(var(--paper)) 78%,
+        hsl(var(--paper-warm)) 100%
+      ),
+      radial-gradient(hsl(var(--ink) / 0.014) 1px, transparent 1px),
+      radial-gradient(hsl(var(--ink) / 0.01) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 58%, 100% 100%, 18px 18px, 30px 30px;
+    background-position: center top, center top, 0 0, 0 0, 9px 9px;
+  }
+
+  :root[data-time-theme="dusk"] body {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      radial-gradient(circle at 50% 0%, hsl(24 86% 70% / 0.56) 0%, transparent 48%),
+      linear-gradient(
+        180deg,
+        hsl(var(--paper-soft)) 0%,
+        hsl(var(--paper)) 20%,
+        hsl(var(--paper-warm)) 100%
+      ),
+      radial-gradient(hsl(var(--ink) / 0.016) 1px, transparent 1px),
+      radial-gradient(hsl(var(--ink) / 0.01) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 56%, 100% 100%, 18px 18px, 30px 30px;
+    background-position: center top, center top, 0 0, 0 0, 9px 9px;
+  }
+
+  :root[data-time-theme="deep-night"] body {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      radial-gradient(circle at 50% 0%, hsl(206 64% 84% / 0.55) 0%, transparent 40%),
+      linear-gradient(
+        180deg,
+        hsl(var(--paper-soft)) 0%,
+        hsl(var(--paper)) 18%,
+        hsl(var(--paper-warm)) 100%
+      ),
+      radial-gradient(hsl(var(--ink) / 0.014) 1px, transparent 1px),
+      radial-gradient(hsl(var(--ink) / 0.012) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 52%, 100% 100%, 18px 18px, 30px 30px;
+    background-position: center top, center top, 0 0, 0 0, 9px 9px;
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--paper-warm) / 0.18),
+      inset 0 42px 100px hsl(209 45% 44% / 0.08);
+  }
+
+  .dark[data-time-theme="dawn"] body {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      radial-gradient(ellipse at 50% 0%, hsl(28 64% 35% / 0.46) 0%, transparent 66%);
+    background-size: 100% 100%, 100% 62%;
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--paper-warm) / 0.13),
+      inset 0 18px 60px hsl(var(--stamp) / 0.1);
+  }
+
+  .dark[data-time-theme="dusk"] body {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% - 1px),
+        hsl(var(--ink) / 0.04) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      radial-gradient(ellipse at 50% 0%, hsl(17 66% 30% / 0.42) 0%, transparent 68%);
+    background-size: 100% 100%, 100% 60%;
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--paper-warm) / 0.12),
+      inset 0 22px 64px hsl(var(--stamp) / 0.12);
+  }
+
+  .dark[data-time-theme="deep-night"] body {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(50% - 1px),
+        hsl(var(--ink) / 0.045) calc(50% - 1px),
+        hsl(var(--ink) / 0.045) calc(50% + 1px),
+        transparent calc(50% + 1px),
+        transparent 100%
+      ),
+      radial-gradient(ellipse at 50% 0%, hsl(202 48% 26% / 0.42) 0%, transparent 70%);
+    background-size: 100% 100%, 100% 64%;
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--paper-warm) / 0.12),
+      inset 0 22px 72px hsl(203 72% 36% / 0.12);
   }
 
   ::selection {

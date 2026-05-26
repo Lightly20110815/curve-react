@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { streamDeepSeekText, type DeepSeekMessage } from "@/lib/deepseek";
+import { useTheme } from "@/hooks/useTheme";
+import { getTimeThemeInfo, type TimeTheme } from "@/lib/time-theme";
 const ORIGINAL_POETRY_API_URL = "https://v1.jinrishici.com/all.json";
 
 const HISTORY_KEY = "daily-poetry-history-v2";
@@ -17,6 +19,13 @@ interface PoetryApiData {
   origin?: string;
   author?: string;
 }
+
+const DEEP_NIGHT_FALLBACK_QUOTES: QuoteData[] = [
+  { content: "明月松间照，清泉石上流", origin: "山居秋暝", author: "王维" },
+  { content: "缺月挂疏桐，漏断人初静", origin: "卜算子·黄州定慧院寓居作", author: "苏轼" },
+  { content: "晚来天欲雪，能饮一杯无", origin: "问刘十九", author: "白居易" },
+  { content: "行到水穷处，坐看云起时", origin: "终南别业", author: "王维" },
+];
 
 function normalizeQuote(value: string): string {
   return value.replace(/[「」『』“”"'`]/g, "").replace(/\s+/g, "").trim();
@@ -88,11 +97,16 @@ function parseDraft(raw: string): QuoteData {
   return { content, origin, author };
 }
 
-function buildMessages(history: QuoteData[], retryNote?: string): DeepSeekMessage[] {
+function buildMessages(
+  history: QuoteData[],
+  timeTheme: TimeTheme,
+  retryNote?: string,
+): DeepSeekMessage[] {
   const recentList = history
     .slice(0, 16)
     .map((item, index) => `${index + 1}. ${item.content}`)
     .join("\n");
+  const timeThemeInfo = getTimeThemeInfo(timeTheme);
 
   return [
     {
@@ -114,6 +128,7 @@ function buildMessages(history: QuoteData[], retryNote?: string): DeepSeekMessag
 第一行：句子
 第二行：出处：作品名或文章名
 第三行：作者：作者名
+8. 当前是${timeThemeInfo.label}时段，${timeThemeInfo.poetryInstruction}
       `.trim(),
     },
     {
@@ -129,6 +144,7 @@ ${retryNote ? `\n补充要求：${retryNote}` : ""}
 }
 
 export function DailyPoetry() {
+  const { timeTheme, timeThemeInfo } = useTheme();
   const [content, setContent] = useState("");
   const [origin, setOrigin] = useState("");
   const [author, setAuthor] = useState("");
@@ -222,6 +238,13 @@ export function DailyPoetry() {
     saveHistory(fallback);
   }
 
+  async function fallbackToDeepNightLibrary(signal: AbortSignal, history: QuoteData[]) {
+    resetDisplay();
+    const fallback = pickNightFallback(history);
+    await typewriteDraft(stringifyDraft(fallback), signal);
+    saveHistory(fallback);
+  }
+
   async function generate(attempt = 0, retryNote?: string) {
     abortRef.current?.abort();
     abortRef.current = new AbortController();
@@ -240,7 +263,7 @@ export function DailyPoetry() {
           thinking: { type: "disabled" },
           temperature: 1.05,
           max_tokens: 120,
-          messages: buildMessages(history, retryNote),
+          messages: buildMessages(history, timeTheme, retryNote),
         },
         (delta) => {
           applyDraft(draftRef.current + delta);
@@ -255,7 +278,14 @@ export function DailyPoetry() {
       if (isDuplicate && attempt < MAX_RETRIES) {
         await generate(
           attempt + 1,
-          "上一条与历史重复或格式不合规，请务必换成另一句真实存在于诗词、散文、古文或著名文章中的句子，并保持三行格式。",
+          [
+            "上一条与历史重复或格式不合规，请务必换成另一句真实存在于诗词、散文、古文或著名文章中的句子，并保持三行格式。",
+            timeTheme === "deep-night"
+              ? "这次请明显偏向安抚、静谧、适合夜里读的句子，不要热闹，不要惊烈。"
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
         );
         return;
       }
@@ -272,10 +302,14 @@ export function DailyPoetry() {
 
       console.warn("获取 DeepSeek 摘句失败：", error);
       try {
-        await fallbackToOriginalApi(signal);
+        if (timeTheme === "deep-night") {
+          await fallbackToDeepNightLibrary(signal, history);
+        } else {
+          await fallbackToOriginalApi(signal);
+        }
       } catch (fallbackError) {
         if ((fallbackError as Error).name !== "AbortError") {
-          console.warn("原始诗词 API 也不可用：", fallbackError);
+          console.warn("备用摘句源也不可用：", fallbackError);
           resetDisplay();
         }
       }
@@ -287,6 +321,14 @@ export function DailyPoetry() {
   return (
     <section className="py-6 md:py-7" aria-label="每日诗词">
       <div className="mx-auto max-w-2xl">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-rule-soft/25 pb-2">
+          <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
+            Daily Poetry
+          </p>
+          <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-stamp/85">
+            {timeThemeInfo.label}版
+          </p>
+        </div>
         <div
           className={`min-h-[6.75rem] transition-all duration-500 ease-out ${
             show ? "translate-y-0 opacity-100" : "translate-y-1.5 opacity-0"
@@ -309,4 +351,13 @@ export function DailyPoetry() {
       </div>
     </section>
   );
+}
+
+function pickNightFallback(history: QuoteData[]): QuoteData {
+  const historySet = new Set(history.map((item) => normalizeQuote(item.content)));
+  const available = DEEP_NIGHT_FALLBACK_QUOTES.filter(
+    (item) => !historySet.has(normalizeQuote(item.content)),
+  );
+  const pool = available.length > 0 ? available : DEEP_NIGHT_FALLBACK_QUOTES;
+  return pool[Math.floor(Math.random() * pool.length)];
 }

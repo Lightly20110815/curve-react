@@ -21,6 +21,7 @@ import {
   type ArticleAiDocument,
 } from "@/lib/article-ai";
 import { siteContactMailHref } from "@/lib/site";
+import { getTimeThemeInfo } from "@/lib/time-theme";
 import { cn } from "@/lib/utils";
 
 interface Position {
@@ -246,13 +247,14 @@ function MenuClock() {
   const hh = time.getHours().toString().padStart(2, "0");
   const mm = time.getMinutes().toString().padStart(2, "0");
   const ss = time.getSeconds().toString().padStart(2, "0");
+  const timeThemeInfo = getTimeThemeInfo(time);
 
   return (
     <div
       className="flex items-center justify-center gap-5 border-b border-rule bg-paper-warm/40 py-3.5"
       onClick={(event) => event.stopPropagation()}
     >
-      <AnalogClock className="h-12 w-12 border-2 shadow-none" />
+      <AnalogClock className="h-12 w-12 border-2 shadow-none" time={time} />
       <div className="flex flex-col justify-center">
         <span className="font-ui leading-none text-[17px] font-black tracking-[0.05em] text-ink-strong">
           {hh}
@@ -262,7 +264,10 @@ function MenuClock() {
           {ss}
         </span>
         <span className="mt-1 font-ui text-[10px] font-medium uppercase tracking-[0.14em] text-ink-muted">
-          Local Time
+          {timeThemeInfo.badge}
+        </span>
+        <span className="mt-1 font-serif text-[11px] italic leading-[1.4] text-ink-muted">
+          {timeThemeInfo.clockHint}
         </span>
       </div>
     </div>

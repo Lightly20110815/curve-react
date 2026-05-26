@@ -1,17 +1,29 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-export function AnalogClock({ className }: { className?: string }) {
-  const [time, setTime] = useState(new Date());
+interface Props {
+  className?: string;
+  time?: Date;
+}
+
+export function AnalogClock({ className, time: providedTime }: Props) {
+  const [time, setTime] = useState(providedTime ?? new Date());
 
   useEffect(() => {
+    if (providedTime) {
+      setTime(providedTime);
+      return;
+    }
+
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [providedTime]);
 
-  const secondsDegrees = time.getSeconds() * 6;
-  const minsDegrees = time.getMinutes() * 6 + time.getSeconds() * 0.1;
-  const hoursDegrees = (time.getHours() % 12) * 30 + time.getMinutes() * 0.5;
+  const currentTime = providedTime ?? time;
+
+  const secondsDegrees = currentTime.getSeconds() * 6;
+  const minsDegrees = currentTime.getMinutes() * 6 + currentTime.getSeconds() * 0.1;
+  const hoursDegrees = (currentTime.getHours() % 12) * 30 + currentTime.getMinutes() * 0.5;
 
   return (
     <div className={cn("relative flex h-28 w-28 items-center justify-center rounded-full border-[3px] border-ink bg-paper shadow-sm", className)}>

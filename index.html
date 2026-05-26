@@ -28,14 +28,33 @@
         try {
           var stored = localStorage.getItem("curve-theme");
           var dark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var hour = new Date().getHours();
+          var timeTheme =
+            hour >= 5 && hour < 8 ? "dawn" :
+            hour >= 17 && hour < 20 ? "dusk" :
+            (hour >= 22 || hour < 5) ? "deep-night" :
+            "day";
+          var lightChrome =
+            timeTheme === "dawn" ? "#efe1be" :
+            timeTheme === "dusk" ? "#dcc197" :
+            timeTheme === "deep-night" ? "#d8dbdf" :
+            "#e3d3ab";
+          var darkChrome =
+            timeTheme === "dawn" ? "#241b14" :
+            timeTheme === "dusk" ? "#21160f" :
+            timeTheme === "deep-night" ? "#10191d" :
+            "#1a1a1a";
+
+          document.documentElement.dataset.timeTheme = timeTheme;
+
           if (dark) {
             document.documentElement.classList.add("dark");
             document.documentElement.style.colorScheme = "dark";
-            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#1a1a1a");
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", darkChrome);
           } else {
             document.documentElement.classList.remove("dark");
             document.documentElement.style.colorScheme = "light";
-            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#e3d3ab");
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", lightChrome);
           }
         } catch (_) {
           document.documentElement.style.colorScheme = "light";
@@ -45,7 +64,13 @@
 
     <style>
       html { background-color: #e3d3ab; }
+      html[data-time-theme="dawn"] { background-color: #efe1be; }
+      html[data-time-theme="dusk"] { background-color: #dcc197; }
+      html[data-time-theme="deep-night"] { background-color: #d8dbdf; }
       html.dark { background-color: #1a1a1a; }
+      html.dark[data-time-theme="dawn"] { background-color: #241b14; }
+      html.dark[data-time-theme="dusk"] { background-color: #21160f; }
+      html.dark[data-time-theme="deep-night"] { background-color: #10191d; }
     </style>
   </head>
   <body>

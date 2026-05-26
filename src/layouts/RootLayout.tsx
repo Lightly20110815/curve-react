@@ -7,6 +7,7 @@ import { MusicPlayer } from "@/components/MusicPlayer";
 import { ContextMenu } from "@/components/ContextMenu";
 import { ArticleAiProvider } from "@/components/ArticleAiProvider";
 import { posts } from "@/content/posts";
+import { ThemeProvider } from "@/hooks/useTheme";
 
 export default function RootLayout() {
   const { pathname } = useLocation();
@@ -17,25 +18,27 @@ export default function RootLayout() {
   }, [pathname]);
 
   return (
-    <ArticleAiProvider>
-      <div className="flex min-h-screen flex-col bg-paper">
-        <div key={`header-${pathname}`} className="page-impression-header">
-          <Masthead issueNo={posts.length} totalIssues={posts.length} />
-          <Nav />
-        </div>
-        <main className="relative flex-1 overflow-x-clip">
-          <div
-            key={pathname}
-            className="page-impression min-h-full"
-            style={{ "--outlet-delay": `${outletDelay}ms` } as React.CSSProperties}
-          >
-            <Outlet />
+    <ThemeProvider>
+      <ArticleAiProvider>
+        <div className="flex min-h-screen flex-col bg-paper">
+          <div key={`header-${pathname}`} className="page-impression-header">
+            <Masthead issueNo={posts.length} totalIssues={posts.length} />
+            <Nav />
           </div>
-        </main>
-        <Footer />
-        <MusicPlayer />
-        <ContextMenu />
-      </div>
-    </ArticleAiProvider>
+          <main className="relative flex-1 overflow-x-clip">
+            <div
+              key={pathname}
+              className="page-impression min-h-full"
+              style={{ "--outlet-delay": `${outletDelay}ms` } as React.CSSProperties}
+            >
+              <Outlet />
+            </div>
+          </main>
+          <Footer />
+          <MusicPlayer />
+          <ContextMenu />
+        </div>
+      </ArticleAiProvider>
+    </ThemeProvider>
   );
 }

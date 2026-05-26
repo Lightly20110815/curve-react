@@ -11,7 +11,7 @@ interface Props {
  * Theme toggle button — switches between light (newsprint) and dark (darkroom) modes.
  */
 export function ThemeToggle({ className, variant = "icon" }: Props) {
-  const { theme, toggle, mounted } = useTheme();
+  const { theme, toggle, mounted, timeThemeInfo } = useTheme();
 
   // Prevent hydration mismatch: render a placeholder until mounted
   if (!mounted) {
@@ -50,8 +50,8 @@ export function ThemeToggle({ className, variant = "icon" }: Props) {
             {isDark ? "切回日间" : "进入暗房"}
           </span>
         </span>
-        <span className="font-ui text-[11px] font-medium uppercase opacity-60">
-          {isDark ? "Light" : "Dark"}
+          <span className="font-ui text-[11px] font-medium uppercase opacity-60">
+          {isDark ? "Light" : "Dark"} · {timeThemeInfo.label}
         </span>
       </button>
     );
@@ -67,7 +67,7 @@ export function ThemeToggle({ className, variant = "icon" }: Props) {
         className,
       )}
       aria-label={isDark ? "切换到日间模式" : "切换到暗房模式"}
-      title={isDark ? "日间模式" : "暗房模式"}
+      title={`${isDark ? "日间模式" : "暗房模式"} · 当前${timeThemeInfo.label}版`}
     >
       {isDark ? (
         <Sun className="h-[18px] w-[18px]" />
