@@ -4,36 +4,58 @@ import {
   Archive,
   Copy,
   Home,
+  Languages,
   Mail,
+  Pencil,
   RotateCw,
   ScrollText,
-  Pencil,
+  Sparkles,
 } from "lucide-react";
+import { useArticleAi } from "@/components/ArticleAiProvider";
+import { AnalogClock } from "@/components/AnalogClock";
+import { NowPlaying } from "@/components/NowPlaying";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  buildSelectionExcerpt,
+  isMeaningfulSelection,
+  type ArticleAiDocument,
+} from "@/lib/article-ai";
 import { siteContactMailHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import { NowPlaying } from "@/components/NowPlaying";
-import { AnalogClock } from "@/components/AnalogClock";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Position {
   x: number;
   y: number;
 }
 
+interface SelectionSnapshot {
+  text: string;
+  surroundingText: string;
+  anchorRect: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+}
+
 /**
- * Custom right-click menu — a small newspaper-style "editor's toolbox".
+ * Custom right-click menu — a small newspaper-style editor's toolbox.
  *
  * Behavior:
  * - Intercepts contextmenu globally; replaces native menu with our own.
  * - Position-aware: flips toward top/left when near viewport edges.
  * - Dismisses on outside click, Escape, scroll, route change, or window blur.
- * - Disabled inside <input>/<textarea>/contentEditable areas so the user
- *   can still get the native "Cut/Copy/Paste" menu when editing text.
+ * - Disabled inside editable fields so the native Cut/Copy/Paste menu remains available.
  */
 export function ContextMenu() {
   const [pos, setPos] = useState<Position | null>(null);
+  const [selectionSnapshot, setSelectionSnapshot] = useState<SelectionSnapshot | null>(null);
   const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);
+  const { activeArticle, runSelectionAction } = useArticleAi();
 
   useEffect(() => {
     const isEditable = (el: EventTarget | null): boolean => {
@@ -44,34 +66,42 @@ export function ContextMenu() {
       return false;
     };
 
-    const onCtx = (e: MouseEvent) => {
-      if (isEditable(e.target)) return; // let the browser handle text inputs
-      e.preventDefault();
-      const W = 248;
-      const H = 320; // upper bound; flip-anchor handles real height
-      const x = e.clientX + W > window.innerWidth ? e.clientX - W : e.clientX;
-      const y = e.clientY + H > window.innerHeight ? e.clientY - H : e.clientY;
+    const close = () => {
+      setPos(null);
+      setSelectionSnapshot(null);
+    };
+
+    const onCtx = (event: MouseEvent) => {
+      if (isEditable(event.target)) return;
+
+      event.preventDefault();
+      setSelectionSnapshot(getSelectionSnapshot(activeArticle));
+
+      const width = 248;
+      const height = 400;
+      const x = event.clientX + width > window.innerWidth ? event.clientX - width : event.clientX;
+      const y = event.clientY + height > window.innerHeight ? event.clientY - height : event.clientY;
       setPos({ x: Math.max(8, x), y: Math.max(8, y) });
     };
 
-    const close = () => setPos(null);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
     };
 
     document.addEventListener("contextmenu", onCtx);
     document.addEventListener("click", close);
     document.addEventListener("scroll", close, true);
     window.addEventListener("blur", close);
-    document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKeyDown);
+
     return () => {
       document.removeEventListener("contextmenu", onCtx);
       document.removeEventListener("click", close);
       document.removeEventListener("scroll", close, true);
       window.removeEventListener("blur", close);
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onKeyDown);
     };
-  }, []);
+  }, [activeArticle]);
 
   if (!pos) return null;
 
@@ -81,7 +111,7 @@ export function ContextMenu() {
     try {
       await navigator.clipboard.writeText(window.location.href);
     } catch {
-      /* clipboard may be blocked in insecure contexts — fail silently */
+      // Clipboard may be unavailable in insecure contexts.
     }
   };
 
@@ -91,26 +121,38 @@ export function ContextMenu() {
 
   const reload = () => window.location.reload();
 
+  const onSelectionAction = (action: "explain" | "translate") => async () => {
+    if (!selectionSnapshot) return;
+
+    await runSelectionAction({
+      action,
+      selectedText: selectionSnapshot.text,
+      surroundingText: selectionSnapshot.surroundingText,
+      anchorRect: selectionSnapshot.anchorRect,
+    });
+
+    setPos(null);
+    setSelectionSnapshot(null);
+  };
+
   return (
     <div
       ref={ref}
       role="menu"
       style={{ left: pos.x, top: pos.y }}
-      onContextMenu={(e) => e.preventDefault()}
+      onContextMenu={(event) => event.preventDefault()}
       className="fixed z-[100] w-[248px] animate-fade-in border-2 border-ink bg-paper shadow-[4px_4px_0_0_hsl(var(--ink))]"
     >
-      {/* Mini-masthead header */}
       <div className="border-b-2 border-ink bg-ink px-3 py-2 text-paper">
         <p className="font-masthead text-[15px] font-black leading-none">THE CURVE TIMES</p>
         <p className="mt-1 font-ui text-[11px] font-medium uppercase text-paper/60">
-          Editor's toolbox · 编报工具
+          Editor&apos;s toolbox · 编报工具
         </p>
       </div>
 
-      {/* Clock widget (Analog + Digital) */}
       <MenuClock />
 
-      <div className="border-b border-rule" onClick={(e) => e.stopPropagation()}>
+      <div className="border-b border-rule" onClick={(event) => event.stopPropagation()}>
         <NowPlaying />
       </div>
 
@@ -120,12 +162,29 @@ export function ContextMenu() {
         <Item icon={ScrollText} onSelect={go("/notes")} label="读读随笔" hint="Notes" />
         <Item icon={Pencil} onSelect={go("/about")} label="编者按" hint="About" />
         <Divider />
+        {selectionSnapshot ? (
+          <>
+            <Item
+              icon={Sparkles}
+              onSelect={onSelectionAction("explain")}
+              label="✨ 让 AI 解释"
+              hint="Explain"
+            />
+            <Item
+              icon={Languages}
+              onSelect={onSelectionAction("translate")}
+              label="✨ AI 翻译成中文"
+              hint="Translate"
+            />
+            <Divider />
+          </>
+        ) : null}
         <Item icon={Copy} onSelect={copyLink} label="复制本页链接" hint="Copy URL" />
         <Item icon={RotateCw} onSelect={reload} label="重新印刷" hint="Reload" />
         <Divider />
         <Item icon={Mail} onSelect={sendMail} label="写信给编辑" hint="Mail" />
         <Divider />
-        <li role="none" onClick={(e) => e.stopPropagation()}>
+        <li role="none" onClick={(event) => event.stopPropagation()}>
           <ThemeToggle variant="menu" />
         </li>
       </ul>
@@ -164,9 +223,7 @@ function Item({
           <Icon className="h-3.5 w-3.5" />
           <span className="font-serif text-[14px] leading-none">{label}</span>
         </span>
-        <span className="font-ui text-[11px] font-medium uppercase opacity-60">
-          {hint}
-        </span>
+        <span className="font-ui text-[11px] font-medium uppercase opacity-60">{hint}</span>
       </button>
     </li>
   );
@@ -191,10 +248,13 @@ function MenuClock() {
   const ss = time.getSeconds().toString().padStart(2, "0");
 
   return (
-    <div className="flex items-center justify-center gap-5 border-b border-rule bg-paper-warm/40 py-3.5" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="flex items-center justify-center gap-5 border-b border-rule bg-paper-warm/40 py-3.5"
+      onClick={(event) => event.stopPropagation()}
+    >
       <AnalogClock className="h-12 w-12 border-2 shadow-none" />
       <div className="flex flex-col justify-center">
-        <span className="font-ui text-[17px] font-black tracking-[0.05em] text-ink-strong leading-none">
+        <span className="font-ui leading-none text-[17px] font-black tracking-[0.05em] text-ink-strong">
           {hh}
           <span className="animate-[pulse_1s_ease-in-out_infinite] text-stamp opacity-80">:</span>
           {mm}
@@ -207,4 +267,42 @@ function MenuClock() {
       </div>
     </div>
   );
+}
+
+function getSelectionSnapshot(activeArticle: ArticleAiDocument | null): SelectionSnapshot | null {
+  if (!activeArticle) return null;
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+
+  const text = selection.toString();
+  if (!isMeaningfulSelection(text)) return null;
+
+  const range = selection.getRangeAt(0);
+  const articleRoot = getArticleRoot(range.commonAncestorContainer);
+  if (!articleRoot) return null;
+  if (!articleRoot.contains(range.startContainer) || !articleRoot.contains(range.endContainer)) {
+    return null;
+  }
+
+  const rect = range.getBoundingClientRect();
+  if (!rect.width && !rect.height) return null;
+
+  return {
+    text: text.replace(/\s+/g, " ").trim(),
+    surroundingText: buildSelectionExcerpt(activeArticle, text),
+    anchorRect: {
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+    },
+  };
+}
+
+function getArticleRoot(node: Node): HTMLElement | null {
+  const element = node instanceof HTMLElement ? node : node.parentElement;
+  return element?.closest("[data-article-content='true']") ?? null;
 }

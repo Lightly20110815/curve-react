@@ -1,17 +1,33 @@
+import { useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArticleAiReader } from "@/components/ArticleAiReader";
 import { Badge } from "@/components/ui/badge";
 import { ArticleAiSummary } from "@/components/ArticleAiSummary";
+import { useArticleAi } from "@/components/ArticleAiProvider";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { TwikooComments } from "@/components/TwikooComments";
 import { buttonVariants } from "@/components/ui/button";
 import { getPostBySlug, posts } from "@/content/posts";
+import { buildArticleAiDocument } from "@/lib/article-ai";
 import { formatArticleDateline } from "@/lib/han-date";
 import { cn } from "@/lib/utils";
 
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getPostBySlug(slug) : undefined;
+  const { setActiveArticle } = useArticleAi();
+  const aiArticle = useMemo(
+    () => (post?.articleGPT ? buildArticleAiDocument(post) : null),
+    [post],
+  );
+
+  useEffect(() => {
+    setActiveArticle(aiArticle);
+    return () => {
+      setActiveArticle(null);
+    };
+  }, [aiArticle, setActiveArticle]);
 
   if (!post) {
     return (
@@ -38,83 +54,113 @@ export default function PostPage() {
 
   return (
     <article className="container py-8 md:py-12">
-      <div className="mx-auto max-w-[960px]">
-        <div className="overflow-hidden border-y-[3px] border-rule bg-paper/95 shadow-[0_1px_0_hsl(var(--rule-soft)/0.35)]">
-          <div className="px-4 py-4 md:px-5 md:py-6 lg:px-8">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3">
-              <Link
-                to={`/categories/${encodeURIComponent(section)}`}
-                className="font-ui text-[12px] font-semibold uppercase text-stamp transition-colors hover:text-ink"
-              >
-                {section}
-              </Link>
-              <Link
-                to="/archives"
-                className="inline-flex items-center gap-1 font-ui text-[12px] font-medium uppercase text-ink-muted transition-colors hover:text-stamp"
-              >
-                <ArrowLeft className="h-3 w-3" />
-                All issues
-              </Link>
-            </div>
-
-            <header className="mt-7">
-              <Kicker variant="stamp">Lead Story</Kicker>
-              <h1 className="mt-3 font-display text-[clamp(34px,5vw,60px)] font-bold leading-[1.18] text-ink-strong">
-                {post.title}
-              </h1>
-              {post.description && (
-                <p className="mt-5 font-serif text-[18px] leading-[1.9] text-ink-strong/90 md:text-[20px]">
-                  {post.description}
-                </p>
-              )}
-            </header>
-
-            <div className="mt-7 grid gap-4 border-y border-rule/70 bg-paper-soft/55 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-              <div className="space-y-1">
-                <p className="font-ui text-[12px] font-semibold uppercase text-ink-muted">
-                  By <span className="text-ink-strong">{post.author}</span>
-                </p>
-                <p className="font-serif text-[15px] leading-[1.7] text-ink-body">
-                  {formatArticleDateline(post.date)}
-                </p>
+      <div
+        className={cn(
+          "mx-auto",
+          aiArticle
+            ? "max-w-[1280px] lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8"
+            : "max-w-[960px]",
+        )}
+      >
+        <div className="min-w-0">
+          <div className="overflow-hidden border-y-[3px] border-rule bg-paper/95 shadow-[0_1px_0_hsl(var(--rule-soft)/0.35)]">
+            <div className="px-4 py-4 md:px-5 md:py-6 lg:px-8">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3">
+                <Link
+                  to={`/categories/${encodeURIComponent(section)}`}
+                  className="font-ui text-[12px] font-semibold uppercase text-stamp transition-colors hover:text-ink"
+                >
+                  {section}
+                </Link>
+                <Link
+                  to="/archives"
+                  className="inline-flex items-center gap-1 font-ui text-[12px] font-medium uppercase text-ink-muted transition-colors hover:text-stamp"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  All issues
+                </Link>
               </div>
 
-              <div className="flex flex-wrap gap-2 md:justify-end">
-                <MetaChip>约 {post.readingMinutes} 分钟</MetaChip>
-                <MetaChip>{post.wordCount} 字</MetaChip>
-              </div>
-            </div>
+              <header className="mt-7">
+                <Kicker variant="stamp">Lead Story</Kicker>
+                <h1 className="mt-3 font-display text-[clamp(34px,5vw,60px)] font-bold leading-[1.18] text-ink-strong">
+                  {post.title}
+                </h1>
+                {post.description && (
+                  <p className="mt-5 font-serif text-[18px] leading-[1.9] text-ink-strong/90 md:text-[20px]">
+                    {post.description}
+                  </p>
+                )}
+              </header>
 
-            {post.articleGPT ? <ArticleAiSummary post={post} /> : null}
-          </div>
+              <div className="mt-7 grid gap-4 border-y border-rule/70 bg-paper-soft/55 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                <div className="space-y-1">
+                  <p className="font-ui text-[12px] font-semibold uppercase text-ink-muted">
+                    By <span className="text-ink-strong">{post.author}</span>
+                  </p>
+                  <p className="font-serif text-[15px] leading-[1.7] text-ink-body">
+                    {formatArticleDateline(post.date)}
+                  </p>
+                </div>
 
-          <div className="px-4 pb-12 pt-8 md:px-5 md:pb-16 lg:px-8">
-            <div className="prose-news prose-news-article" dangerouslySetInnerHTML={{ __html: post.html }} />
-
-            {post.tags.length > 0 && (
-              <div className="mt-14 border-t border-rule pt-6">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Kicker>Filed Under</Kicker>
-                  {post.tags.map((tag) => (
-                    <Link key={tag} to={`/tags/${encodeURIComponent(tag)}`}>
-                      <Badge variant="default">#{tag}</Badge>
-                    </Link>
-                  ))}
+                <div className="flex flex-wrap gap-2 md:justify-end">
+                  <MetaChip>约 {post.readingMinutes} 分钟</MetaChip>
+                  <MetaChip>{post.wordCount} 字</MetaChip>
                 </div>
               </div>
-            )}
 
-            <Ornament className="mt-12" symbol="*" count={3} />
-            <p className="mt-4 text-center font-ui text-[12px] font-medium uppercase text-ink-faded">
-              End of Article · 完
-            </p>
+              {post.articleGPT ? <ArticleAiSummary post={post} /> : null}
+            </div>
 
-            <TwikooComments key={post.slug} pageKey={`/posts/${post.slug}`} />
+            <div className="px-4 pb-12 pt-8 md:px-5 md:pb-16 lg:px-8">
+              {aiArticle ? (
+                <div className="mb-8 lg:hidden">
+                  <ArticleAiReader article={aiArticle} />
+                </div>
+              ) : null}
+
+              <div
+                className="prose-news prose-news-article"
+                data-article-content="true"
+                dangerouslySetInnerHTML={{ __html: post.html }}
+              />
+
+              {post.tags.length > 0 && (
+                <div className="mt-14 border-t border-rule pt-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Kicker>Filed Under</Kicker>
+                    {post.tags.map((tag) => (
+                      <Link key={tag} to={`/tags/${encodeURIComponent(tag)}`}>
+                        <Badge variant="default">#{tag}</Badge>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Ornament className="mt-12" symbol="*" count={3} />
+              <p className="mt-4 text-center font-ui text-[12px] font-medium uppercase text-ink-faded">
+                End of Article · 完
+              </p>
+
+              <TwikooComments key={post.slug} pageKey={`/posts/${post.slug}`} />
+            </div>
           </div>
         </div>
+
+        {aiArticle ? (
+          <aside className="mt-8 hidden min-w-0 lg:block">
+            <ArticleAiReader article={aiArticle} />
+          </aside>
+        ) : null}
       </div>
 
-      <nav className="mx-auto mt-8 grid max-w-[860px] gap-4 md:grid-cols-2">
+      <nav
+        className={cn(
+          "mx-auto mt-8 grid gap-4 md:grid-cols-2",
+          aiArticle ? "max-w-[1280px]" : "max-w-[860px]",
+        )}
+      >
         {previousPost ? (
           <Link
             to={`/posts/${previousPost.slug}`}
