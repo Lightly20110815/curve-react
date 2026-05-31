@@ -29,7 +29,7 @@ function LayoutShell() {
       {!isZen && <AsOfBanner />}
       {!isZen && (
         <div key={`header-${pathname}`} className="page-impression-header">
-          <Masthead issueNo={visiblePosts.length} totalIssues={visiblePosts.length} />
+          <Masthead issueNo={visiblePosts.length} />
           <Nav />
         </div>
       )}

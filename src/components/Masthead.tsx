@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { getDeepSeekText, trimGeneratedText } from "@/lib/deepseek";
+import { MastheadWeather } from "@/components/MastheadWeather";
 import { cn } from "@/lib/utils";
 import { formatMastheadDate, formatIssueSeason } from "@/lib/han-date";
 
 interface Props {
   issueNo: number;
-  totalIssues?: number;
   className?: string;
 }
 
@@ -167,7 +167,7 @@ function DynamicMastheadTitle() {
  * non-interactive heading — navigation to home is handled by the Nav bar
  * below the masthead instead, per editor's request.
  */
-export function Masthead({ issueNo, totalIssues, className }: Props) {
+export function Masthead({ issueNo, className }: Props) {
   const today = new Date();
   return (
     <header className={cn("border-b-2 border-rule/85", className)}>
@@ -204,16 +204,8 @@ export function Masthead({ issueNo, totalIssues, className }: Props) {
             </p>
           </div>
 
-          {/* Right ornament */}
-          <div className="hidden flex-col items-end justify-center gap-1 md:flex">
-            <span className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
-              Somewhere · 编于某处
-            </span>
-            <span className="block h-px w-10 bg-rule-soft/70" />
-            <span className="font-ui text-[11px] font-medium text-stamp">
-              {totalIssues ?? "—"} 篇
-            </span>
-          </div>
+          {/* Right ornament — live weather, mirrors the left "创刊于 2025" block */}
+          <MastheadWeather className="hidden flex-col items-end justify-center gap-1 md:flex" />
         </div>
       </div>
 
