@@ -170,10 +170,10 @@ function DynamicMastheadTitle() {
 export function Masthead({ issueNo, className }: Props) {
   const today = new Date();
   return (
-    <header className={cn("border-b-2 border-rule/85", className)}>
+    <header className={cn("border-b border-rule/85", className)}>
       {/* Edition strip */}
       <div className="border-b border-rule-soft/55">
-        <div className="container flex flex-wrap items-center justify-between gap-x-4 py-1.5 font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted md:text-[12px]">
+        <div className="container flex flex-wrap items-center justify-between gap-x-4 py-1 font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted md:text-[12px]">
           <span>VOL. I · No. {String(issueNo).padStart(3, "0")}</span>
           <span className="hidden font-serif text-[13px] font-medium normal-case text-ink-body md:block">
             {formatMastheadDate(today)}
@@ -183,8 +183,8 @@ export function Masthead({ issueNo, className }: Props) {
       </div>
 
       {/* Nameplate — 3-column grid keeps ornaments out of the title's path */}
-      <div className="container py-4 md:py-5">
-        <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[minmax(112px,1fr)_auto_minmax(112px,1fr)] md:gap-6">
+      <div className="container py-3 md:py-4">
+        <div className="grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(112px,1fr)_auto_minmax(112px,1fr)] md:gap-5">
           {/* Left ornament */}
           <div className="hidden flex-col items-start justify-center gap-1 md:flex">
             <span className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
@@ -196,10 +196,10 @@ export function Masthead({ issueNo, className }: Props) {
 
           {/* Title — non-interactive */}
           <div className="text-center">
-            <h1 className="font-masthead text-[clamp(28px,8vw,78px)] font-black leading-[0.98] text-ink-strong text-glow-masthead sm:whitespace-nowrap">
+            <h1 className="font-masthead text-[clamp(30px,6.8vw,68px)] font-black leading-none text-ink-strong text-glow-masthead sm:whitespace-nowrap">
               <DynamicMastheadTitle />
             </h1>
-            <p className="mt-1.5 font-serif text-[clamp(15px,1.6vw,18px)] font-medium text-stamp text-glow-sub">
+            <p className="mt-1 font-serif text-[clamp(14px,1.4vw,17px)] font-medium text-stamp text-glow-sub">
               曲線時報
             </p>
           </div>
@@ -211,7 +211,7 @@ export function Masthead({ issueNo, className }: Props) {
 
       {/* Tagline strap */}
       <div className="border-t border-rule-soft/55">
-        <div className="container py-1.5 text-center font-serif text-[12px] text-ink-muted transition-opacity duration-1000 md:text-[13px]">
+        <div className="container py-1 text-center font-serif text-[12px] text-ink-muted transition-opacity duration-1000 md:text-[13px]">
           <DeepSeekTagline />
         </div>
       </div>

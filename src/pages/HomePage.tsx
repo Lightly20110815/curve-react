@@ -64,18 +64,18 @@ export default function HomePage() {
   ] as const;
 
   return (
-    <div className="container py-7 md:py-9">
+    <div className="container py-5 md:py-7">
       <HomeTerminalEasterEgg />
 
       {/* LEAD STORY — front page hero */}
       {lead && <PostCard post={lead} variant="lead" />}
 
-      <section className="mt-6">
+      <section className="mt-4">
         <DailyPoetry />
       </section>
 
       {/* ABOVE-THE-FOLD GRID — 3 columns of articles */}
-      <section className="mt-7 border-y border-rule-soft/35 py-3 md:py-4">
+      <section className="mt-5 border-y border-rule-soft/35 py-2.5 md:py-3">
         <div className="grid gap-px bg-rule-soft/20 md:grid-cols-3">
           {quickRoutes.map((route) => (
             <QuickRouteCard key={route.to} {...route} />
@@ -83,7 +83,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mt-10 md:mt-12">
+      <section className="mt-9 md:mt-11">
         <SectionTitle title="头版要闻" note="继续往下读" />
         <div className="grid gap-x-8 gap-y-10 divide-y divide-rule-soft/25 md:grid-cols-3 md:divide-y-0 md:[&>article:not(:nth-child(3n+1))]:border-l md:[&>article:not(:nth-child(3n+1))]:border-rule-soft/25 md:[&>article:not(:nth-child(3n+1))]:pl-8">
           {aboveFold.map((p) => (
@@ -93,7 +93,7 @@ export default function HomePage() {
       </section>
 
       {/* MORE HEADLINES + EDITOR'S DESK side-by-side */}
-      <section className="mt-16 grid items-start gap-14 md:grid-cols-[1.45fr_0.95fr] md:gap-16">
+      <section className="mt-14 grid items-start gap-12 md:grid-cols-[1.45fr_0.95fr] md:gap-14">
         <div>
           <SectionTitle title="更多文章" note="这里还有几条值得翻看的短讯" />
           <div className="divide-y divide-rule-soft/30">
@@ -306,18 +306,18 @@ function QuickRouteCard({
   return (
     <Link
       to={to}
-      className="group bg-paper/80 px-4 py-4 transition-colors hover:bg-paper-warm/75 md:min-h-[138px] md:px-5"
+      className="group bg-paper/80 px-4 py-3.5 transition-colors hover:bg-paper-warm/75 md:min-h-[124px] md:px-5"
     >
       <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
         {eyebrow}
       </p>
-      <p className="mt-3 max-w-[18rem] font-display text-[20px] leading-[1.3] text-ink-strong transition-colors group-hover:text-stamp">
+      <p className="mt-2.5 max-w-[18rem] font-display text-[19px] leading-[1.32] text-ink-strong transition-colors group-hover:text-stamp">
         {title}
       </p>
       <p className="mt-2 line-clamp-2 max-w-[22rem] font-serif text-[14px] leading-[1.7] text-ink-body">
         {summary}
       </p>
-      <p className="mt-5 inline-flex items-center gap-1.5 font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-stamp">
+      <p className="mt-4 inline-flex items-center gap-1.5 font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-stamp">
         {meta}
         <ArrowRight className="h-3 w-3" />
       </p>

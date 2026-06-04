@@ -26,32 +26,32 @@ export function PostCard({ post, variant = "default", className }: PostCardProps
     return (
       <article
         className={cn(
-          "group relative isolate border-b border-rule-soft/35 pb-7 md:pb-8",
+          "group relative isolate border-b border-rule-soft/35 pb-5 md:pb-6",
           className,
         )}
       >
         <Link to={`/posts/${post.slug}`} className="absolute inset-0 z-10" aria-label={post.title} />
-        <div className="grid gap-8 md:grid-cols-[minmax(0,2.15fr)_minmax(240px,0.95fr)] md:gap-10">
+        <div className="grid gap-6 md:grid-cols-[minmax(0,2.15fr)_minmax(240px,0.95fr)] md:gap-8">
           <div>
             <div className="flex flex-wrap items-center gap-3 font-ui text-[12px] font-medium">
               <span className="font-semibold text-stamp">{section}</span>
               <span className="text-ink-muted">· {formatArticleDateline(post.date)}</span>
             </div>
-            <h2 className="mt-4 font-display text-[clamp(28px,7vw,58px)] font-bold leading-[1.12] text-balance text-ink-strong transition-colors group-hover:text-stamp">
+            <h2 className="mt-3 font-display text-[clamp(30px,6vw,52px)] font-bold leading-[1.14] text-balance text-ink-strong transition-colors group-hover:text-stamp">
               {post.title}
             </h2>
             {post.description && (
-              <p className="mt-4 max-w-3xl font-serif text-[19px] leading-[1.9] text-ink-strong/95 md:text-[21px]">
+              <p className="mt-3 max-w-3xl font-serif text-[18px] leading-[1.78] text-ink-strong/95 md:text-[20px]">
                 {post.description}
               </p>
             )}
-            <p className="mt-5 font-ui text-[13px] font-medium text-ink-body">
+            <p className="mt-4 font-ui text-[13px] font-medium text-ink-body">
               <span className="uppercase text-ink-muted">By</span>{" "}
               <span className="font-semibold text-ink-strong">{post.author}</span>
               <span className="mx-2 text-ink-muted">·</span>
               <span>约 {post.readingMinutes} 分钟 · {post.wordCount} 字</span>
             </p>
-            <p className="mt-3 max-w-2xl pl-1 font-serif text-[14px] italic leading-[1.8] text-stamp/85">
+            <p className="mt-2.5 max-w-2xl pl-1 font-serif text-[14px] italic leading-[1.7] text-stamp/85">
               {leadWhisper}
             </p>
           </div>
@@ -59,10 +59,10 @@ export function PostCard({ post, variant = "default", className }: PostCardProps
             <p className="font-ui text-[11px] font-medium tracking-[0.12em] text-ink-muted">
               读前一眼
             </p>
-            <p className="mt-2 max-w-[18rem] font-serif text-[17px] leading-[1.8] text-ink-strong/95">
+            <p className="mt-2 max-w-[18rem] font-serif text-[16px] leading-[1.72] text-ink-strong/95">
               {editorNote}
             </p>
-            <p className="mt-3 max-w-[18rem] font-serif text-[15px] leading-[1.85] text-ink-body">
+            <p className="mt-2.5 max-w-[18rem] font-serif text-[15px] leading-[1.75] text-ink-body">
               {marginNote}
             </p>
             <p className="mt-3 font-ui text-[11px] text-ink-muted">

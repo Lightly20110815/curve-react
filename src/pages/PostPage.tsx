@@ -116,15 +116,15 @@ export default function PostPage() {
         </button>
       )}
 
-      <article className={cn("container", isZen ? "py-10 md:py-16" : "py-8 md:py-12")}>
+      <article className={cn("container", isZen ? "py-8 md:py-12" : "py-5 md:py-8")}>
         <div
           className={cn(
             "mx-auto",
             showAside
-              ? "max-w-[1280px] lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8"
+              ? "max-w-[1120px] lg:grid lg:grid-cols-[minmax(0,720px)_300px] lg:items-start lg:justify-center lg:gap-8"
               : isZen
               ? "max-w-[760px]"
-              : "max-w-[960px]",
+              : "max-w-[820px]",
           )}
         >
           <div className="min-w-0">
@@ -137,8 +137,8 @@ export default function PostPage() {
               )}
             >
               {!isZen && (
-                <div className="px-4 py-4 md:px-5 md:py-6 lg:px-8">
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3">
+                <div className="px-4 py-4 md:px-6 md:py-5 lg:px-7">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-2.5">
                     <Link
                       to={`/categories/${encodeURIComponent(section)}`}
                       className="font-ui text-[12px] font-semibold uppercase text-stamp transition-colors hover:text-ink"
@@ -165,19 +165,19 @@ export default function PostPage() {
                     </div>
                   </div>
 
-                  <header className="mt-7">
+                  <header className="mt-5">
                     <Kicker variant="stamp">Lead Story</Kicker>
-                    <h1 className="mt-3 font-display text-[clamp(34px,5vw,60px)] font-bold leading-[1.18] text-ink-strong">
+                    <h1 className="mt-2.5 font-display text-[clamp(32px,4.4vw,52px)] font-bold leading-[1.16] text-ink-strong">
                       {post.title}
                     </h1>
                     {post.description && (
-                      <p className="mt-5 font-serif text-[18px] leading-[1.9] text-ink-strong/90 md:text-[20px]">
+                      <p className="mt-3 font-serif text-[17px] leading-[1.75] text-ink-strong/90 md:text-[19px]">
                         {post.description}
                       </p>
                     )}
                   </header>
 
-                  <div className="mt-7 grid gap-4 border-y border-rule/70 bg-paper-soft/55 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                  <div className="mt-5 grid gap-3 border-y border-rule/70 bg-paper-soft/55 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
                     <div className="space-y-1">
                       <p className="font-ui text-[12px] font-semibold uppercase text-ink-muted">
                         By <span className="text-ink-strong">{post.author}</span>
@@ -208,22 +208,22 @@ export default function PostPage() {
                 </header>
               )}
 
-              <div className="px-4 pb-12 pt-8 md:px-5 md:pb-16 lg:px-8">
+              <div className="px-4 pb-10 pt-6 md:px-6 md:pb-14 lg:px-7">
                 {aiArticle && !isZen ? (
-                  <div className="mb-8 lg:hidden">
+                  <div className="mb-6 lg:hidden">
                     <ArticleAiReader article={aiArticle} />
                   </div>
                 ) : null}
 
                 <div
                   ref={articleBodyRef}
-                  className="prose-news prose-news-article"
+                  className="prose-news prose-news-article mx-auto"
                   data-article-content="true"
                   dangerouslySetInnerHTML={{ __html: post.html }}
                 />
 
                 {post.tags.length > 0 && !isZen && (
-                  <div className="mt-14 border-t border-rule pt-6">
+                  <div className="mx-auto mt-12 max-w-[68ch] border-t border-rule pt-5">
                     <div className="flex flex-wrap items-center gap-2">
                       <Kicker>Filed Under</Kicker>
                       {post.tags.map((tag) => (
@@ -246,7 +246,7 @@ export default function PostPage() {
           </div>
 
           {showAside ? (
-            <aside className="mt-8 hidden min-w-0 lg:block">
+            <aside className="hidden min-w-0 lg:block">
               <ArticleAiReader article={aiArticle} />
             </aside>
           ) : null}
@@ -256,7 +256,7 @@ export default function PostPage() {
           <nav
             className={cn(
               "mx-auto mt-8 grid gap-4 md:grid-cols-2",
-              aiArticle ? "max-w-[1280px]" : "max-w-[860px]",
+              aiArticle ? "max-w-[1120px]" : "max-w-[820px]",
             )}
           >
             {previousPost ? (

@@ -156,43 +156,43 @@ export function ArticleAiReader({ article }: { article: ArticleAiDocument }) {
 
   return (
     <section
-      className="border-y-[3px] border-double border-rule bg-paper/95 shadow-[0_10px_35px_hsl(var(--ink)/0.07)] lg:sticky lg:top-24"
+      className="border border-rule-soft/60 bg-paper/96 shadow-[0_8px_24px_hsl(var(--ink)/0.06)] lg:sticky lg:top-20"
       aria-labelledby="article-ai-reader-title"
     >
-      <div className="border-b border-rule bg-paper-soft/70 px-4 py-5">
+      <div className="border-b border-rule-soft/55 bg-paper-soft/65 px-3.5 py-4">
         <Kicker variant="stamp">Interactive Reader</Kicker>
         <div className="mt-2 flex items-start justify-between gap-3">
           <div>
             <h2
               id="article-ai-reader-title"
-              className="font-display text-[28px] font-semibold leading-[1.1] text-ink-strong"
+              className="font-display text-[24px] font-semibold leading-[1.15] text-ink-strong"
             >
               伴读助手
             </h2>
-            <p className="mt-2 max-w-[28rem] font-serif text-[15px] leading-[1.8] text-ink-body">
+            <p className="mt-2 max-w-[28rem] font-serif text-[14px] leading-[1.65] text-ink-body">
               向 AI 提问关于本文的内容。它会把当前文章当作唯一上下文，优先解释术语、步骤和难点。
             </p>
           </div>
           <MessageSquareText className="mt-1 h-5 w-5 shrink-0 text-stamp" />
         </div>
 
-        <div className="mt-4 border-l-2 border-stamp/45 pl-3">
-          <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
+        <div className="mt-3 border-l-2 border-stamp/45 pl-3">
+          <p className="font-ui text-[10px] font-medium uppercase tracking-[0.12em] text-ink-muted">
             Context locked to
           </p>
-          <p className="mt-1 font-serif text-[15px] leading-[1.7] text-ink-strong">
+          <p className="mt-1 font-serif text-[14px] leading-[1.6] text-ink-strong">
             {article.title}
           </p>
         </div>
       </div>
 
-      <div className="px-4 py-4">
+      <div className="px-3.5 py-3.5">
         <div className="flex flex-wrap gap-2">
           {QUICK_PROMPTS.map((prompt) => (
             <button
               key={prompt}
               type="button"
-              className="border border-rule-soft/35 bg-paper-soft/60 px-2.5 py-1.5 text-left font-ui text-[11px] font-medium uppercase tracking-[0.08em] text-ink-muted transition-colors hover:border-rule hover:text-ink-strong"
+              className="border border-rule-soft/35 bg-paper-soft/60 px-2.5 py-1.5 text-left font-ui text-[11px] font-medium leading-[1.45] text-ink-muted transition-colors hover:border-rule hover:text-ink-strong"
               onClick={() => void submitQuestion(prompt)}
               disabled={status === "streaming"}
             >
@@ -203,12 +203,12 @@ export function ArticleAiReader({ article }: { article: ArticleAiDocument }) {
 
         <div
           ref={scrollRef}
-          className="mt-4 max-h-[380px] overflow-y-auto border border-rule-soft/35 bg-paper-warm/20"
+          className="mt-3 max-h-[300px] overflow-y-auto border border-rule-soft/35 bg-paper-warm/20"
         >
-          <div className="space-y-4 px-4 py-4">
+          <div className="space-y-3 px-3 py-3">
             {messages.length === 0 ? (
               <div className="border-l-2 border-rule-soft/40 pl-3">
-                <p className="font-serif text-[15px] leading-[1.85] text-ink-body">
+                <p className="font-serif text-[14px] leading-[1.7] text-ink-body">
                   从一个具体问题开始会更有效，比如“文中这个步骤为什么不能省略？”或者“这里的术语可以用更白话的话解释吗？”
                 </p>
               </div>
@@ -253,8 +253,8 @@ export function ArticleAiReader({ article }: { article: ArticleAiDocument }) {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="向 AI 提问关于本文的内容……"
-            rows={4}
-            className="w-full resize-y border border-rule bg-paper px-3 py-3 font-serif text-[15px] leading-[1.8] text-ink-strong outline-none transition-colors placeholder:text-ink-faded focus:border-stamp"
+            rows={3}
+            className="w-full resize-y border border-rule bg-paper px-3 py-2.5 font-serif text-[14px] leading-[1.7] text-ink-strong outline-none transition-colors placeholder:text-ink-faded focus:border-stamp"
           />
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
@@ -290,7 +290,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
   return (
     <article
       className={cn(
-        "border px-3 py-3",
+        "border px-3 py-2.5",
         message.role === "assistant"
           ? "border-rule-soft/35 bg-paper"
           : "border-stamp/20 bg-stamp-soft/35",
@@ -299,7 +299,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
       <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
         {message.role === "assistant" ? "DeepSeek" : "You"}
       </p>
-      <p className="mt-2 whitespace-pre-wrap font-serif text-[15px] leading-[1.9] text-ink-body">
+      <p className="mt-1.5 whitespace-pre-wrap font-serif text-[14px] leading-[1.72] text-ink-body">
         {message.content}
         {message.role === "assistant" && !message.content ? (
           <span className="inline-block h-4 w-px animate-pulse bg-stamp align-[-1px]" />

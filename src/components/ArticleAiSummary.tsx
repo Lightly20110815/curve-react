@@ -90,21 +90,63 @@ export function ArticleAiSummary({ post }: Props) {
     }
   }
 
+  if (state === "error") {
+    return (
+      <section
+        className="mt-5 border border-rule-soft/45 bg-paper-soft/45 px-4 py-2.5 md:px-5"
+        aria-labelledby="article-ai-summary-title"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <Kicker variant="stamp">DeepSeek Brief</Kicker>
+              <h2
+                id="article-ai-summary-title"
+                className="font-display text-[18px] font-semibold leading-[1.25] text-ink-strong"
+              >
+                AI 摘要暂不可用
+              </h2>
+            </div>
+            <p className="mt-1 font-serif text-[14px] leading-[1.6] text-ink-muted">
+              正文内容不受影响。
+              <span className="ml-2 font-ui text-[10px] uppercase tracking-[0.12em]">
+                {errorMessage}
+              </span>
+            </p>
+          </div>
+
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="h-7 shrink-0 px-2.5"
+            onClick={() => void generateSummary(true)}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            再试一次
+          </Button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
-      className="mt-8 border-y-[3px] border-double border-rule bg-paper-soft/55 px-4 py-5 md:px-5 lg:px-6"
+      className="mt-5 border border-rule-soft/45 bg-paper-soft/45 px-4 py-3.5 md:px-5"
       aria-labelledby="article-ai-summary-title"
     >
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Kicker variant="stamp">DeepSeek Brief</Kicker>
-          <h2
-            id="article-ai-summary-title"
-            className="mt-2 font-display text-[24px] font-semibold leading-[1.25] text-ink-strong"
-          >
-            AI 摘要
-          </h2>
-          <p className="mt-2 font-serif text-[15px] italic leading-[1.8] text-ink-muted">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <Kicker variant="stamp">DeepSeek Brief</Kicker>
+            <h2
+              id="article-ai-summary-title"
+              className="font-display text-[19px] font-semibold leading-[1.25] text-ink-strong"
+            >
+              AI 摘要
+            </h2>
+          </div>
+          <p className="mt-1 font-serif text-[14px] italic leading-[1.65] text-ink-muted">
             一段放在正文前的导读，帮你更快进入这篇文章。
           </p>
         </div>
@@ -113,19 +155,19 @@ export function ArticleAiSummary({ post }: Props) {
           type="button"
           variant="secondary"
           size="sm"
-          className="shrink-0"
+          className="h-7 shrink-0 px-2.5"
           onClick={() => void generateSummary(true)}
           disabled={state === "loading"}
         >
           <RefreshCw className={`h-3.5 w-3.5 ${state === "loading" ? "animate-spin" : ""}`} />
-          {state === "error" ? "再试一次" : "重写一版"}
+          重写一版
         </Button>
       </div>
 
-      <div className="mt-4 border-l-2 border-stamp/45 pl-4 md:pl-5">
+      <div className="mt-3 border-l-2 border-stamp/45 pl-3 md:pl-4">
         {state === "ready" ? (
           <p
-            className="text-pretty font-serif text-[17px] leading-[1.95] text-ink-body"
+            className="text-pretty font-serif text-[16px] leading-[1.78] text-ink-body"
             aria-live="polite"
           >
             {summary}
@@ -133,29 +175,19 @@ export function ArticleAiSummary({ post }: Props) {
         ) : null}
 
         {state === "loading" ? (
-          <p className="font-serif text-[17px] leading-[1.95] text-ink-body" aria-live="polite">
+          <p className="font-serif text-[16px] leading-[1.78] text-ink-body" aria-live="polite">
             DeepSeek 正在替这篇文章整理一则导读
             <span className="ml-1 inline-block h-5 w-px animate-pulse bg-stamp align-[-2px]" />
           </p>
         ) : null}
 
-        {state === "error" ? (
-          <div aria-live="polite">
-            <p className="font-serif text-[17px] leading-[1.95] text-ink-body">
-              这一栏暂时没有等到 DeepSeek 的导读，正文内容不受影响。
-            </p>
-            <p className="mt-2 font-ui text-[11px] uppercase tracking-[0.12em] text-ink-muted">
-              {errorMessage}
-            </p>
-          </div>
-        ) : null}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-rule-soft/35 pt-3">
-        <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-rule-soft/35 pt-2.5">
+        <p className="font-ui text-[10px] font-medium uppercase tracking-[0.12em] text-ink-muted">
           AI summary generated by DeepSeek
         </p>
-        <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
+        <p className="font-ui text-[10px] font-medium uppercase tracking-[0.12em] text-ink-muted">
           For quick reading only
         </p>
       </div>

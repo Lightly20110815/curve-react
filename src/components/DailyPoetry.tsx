@@ -319,7 +319,7 @@ export function DailyPoetry() {
   }
 
   return (
-    <section className="py-6 md:py-7" aria-label="每日诗词">
+    <section className="py-4 md:py-5" aria-label="每日诗词">
       <div className="mx-auto max-w-2xl">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-rule-soft/25 pb-2">
           <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
@@ -330,11 +330,11 @@ export function DailyPoetry() {
           </p>
         </div>
         <div
-          className={`min-h-[6.75rem] transition-all duration-500 ease-out ${
+          className={`min-h-[5.25rem] transition-all duration-500 ease-out ${
             show ? "translate-y-0 opacity-100" : "translate-y-1.5 opacity-0"
           }`}
         >
-          <p className="text-pretty font-serif text-[18px] leading-[1.95] text-ink-strong md:text-[20px]">
+          <p className="text-pretty font-serif text-[18px] leading-[1.82] text-ink-strong md:text-[20px]">
             {content}
             {isStreaming && content && (
               <span className="ml-1 inline-block h-5 w-px animate-pulse bg-[hsl(var(--stamp))] align-[-2px]" />

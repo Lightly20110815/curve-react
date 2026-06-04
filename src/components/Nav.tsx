@@ -58,7 +58,7 @@ export function Nav() {
                 end={l.end}
                 className={({ isActive }) =>
                   cn(
-                    "group flex flex-col items-center border-b-[4px] border-transparent px-3 py-2 transition-colors",
+                    "group flex flex-col items-center border-b-[3px] border-transparent px-3 py-1.5 transition-colors",
                     l.width,
                     isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
                   )
@@ -93,7 +93,7 @@ export function Nav() {
 
         {/* Theme toggle (desktop) */}
         <div className="hidden md:block">
-          <ThemeToggle />
+          <ThemeToggle className="h-9 w-9" />
         </div>
 
         {/* Mobile toggle */}
