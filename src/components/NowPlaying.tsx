@@ -26,24 +26,17 @@ export function NowPlaying() {
 
   useEffect(() => {
     const loop = (ts: number) => {
-      if (ts - lastUpdateRef.current > 1000) {
+      if (nowPlaying.isPlaying && ts - lastUpdateRef.current > 1000) {
         setProgress(nowPlaying.getProgress());
         lastUpdateRef.current = ts;
       }
       rafRef.current = requestAnimationFrame(loop);
     };
-
-    if (nowPlaying.isPlaying) {
-      rafRef.current = requestAnimationFrame(loop);
-    } else {
-      setProgress(nowPlaying.getProgress());
-    }
-
+    rafRef.current = requestAnimationFrame(loop);
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nowPlaying.isPlaying]);
+  }, []);
 
   // Check marquee + cover when track changes
   const track = nowPlaying.currentTrack;

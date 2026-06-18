@@ -29,13 +29,53 @@ function getAudio(): HTMLAudioElement {
           _audio!.src = next.url;
           _audio!.load();
         }
+        updateMediaSession();
+        syncPlaybackState();
         scheduleAutoPlay();
         notify();
       }
     });
+    setupMediaSession();
     document.body.appendChild(_audio);
   }
   return _audio;
+}
+
+function setupMediaSession(): void {
+  if (!("mediaSession" in navigator)) return;
+
+  navigator.mediaSession.setActionHandler("play", () => nowPlaying.togglePlay());
+  navigator.mediaSession.setActionHandler("pause", () => nowPlaying.togglePlay());
+  navigator.mediaSession.setActionHandler("previoustrack", () => nowPlaying.prev());
+  navigator.mediaSession.setActionHandler("nexttrack", () => nowPlaying.next());
+}
+
+function updateMediaSession(): void {
+  if (!("mediaSession" in navigator)) return;
+
+  const track = _tracks?.[_trackIndex];
+  if (!track) {
+    navigator.mediaSession.metadata = null;
+    return;
+  }
+
+  const artwork: MediaImage[] = [];
+  if (track.pic) {
+    const mime = track.pic.slice(5, track.pic.indexOf(";"));
+    artwork.push({ src: track.pic, sizes: "512x512", type: mime || "image/jpeg" });
+  }
+
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: track.name,
+    artist: track.artist,
+    album: "Curve Radio",
+    artwork,
+  });
+}
+
+function syncPlaybackState(): void {
+  if (!("mediaSession" in navigator)) return;
+  navigator.mediaSession.playbackState = _audio && !_audio.paused ? "playing" : "paused";
 }
 
 function scheduleAutoPlay(): void {
@@ -43,7 +83,7 @@ function scheduleAutoPlay(): void {
   if (!audio) return;
   const onReady = () => {
     audio.removeEventListener("canplay", onReady);
-    audio.play().catch(() => {});
+    audio.play().then(() => syncPlaybackState()).catch(() => {});
   };
   audio.addEventListener("canplay", onReady);
 }
@@ -60,6 +100,7 @@ loadTracks()
     if (tracks.length > 0) {
       getAudio().src = tracks[0].url;
     }
+    updateMediaSession();
     notify();
   })
   .catch(() => {
@@ -84,6 +125,9 @@ export const nowPlaying = {
   get currentTrack(): TrackInfo | null {
     return _tracks?.[_trackIndex] ?? null;
   },
+  get audio(): HTMLAudioElement | null {
+    return _audio;
+  },
   get isPlaying(): boolean {
     return _audio ? !_audio.paused : false;
   },
@@ -99,9 +143,13 @@ export const nowPlaying = {
     const audio = getAudio();
     if (!_tracks || _tracks.length === 0) return;
     if (audio.paused) {
-      audio.play().then(() => notify()).catch(() => {});
+      audio.play().then(() => {
+        syncPlaybackState();
+        notify();
+      }).catch(() => {});
     } else {
       audio.pause();
+      syncPlaybackState();
       notify();
     }
   },
@@ -113,6 +161,7 @@ export const nowPlaying = {
     _trackIndex = (_trackIndex - 1 + _tracks.length) % _tracks.length;
     audio.src = _tracks[_trackIndex].url;
     audio.load();
+    updateMediaSession();
     if (wasPlaying) scheduleAutoPlay();
     notify();
   },
@@ -124,6 +173,7 @@ export const nowPlaying = {
     _trackIndex = (_trackIndex + 1) % _tracks.length;
     audio.src = _tracks[_trackIndex].url;
     audio.load();
+    updateMediaSession();
     if (wasPlaying) scheduleAutoPlay();
     notify();
   },
