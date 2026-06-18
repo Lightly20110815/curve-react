@@ -10,7 +10,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { buildMetingUrl, musicConfig, type MetingTrack } from "@/lib/music-config";
+import { loadTracks, musicConfig, type TrackInfo } from "@/lib/music-config";
 import { cn } from "@/lib/utils";
 
 const PERCENT_MAX = 100;
@@ -19,16 +19,18 @@ const PERCENT_MAX = 100;
  * Floating music player.
  *
  * - Pinned bottom-right; collapsed = pill button, expanded = compact card.
- * - Backed by a single <audio> element + Meting API for the track list.
+ * - Backed by a single <audio> element + local audio files from
+ *   src/assets/Musics/.
+ * - ID3 tags (title, artist, cover art) are read at runtime via jsmediatags.
  * - No autoplay (browser policies block it anyway); user clicks play.
- * - Graceful fallback: if the API call fails, the player hides itself instead
- *   of rendering an empty/broken control panel.
+ * - Graceful fallback: if loading fails, the player hides itself instead of
+ *   rendering an empty/broken control panel.
  */
 export function MusicPlayer() {
   const { pathname } = useLocation();
   const isPostPage = pathname.startsWith("/posts/");
 
-  const [tracks, setTracks] = useState<MetingTrack[] | null>(null);
+  const [tracks, setTracks] = useState<TrackInfo[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
@@ -246,37 +248,6 @@ export function MusicPlayer() {
         </button>
       )}
     </div>
-  );
-}
-
-async function loadTracks(): Promise<MetingTrack[]> {
-  const response = await fetch(buildMetingUrl(), { mode: "cors" });
-  if (!response.ok) {
-    throw new Error(`Meting request failed: ${response.status}`);
-  }
-
-  const data: unknown = await response.json();
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error("Meting playlist is empty");
-  }
-
-  const tracks = data.filter(isMetingTrack);
-  if (tracks.length === 0) {
-    throw new Error("Meting playlist has no playable tracks");
-  }
-
-  return tracks;
-}
-
-function isMetingTrack(value: unknown): value is MetingTrack {
-  if (!value || typeof value !== "object") return false;
-
-  const track = value as Partial<Record<keyof MetingTrack, unknown>>;
-  return (
-    typeof track.name === "string" &&
-    typeof track.artist === "string" &&
-    typeof track.url === "string" &&
-    typeof track.pic === "string"
   );
 }
 

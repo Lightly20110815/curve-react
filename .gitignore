@@ -10,3 +10,4 @@ dist-ssr
 *-check.png
 src/content/generated/
 public/rss.xml
+public/Musics/manifest.json

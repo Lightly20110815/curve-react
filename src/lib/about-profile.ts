@@ -27,7 +27,7 @@ export const aboutColophonEntries: ColophonEntry[] = [
   { label: "Layout · 版式", value: "Tailwind CSS" },
   { label: "Type · 字体", value: "Playfair Display · Cormorant · Noto Serif SC" },
   { label: "Composing · 排字", value: "Markdown → JSON 构建期管线" },
-  { label: "Music · 报刊电台", value: "Meting API · HTML5 audio" },
+  { label: "Music · 报刊电台", value: "Local files · HTML5 audio" },
   { label: "Hosting · 印厂", value: "Static site, anywhere" },
 ] as const;
 

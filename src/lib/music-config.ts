@@ -1,20 +1,17 @@
 /**
- * Music player configuration.
+ * Local music player configuration.
  *
- * Mirrors the Meting API contract used by the original VitePress theme so the
- * existing playlist keeps working without server changes.
- *
- * Meting returns an array of: { name, artist, url, pic, lrc }
+ * Audio files live in public/Musics/. A build-time script
+ * (scripts/generate-music-manifest.ts) scans the directory, reads ID3
+ * metadata with music-metadata, and writes manifest.json.  The browser
+ * fetches that manifest at runtime so it knows which tracks are available.
  */
+
 export const musicConfig = {
   enable: true,
-  api: "https://meting.20110815.xyz/api",
-  server: "netease" as const,
-  type: "playlist" as const,
-  id: 14022768906,
 };
 
-export interface MetingTrack {
+export interface TrackInfo {
   name: string;
   artist: string;
   url: string;
@@ -22,11 +19,16 @@ export interface MetingTrack {
   lrc?: string;
 }
 
-export function buildMetingUrl(cfg = musicConfig): string {
-  const qs = new URLSearchParams({
-    server: cfg.server,
-    type: cfg.type,
-    id: String(cfg.id),
-  });
-  return `${cfg.api}?${qs.toString()}`;
+const MANIFEST_URL = "/Musics/manifest.json";
+
+export async function loadTracks(): Promise<TrackInfo[]> {
+  const response = await fetch(MANIFEST_URL);
+  if (!response.ok) {
+    throw new Error(`Manifest fetch failed: ${response.status}`);
+  }
+  const data: unknown = await response.json();
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error("Music manifest is empty");
+  }
+  return data as TrackInfo[];
 }

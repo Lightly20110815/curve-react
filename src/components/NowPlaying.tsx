@@ -1,119 +1,66 @@
 import { useEffect, useRef, useState } from "react";
-import { buildMetingUrl, type MetingTrack } from "@/lib/music-config";
+import { nowPlaying } from "@/lib/music-controller";
 
 /**
  * Compact music-player widget for sidebars.
  *
- * Loads its own playlist from the Meting API and drives a hidden <audio> element.
- * Shows cover art, track name, artist, progress bar, and playback controls.
+ * The audio element is owned by the module-level nowPlaying controller
+ * (music-controller.ts) and lives on document.body, so playback survives
+ * the ContextMenu mount/unmount cycle.  This component is a pure UI shell
+ * that reads/writes the controller.
  */
 export function NowPlaying() {
-  const [tracks, setTracks] = useState<MetingTrack[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [trackIndex, setTrackIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [coverUrl, setCoverUrl] = useState("");
-  const [needsMarquee, setNeedsMarquee] = useState(false);
+  const [, setTick] = useState(0);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => nowPlaying.subscribe(() => setTick((t) => t + 1)), []);
+
+  const [needsMarquee, setNeedsMarquee] = useState(false);
+  const [coverUrl, setCoverUrl] = useState("");
   const nameTextRef = useRef<HTMLSpanElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Progress polling via RAF (throttled to ~1 s)
   const rafRef = useRef<number | null>(null);
   const lastUpdateRef = useRef(0);
+  const [progress, setProgress] = useState(0);
 
-  const track = tracks?.[trackIndex];
-
-  // Load playlist
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setIsLoading(true);
-      setError(false);
-      try {
-        const res = await fetch(buildMetingUrl(), { mode: "cors" });
-        if (!res.ok) throw new Error(String(res.status));
-        const data = (await res.json()) as unknown[];
-        if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
-        const list = data.map(parseMetingTrack).filter((t): t is MetingTrack => t !== null);
-        if (!cancelled) {
-          setTracks(list);
-          setIsLoading(false);
-        }
-      } catch (e) {
-        console.warn("NowPlaying 加载播放列表失败：", e);
-        if (!cancelled) {
-          setError(true);
-          setIsLoading(false);
-        }
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Audio event listeners
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const onEnded = () => {
-      setTrackIndex((i) => (tracks ? (i + 1) % tracks.length : 0));
-    };
-    audio.addEventListener("ended", onEnded);
-    return () => audio.removeEventListener("ended", onEnded);
-  }, [tracks]);
-
-  // Play / pause sync
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !track) return;
-    if (isPlaying) {
-      void audio.play().catch(() => setIsPlaying(false));
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying, trackIndex, track?.url]);
-
-  // Update progress with RAF (throttled to ~1s)
   useEffect(() => {
     const loop = (ts: number) => {
       if (ts - lastUpdateRef.current > 1000) {
-        const audio = audioRef.current;
-        if (audio && audio.duration > 0) {
-          setProgress(Math.round((audio.currentTime / audio.duration) * 1000) / 10);
-        }
+        setProgress(nowPlaying.getProgress());
         lastUpdateRef.current = ts;
       }
       rafRef.current = requestAnimationFrame(loop);
     };
 
-    if (isPlaying) {
+    if (nowPlaying.isPlaying) {
       rafRef.current = requestAnimationFrame(loop);
+    } else {
+      setProgress(nowPlaying.getProgress());
     }
+
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [isPlaying]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nowPlaying.isPlaying]);
 
-  // Check marquee when track changes
+  // Check marquee + cover when track changes
+  const track = nowPlaying.currentTrack;
   useEffect(() => {
     setNeedsMarquee(false);
     const id = setTimeout(() => {
       if (wrapperRef.current && nameTextRef.current) {
-        setNeedsMarquee(nameTextRef.current.offsetWidth > wrapperRef.current.offsetWidth - 4);
+        setNeedsMarquee(
+          nameTextRef.current.offsetWidth > wrapperRef.current.offsetWidth - 4,
+        );
       }
       if (track?.pic) setCoverUrl(track.pic);
     }, 100);
     return () => clearTimeout(id);
   }, [track?.name, track?.pic]);
 
-  if (isLoading) {
+  if (nowPlaying.isLoading) {
     return (
       <div className="flex h-[100px] items-center justify-center border border-[hsl(var(--rule-soft)/0.48)] bg-[hsl(var(--paper-soft))] p-3.5 text-[0.8rem] text-[hsl(var(--ink-muted))]">
         正在加载音乐...
@@ -121,7 +68,7 @@ export function NowPlaying() {
     );
   }
 
-  if (error || !tracks || tracks.length === 0) {
+  if (nowPlaying.error || !nowPlaying.tracks || nowPlaying.tracks.length === 0) {
     return (
       <div className="flex h-[100px] items-center justify-center border border-[hsl(var(--rule-soft)/0.48)] bg-[hsl(var(--paper-soft))] p-3.5 text-[0.8rem] text-[hsl(var(--ink-muted))]">
         暂无音乐播放
@@ -129,29 +76,23 @@ export function NowPlaying() {
     );
   }
 
-  const togglePlay = () => setIsPlaying((p) => !p);
-  const prevTrack = () => setTrackIndex((i) => (i - 1 + tracks.length) % tracks.length);
-  const nextTrack = () => setTrackIndex((i) => (i + 1) % tracks.length);
-
   return (
     <div className="relative cursor-pointer overflow-hidden border border-[hsl(var(--rule-soft)/0.48)] bg-[hsl(var(--paper-soft))] p-3.5 shadow-sm transition-colors hover:border-[hsl(var(--stamp))]">
-      {/* Progress background */}
       <div
         className="pointer-events-none absolute inset-0 origin-left bg-[hsl(var(--stamp))] opacity-[0.06] transition-transform duration-1000 ease-linear"
         style={{ transform: `scaleX(${progress / 100})` }}
       />
 
-      <audio ref={audioRef} src={track?.url} preload="metadata" />
-
       <div className="relative z-10 flex items-center gap-3">
-        {/* Cover */}
         <button
           type="button"
-          onClick={togglePlay}
+          onClick={() => nowPlaying.togglePlay()}
           className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-[hsl(var(--rule-soft)/0.48)] bg-[hsl(var(--paper-warm))] transition-colors ${
-            isPlaying ? "animate-[spin_12s_linear_infinite] border-[hsl(var(--stamp))]" : ""
+            nowPlaying.isPlaying
+              ? "animate-[spin_12s_linear_infinite] border-[hsl(var(--stamp))]"
+              : ""
           }`}
-          aria-label={isPlaying ? "暂停" : "播放"}
+          aria-label={nowPlaying.isPlaying ? "暂停" : "播放"}
         >
           {coverUrl ? (
             <img src={coverUrl} alt="" className="h-full w-full object-cover" />
@@ -159,7 +100,7 @@ export function NowPlaying() {
             <div className="flex h-full w-full items-center justify-center text-xl">🎵</div>
           )}
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100">
-            {isPlaying ? (
+            {nowPlaying.isPlaying ? (
               <PauseIcon className="h-[18px] w-[18px] text-white" />
             ) : (
               <PlayIcon className="h-[18px] w-[18px] text-white" />
@@ -167,27 +108,33 @@ export function NowPlaying() {
           </div>
         </button>
 
-        {/* Info */}
-        <div className="min-w-0 flex-1" onClick={togglePlay} role="button">
+        <div className="min-w-0 flex-1" onClick={() => nowPlaying.togglePlay()} role="button">
           <div className="mb-0.5 flex items-center gap-1">
             <span
               className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                isPlaying ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]" : "bg-[hsl(var(--ink-muted))]"
+                nowPlaying.isPlaying
+                  ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]"
+                  : "bg-[hsl(var(--ink-muted))]"
               }`}
             />
             <span className="text-[0.7rem] font-medium tracking-wide text-[hsl(var(--ink-muted))] opacity-70">
-              {isPlaying ? "正在播放" : "已暂停"}
+              {nowPlaying.isPlaying ? "正在播放" : "已暂停"}
             </span>
           </div>
 
-          {/* Track name with optional marquee */}
           <div
             ref={wrapperRef}
-            className={`overflow-hidden ${needsMarquee ? "[mask-image:linear-gradient(to_right,black_0%,black_88%,transparent_100%)]" : ""}`}
+            className={`overflow-hidden ${
+              needsMarquee
+                ? "[mask-image:linear-gradient(to_right,black_0%,black_88%,transparent_100%)]"
+                : ""
+            }`}
           >
             <div
               className={`text-[0.9rem] font-semibold leading-snug text-[hsl(var(--ink-body))] ${
-                needsMarquee ? "inline-flex w-max animate-[marquee-scroll_8s_linear_infinite]" : "block truncate"
+                needsMarquee
+                  ? "inline-flex w-max animate-[marquee-scroll_8s_linear_infinite]"
+                  : "block truncate"
               }`}
               title={track?.name}
             >
@@ -195,23 +142,27 @@ export function NowPlaying() {
                 {track?.name}
               </span>
               {needsMarquee ? (
-                <span className="inline-block">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{track?.name}</span>
+                <span className="inline-block">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{track?.name}
+                </span>
               ) : null}
             </div>
           </div>
 
-          <p className="truncate text-[0.78rem] leading-snug text-[hsl(var(--ink-muted))]" title={track?.artist}>
+          <p
+            className="truncate text-[0.78rem] leading-snug text-[hsl(var(--ink-muted))]"
+            title={track?.artist}
+          >
             {track?.artist}
           </p>
         </div>
       </div>
 
-      {/* Bottom controls */}
       <div className="relative z-10 mt-2.5 flex items-center justify-between">
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={prevTrack}
+            onClick={() => nowPlaying.prev()}
             className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[hsl(var(--ink-body))] opacity-60 transition hover:bg-[hsl(var(--stamp-soft))] hover:opacity-100"
             aria-label="上一首"
           >
@@ -219,15 +170,19 @@ export function NowPlaying() {
           </button>
           <button
             type="button"
-            onClick={togglePlay}
+            onClick={() => nowPlaying.togglePlay()}
             className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--stamp-soft))] text-[hsl(var(--ink-body))] opacity-80 transition hover:bg-[hsl(var(--stamp))] hover:text-white hover:opacity-100"
-            aria-label={isPlaying ? "暂停" : "播放"}
+            aria-label={nowPlaying.isPlaying ? "暂停" : "播放"}
           >
-            {isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="ml-0.5 h-4 w-4" />}
+            {nowPlaying.isPlaying ? (
+              <PauseIcon className="h-4 w-4" />
+            ) : (
+              <PlayIcon className="ml-0.5 h-4 w-4" />
+            )}
           </button>
           <button
             type="button"
-            onClick={nextTrack}
+            onClick={() => nowPlaying.next()}
             className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[hsl(var(--ink-body))] opacity-60 transition hover:bg-[hsl(var(--stamp-soft))] hover:opacity-100"
             aria-label="下一首"
           >
@@ -235,8 +190,7 @@ export function NowPlaying() {
           </button>
         </div>
 
-        {/* Visualizer */}
-        {isPlaying ? (
+        {nowPlaying.isPlaying ? (
           <div className="flex items-end gap-0.5" style={{ height: "14px" }}>
             {[0, 1, 2, 3].map((i) => (
               <span
@@ -254,18 +208,6 @@ export function NowPlaying() {
       </div>
     </div>
   );
-}
-
-function parseMetingTrack(value: unknown): MetingTrack | null {
-  if (!value || typeof value !== "object") return null;
-  const t = value as Record<string, unknown>;
-  const name = typeof t.name === "string" ? t.name : (typeof t.title === "string" ? t.title : "");
-  const artist = typeof t.artist === "string" ? t.artist : (typeof t.author === "string" ? t.author : "");
-  const url = typeof t.url === "string" ? t.url : "";
-  const pic = typeof t.pic === "string" ? t.pic : "";
-
-  if (!name || !artist || !url || !pic) return null;
-  return { name, artist, url, pic };
 }
 
 /* Inline SVG icons */
