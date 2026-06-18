@@ -1,5 +1,6 @@
 export type TimeTheme = "day" | "dawn" | "dusk" | "deep-night";
 export type ThemeMode = "light" | "dark";
+export type ThemePreference = "auto" | ThemeMode;
 
 export interface TimeThemeInfo {
   id: TimeTheme;

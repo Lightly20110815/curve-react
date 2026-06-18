@@ -733,9 +733,17 @@
     background-color: hsl(var(--paper-soft));
   }
 
-  body.zen-mode .page-impression > * {
+  body.zen-mode .page-impression > *,
+  body.zen-mode .page-impression-header {
     animation: none;
     transform: none;
+    opacity: 1;
+    clip-path: none;
+    filter: none;
+  }
+  body.zen-mode .page-impression::after {
+    animation: none;
+    opacity: 0;
   }
 
   body.zen-mode ::-webkit-scrollbar { width: 6px; }
@@ -792,14 +800,43 @@
     overflow: hidden;
   }
 
+  /* Printing press: content is pressed out from the top roller. The reveal
+     sweeps top→bottom via clip-path while an ink-glow roller line rides ahead. */
   .page-impression > * {
-    transform: translateY(-100%);
-    animation: paper-smooth 360ms cubic-bezier(0.22, 1, 0.36, 1) calc(80ms + var(--outlet-delay, 0ms)) both;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(10px);
+    opacity: 0;
+    animation: roller-press 440ms cubic-bezier(0.22, 1, 0.36, 1)
+      calc(90ms + var(--outlet-delay, 0ms)) both;
   }
 
+  .page-impression::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--stamp) / 0.9) 18%,
+      hsl(var(--stamp) / 0.9) 82%,
+      transparent
+    );
+    box-shadow: 0 0 14px 2px hsl(var(--stamp) / 0.32);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    animation: roller-sweep 440ms cubic-bezier(0.22, 1, 0.36, 1)
+      calc(90ms + var(--outlet-delay, 0ms)) both;
+  }
+
+  /* Masthead/header: ink settles as the roller presses it out. */
   .page-impression-header {
-    transform: translateY(-100%);
-    animation: paper-eject 300ms cubic-bezier(0.22, 1, 0.36, 1) 20ms both;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(8px);
+    opacity: 0;
+    filter: contrast(1.18) saturate(0.7);
+    animation: ink-settle 360ms cubic-bezier(0.22, 1, 0.36, 1) 30ms both;
   }
 }
 
@@ -813,21 +850,51 @@
   100% { height: 14px; }
 }
 
-@keyframes paper-eject {
+@keyframes roller-press {
   0% {
-    transform: translateY(-100%);
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
   }
   100% {
+    clip-path: inset(0 0 0 0);
     transform: translateY(0);
+    opacity: 1;
   }
 }
 
-@keyframes paper-smooth {
+@keyframes roller-sweep {
   0% {
-    transform: translateY(-100%);
+    transform: translateY(0);
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
   }
   100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes ink-settle {
+  0% {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(8px);
+    opacity: 0;
+    filter: contrast(1.18) saturate(0.7);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
     transform: translateY(0);
+    opacity: 1;
+    filter: none;
   }
 }
 
@@ -934,5 +1001,54 @@
   .terminal-cursor {
     animation: none !important;
     transform: none;
+    opacity: 1;
+    clip-path: none;
+    filter: none;
   }
+  .page-impression::after {
+    animation: none !important;
+    opacity: 0;
+  }
+}
+
+/*
+ * Theme switch animation — a circular reveal from the toggle click point,
+ * like a darkroom lamp switching on or a press roller sweeping across.
+ * Falls back to an instant swap where View Transitions is unavailable.
+ */
+@supports (view-transition-name: root) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-new(root) {
+    animation: theme-vt-reveal 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(root) {
+    animation: theme-vt-fade 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none !important;
+    }
+  }
+}
+
+@keyframes theme-vt-reveal {
+  from {
+    clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+  to {
+    clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+}
+
+@keyframes theme-vt-fade {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }

@@ -27,7 +27,14 @@
       (function () {
         try {
           var stored = localStorage.getItem("curve-theme");
-          var dark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var pref =
+            stored === "auto" || stored === "light" || stored === "dark"
+              ? stored
+              : "auto";
+          var dark =
+            pref === "dark" ||
+            (pref === "auto" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
           var hour = new Date().getHours();
           var timeTheme =
             hour >= 5 && hour < 8 ? "dawn" :

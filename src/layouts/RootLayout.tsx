@@ -17,7 +17,7 @@ function LayoutShell() {
   const { pathname } = useLocation();
   const { asOf } = useAsOf();
   const { isZen } = useZenMode();
-  const outletDelay = useMemo(() => Math.round(200 + Math.random() * 800), [pathname]);
+  const outletDelay = useMemo(() => Math.round(60 + Math.random() * 180), [pathname]);
   const visiblePosts = useMemo(() => filterByAsOf(posts, asOf), [asOf]);
 
   useEffect(() => {
