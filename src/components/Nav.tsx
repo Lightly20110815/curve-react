@@ -112,7 +112,7 @@ export function Nav() {
 
       {/* Mobile sheet */}
       {mobileOpen && (
-        <div className="absolute left-0 top-full w-full border-b border-rule bg-paper/98 backdrop-blur-md shadow-lg md:hidden">
+        <div className="absolute left-0 top-full w-full border-b border-rule bg-paper shadow-lg md:hidden">
           <ul className="container divide-y divide-rule-soft/30 py-2">
             {links.map((l) => (
               <li key={l.to}>

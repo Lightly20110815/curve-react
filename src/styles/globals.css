@@ -832,11 +832,11 @@
 
   /* Masthead/header: ink settles as the roller presses it out. */
   .page-impression-header {
-    clip-path: inset(0 0 100% 0);
-    transform: translateY(8px);
-    opacity: 0;
-    filter: contrast(1.18) saturate(0.7);
-    animation: ink-settle 360ms cubic-bezier(0.22, 1, 0.36, 1) 30ms both;
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+    filter: none;
+    animation: ink-settle 360ms cubic-bezier(0.22, 1, 0.36, 1) 30ms backwards;
   }
 }
 
