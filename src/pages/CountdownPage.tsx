@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CalendarClock } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Ornament } from "@/components/Editorial";
+import { LifeProgress } from "@/components/LifeProgress";
 import { TwikooComments } from "@/components/TwikooComments";
 import { formatArticleDateline } from "@/lib/han-date";
 import {
@@ -123,6 +124,10 @@ export default function CountdownPage() {
           </div>
         </>
       )}
+
+      <div className="mt-12">
+        <LifeProgress />
+      </div>
 
       <Ornament className="my-section" />
 
