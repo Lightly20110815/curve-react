@@ -93,16 +93,19 @@ export function MusicPlayer() {
       {isOpen ? (
         <div className="w-[calc(100vw-2.5rem)] sm:w-[320px] max-w-[320px] overflow-hidden border-2 border-ink bg-paper shadow-[0_8px_24px_-8px_rgba(20,16,12,0.25)] animate-fade-in dark:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)]">
           <div className="flex items-center gap-3 border-b-2 border-ink bg-ink p-3 text-paper">
-            <div className="relative h-12 w-12 flex-none overflow-hidden border border-paper/30 bg-ink-strong">
+            <div className="relative h-12 w-12 flex-none border border-paper/30 bg-ink-strong p-1.5">
               {track?.pic && (
-                <img
-                  src={track.pic}
-                  alt=""
-                  className={cn(
-                    "h-full w-full object-cover",
-                    nowPlaying.isPlaying && "animate-[spin_8s_linear_infinite]",
-                  )}
-                />
+                <div className="relative h-full w-full overflow-hidden rounded-full border border-paper/30">
+                  <img
+                    src={track.pic}
+                    alt=""
+                    className={cn(
+                      "h-full w-full rounded-full object-cover",
+                      nowPlaying.isPlaying && "animate-[spin_8s_linear_infinite]",
+                    )}
+                  />
+                  <span className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-paper/50 bg-ink" />
+                </div>
               )}
             </div>
 

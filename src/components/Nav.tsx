@@ -10,6 +10,7 @@ const links = [
   { to: "/categories", label: "SECTIONS", subLabel: "版块", end: false, width: "min-w-[74px]" },
   { to: "/tags", label: "INDEX", subLabel: "索引", end: false, width: "min-w-[72px]" },
   { to: "/notes", label: "OPINION", subLabel: "随笔", end: false, width: "min-w-[78px]" },
+  { to: "/countdown", label: "COUNTDOWN", subLabel: "倒计时", end: false, width: "min-w-[84px]" },
   { to: "/links", label: "LINKS", subLabel: "友链", end: false, width: "min-w-[68px]" },
   { to: "/about", label: "MASTHEAD", subLabel: "编者", end: false, width: "min-w-[70px]" },
 ] as const;
