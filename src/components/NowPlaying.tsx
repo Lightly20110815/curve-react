@@ -90,7 +90,9 @@ export function NowPlaying() {
           {coverUrl ? (
             <img src={coverUrl} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xl">🎵</div>
+            <div className="flex h-full w-full items-center justify-center text-[hsl(var(--ink-muted))]">
+              <MusicIcon className="h-5 w-5" />
+            </div>
           )}
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100">
             {nowPlaying.isPlaying ? (
@@ -106,7 +108,7 @@ export function NowPlaying() {
             <span
               className={`h-1.5 w-1.5 rounded-full transition-colors ${
                 nowPlaying.isPlaying
-                  ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]"
+                  ? "bg-stamp"
                   : "bg-[hsl(var(--ink-muted))]"
               }`}
             />
@@ -224,6 +226,16 @@ function PrevIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
       <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+    </svg>
+  );
+}
+
+function MusicIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M9 17V5l11-2v12" />
+      <circle cx="6" cy="17" r="3" />
+      <circle cx="17" cy="15" r="3" />
     </svg>
   );
 }

@@ -360,7 +360,7 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--rule-soft) / 0.4);
-    border-radius: 9999px;
+    border-radius: 3px; /* sharp edges; newspapers don't round */
     border: 2px solid transparent;
     background-clip: padding-box;
   }
@@ -768,7 +768,7 @@
   }
 
   .dark .text-glow-sub {
-    text-shadow: 0 0 18px hsl(var(--stamp) / 0.18);
+    text-shadow: 0 0 18px hsl(var(--stamp) / 0.18); /* unslop-ignore: deliberate nocturnal newsstand-sign concept */
   }
 
   .rule-double {
@@ -822,7 +822,7 @@
       hsl(var(--stamp) / 0.9) 82%,
       transparent
     );
-    box-shadow: 0 0 14px 2px hsl(var(--stamp) / 0.32);
+    box-shadow: 0 0 14px 2px hsl(var(--stamp) / 0.32); /* unslop-ignore: printing-press roller ink-glow, part of the page-impression animation */
     opacity: 0;
     pointer-events: none;
     z-index: 5;
@@ -964,7 +964,7 @@
 }
 
 .terminal-output {
-  text-shadow: 0 0 9px rgba(29, 255, 143, 0.14);
+  text-shadow: 0 0 9px rgba(29, 255, 143, 0.14); /* unslop-ignore: intentional retro CRT terminal glow */
 }
 
 .terminal-line {

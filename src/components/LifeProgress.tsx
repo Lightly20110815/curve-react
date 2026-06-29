@@ -20,7 +20,7 @@ function Bar({ item }: { item: ProgressItem }) {
       </div>
 
       <div
-        className="mt-2 h-[6px] w-full overflow-hidden rounded-full bg-rule-soft/40"
+        className="mt-2 h-[6px] w-full overflow-hidden rounded-sm bg-rule-soft/40"
         role="progressbar"
         aria-valuenow={Math.round(percent)}
         aria-valuemin={0}
@@ -28,7 +28,7 @@ function Bar({ item }: { item: ProgressItem }) {
         aria-label={item.label}
       >
         <div
-          className="h-full origin-left rounded-full bg-stamp transition-[width] duration-500 ease-out"
+          className="h-full origin-left rounded-sm bg-stamp transition-[width] duration-500 ease-out"
           style={{ width: `${percent}%` }}
         />
       </div>

@@ -61,7 +61,7 @@ function CountdownCard({ status }: { status: CountdownStatus }) {
 
       <div className="mt-5 border-t border-rule-soft/40 pt-5">
         {isToday ? (
-          <p className="font-display text-[26px] font-bold text-stamp">就是今天 🎉</p>
+          <p className="font-display text-[26px] font-bold text-stamp">就是今天</p>
         ) : isPast ? (
           <p className="font-ui text-[14px] font-medium uppercase tracking-[0.12em] text-ink-muted">
             已过去 {days} 天

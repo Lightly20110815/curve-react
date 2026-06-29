@@ -168,13 +168,13 @@ export function ContextMenu() {
             <Item
               icon={Sparkles}
               onSelect={onSelectionAction("explain")}
-              label="✨ 让 AI 解释"
+              label="让 AI 解释"
               hint="Explain"
             />
             <Item
               icon={Languages}
               onSelect={onSelectionAction("translate")}
-              label="✨ AI 翻译成中文"
+              label="AI 翻译成中文"
               hint="Translate"
             />
             <Divider />
