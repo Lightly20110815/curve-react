@@ -1,26 +1,21 @@
+/**
+ * 404 — 一只迷路的萤火虫。
+ */
 import { Link } from "react-router-dom";
-import { Home } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { Kicker, Ornament } from "@/components/Editorial";
-import { cn } from "@/lib/utils";
 
 export default function NotFoundPage() {
   return (
-    <div className="container py-section text-center">
-      <Kicker variant="stamp">404 · 失踪刊号</Kicker>
-      <h1 className="mt-4 font-masthead text-[clamp(72px,15vw,200px)] font-black leading-[0.9] text-ink-strong">
-        404
-      </h1>
-      <Ornament className="mx-auto my-6 max-w-md" />
-      <p className="font-display text-[28px] italic text-ink-body">
-        这条路走不通。
+    <div className="mx-auto flex min-h-[70dvh] max-w-2xl flex-col items-center justify-center px-5 text-center md:px-8">
+      <p className="font-mono text-[64px] font-bold leading-none text-firefly">404</p>
+      <p className="mt-6 text-[20px] text-ink-strong">这条小径没有通向任何地方。</p>
+      <p className="mt-2 text-[14.5px] text-mist">
+        也许链接写错了，也许那株植物已经移走了。
       </p>
-      <p className="mt-3 font-serif text-[16px] text-ink-muted">
-        要找的页面或许从未存在，或许只是迷路了。
-      </p>
-      <Link to="/" className={cn(buttonVariants({ size: "lg" }), "mt-10")}>
-        <Home className="h-4 w-4" />
-        回到头版
+      <Link
+        to="/"
+        className="pressable mt-8 rounded-full border border-firefly/50 px-6 py-2.5 text-[14.5px] text-firefly transition-colors duration-200 hover:bg-firefly hover:text-page"
+      >
+        回到花园
       </Link>
     </div>
   );

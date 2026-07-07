@@ -1,48 +1,57 @@
+/**
+ * 花圃索引 — 栏目与全部标签。
+ */
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
-import { getAllTags, posts } from "@/content/posts";
+import { posts, getAllCategories, getAllTags } from "@/content/posts";
 import { useAsOf } from "@/hooks/useAsOf";
 import { filterByAsOf } from "@/lib/as-of";
+import { hanNumber } from "@/lib/han-date";
 
 export default function TagsPage() {
   const { asOf } = useAsOf();
   const visiblePosts = filterByAsOf(posts, asOf);
+  const categories = getAllCategories(visiblePosts);
   const tags = getAllTags(visiblePosts);
-  const max = Math.max(1, ...tags.map((t) => t.count));
 
   return (
-    <div className="container py-10 md:py-14">
-      <PageHeader
-        kicker="INDEX · 关键词索引"
-        title="标签云"
-        description="散落在文章里的关键词。越大越常出现 — 也大概就是我最近在想的事。"
-      />
-
-      <div className="mt-16 flex flex-wrap items-baseline gap-x-6 gap-y-4 border-y-[3px] border-double border-rule py-10">
-        {tags.map((t) => {
-          const ratio = t.count / max;
-          const size = 16 + ratio * 28;
-          return (
-            <Link
-              key={t.name}
-              to={`/tags/${encodeURIComponent(t.name)}`}
-              className="group inline-flex items-baseline gap-1 text-ink-body transition-colors hover:text-stamp"
-            >
-              <span
-                className="font-display font-semibold leading-tight"
-                style={{ fontSize: `${size}px` }}
+    <div>
+      <PageHeader title="花圃" note="园子分成几块地，每块地里插着不同的标签。" />
+      <div className="mx-auto max-w-5xl space-y-14 px-5 md:px-8">
+        <section>
+          <h2 className="mb-5 text-[15px] font-bold tracking-wide text-mist">几块地</h2>
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {categories.map((c) => (
+              <Link
+                key={c.name}
+                to={`/categories/${encodeURIComponent(c.name)}`}
+                className="group rounded-2xl border border-line bg-surface/60 p-5 transition-[border-color,background-color] duration-300 hover:border-firefly/40 hover:bg-surface"
               >
-                {t.name}
-              </span>
-              <span className="font-ui text-[12px] font-medium uppercase text-ink-faded">
-                {t.count}
-              </span>
-            </Link>
-          );
-        })}
-        {tags.length === 0 && (
-          <p className="font-serif italic text-ink-muted">还没有任何标签。</p>
-        )}
+                <p className="text-[18px] text-ink-strong transition-colors group-hover:text-firefly">
+                  {c.name}
+                </p>
+                <p className="mt-2 font-mono text-[11.5px] tracking-wider text-mist">
+                  收着 {hanNumber(c.count)} 篇
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-5 text-[15px] font-bold tracking-wide text-mist">全部标签</h2>
+          <div className="flex flex-wrap gap-2.5">
+            {tags.map((t) => (
+              <Link
+                key={t.name}
+                to={`/tags/${encodeURIComponent(t.name)}`}
+                className="pressable rounded-full border border-line px-4 py-1.5 text-[14px] text-mist transition-colors duration-200 hover:border-firefly/50 hover:text-firefly"
+              >
+                {t.name} · {t.count}
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

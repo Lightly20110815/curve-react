@@ -15,21 +15,21 @@ export interface LinkGroup {
 const linkData: LinkGroup[] = [
   {
     type: "rec",
-    typeName: "本站",
-    typeDesc: "自己的东西",
+    typeName: "旧居",
+    typeDesc: "从前的家",
     typeList: [
       {
-        name: "Sy's Digital Garden",
+        name: "The Curve Times",
         avatar: "/images/logo/logo.webp",
         desc: "重构时间线，再次重逢",
-        url: "https://404yann.com",
+        url: "https://chiyu.it",
       },
     ],
   },
   {
     type: "friends",
     typeName: "小伙伴们",
-    typeDesc: "我们在一起，共同进步",
+    typeDesc: "夜里亮着灯的邻居",
     typeList: [
       {
         name: "池鱼小栈",

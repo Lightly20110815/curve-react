@@ -1,36 +1,13 @@
-import { cn } from "@/lib/utils";
-import { Kicker, Ornament } from "./Editorial";
-
-interface Props {
-  kicker?: string;
-  title: string;
-  description?: string;
-  align?: "left" | "center";
-  className?: string;
-}
-
 /**
- * Newspaper section header — kicker label + serif headline + ornament rule.
+ * 内页页头 — 安静的标题区，给固定导航留出呼吸。
  */
-export function PageHeader({ kicker, title, description, align = "left", className }: Props) {
-  const center = align === "center";
+export function PageHeader({ title, note }: { title: string; note?: string }) {
   return (
-    <header className={cn(center && "text-center", className)}>
-      {kicker && <Kicker variant="stamp">{kicker}</Kicker>}
-      <h1 className="mt-3 font-display text-[clamp(40px,6vw,68px)] font-bold leading-[1.12] text-balance text-ink-strong">
+    <header className="rise-in mx-auto max-w-5xl px-5 pb-10 pt-28 md:px-8 md:pt-32">
+      <h1 className="text-[30px] font-bold leading-snug text-ink-strong md:text-[36px]">
         {title}
       </h1>
-      {description && (
-        <p
-          className={cn(
-            "mt-5 max-w-2xl font-serif text-[18px] leading-[1.85] text-ink-body",
-            center && "mx-auto",
-          )}
-        >
-          {description}
-        </p>
-      )}
-      <Ornament className="mt-8" />
+      {note && <p className="mt-3 max-w-xl text-[15.5px] leading-relaxed text-mist">{note}</p>}
     </header>
   );
 }

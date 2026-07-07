@@ -1,62 +1,31 @@
+import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { useEffect, useMemo } from "react";
-import { Masthead } from "@/components/Masthead";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { MusicPlayer } from "@/components/MusicPlayer";
-import { ContextMenu } from "@/components/ContextMenu";
-import { ArticleAiProvider } from "@/components/ArticleAiProvider";
 import { AsOfBanner } from "@/components/AsOfBanner";
-import { ZenModeProvider, useZenMode } from "@/components/ZenModeProvider";
-import { posts } from "@/content/posts";
-import { useAsOf } from "@/hooks/useAsOf";
-import { filterByAsOf } from "@/lib/as-of";
-import { ThemeProvider } from "@/hooks/useTheme";
+import { MusicDock } from "@/components/MusicDock";
 
-function LayoutShell() {
+export default function RootLayout() {
   const { pathname } = useLocation();
-  const { asOf } = useAsOf();
-  const { isZen } = useZenMode();
-  const outletDelay = useMemo(() => Math.round(60 + Math.random() * 180), [pathname]);
-  const visiblePosts = useMemo(() => filterByAsOf(posts, asOf), [asOf]);
 
+  // 路由切换回到顶部（浏览器前进后退除外，交给默认行为）
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-paper">
-      {!isZen && <AsOfBanner />}
-      {!isZen && (
-        <div key={`header-${pathname}`} className="page-impression-header">
-          <Masthead issueNo={visiblePosts.length} />
-          <Nav />
-        </div>
-      )}
-      <main className="relative flex-1 overflow-x-clip">
-        <div
-          key={pathname}
-          className="page-impression min-h-full"
-          style={{ "--outlet-delay": `${outletDelay}ms` } as React.CSSProperties}
-        >
-          <Outlet />
-        </div>
+    // bg-page 让整页由同一个不透明图层绘制，避免 P3 屏上跨图层的色差缝；
+    // ambient-sky / film-grain 是全站的背景质感层（见 globals.css）
+    <div className="flex min-h-[100dvh] flex-col bg-page">
+      <div aria-hidden className="ambient-sky" />
+      <Nav />
+      <AsOfBanner />
+      <main className="relative z-[1] flex-1">
+        <Outlet />
       </main>
-      {!isZen && <Footer />}
-      {!isZen && <MusicPlayer />}
-      <ContextMenu />
+      <Footer className="relative z-[1]" />
+      <MusicDock />
+      <div aria-hidden className="film-grain" />
     </div>
-  );
-}
-
-export default function RootLayout() {
-  return (
-    <ThemeProvider>
-      <ZenModeProvider>
-        <ArticleAiProvider>
-          <LayoutShell />
-        </ArticleAiProvider>
-      </ZenModeProvider>
-    </ThemeProvider>
   );
 }

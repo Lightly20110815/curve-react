@@ -1,10 +1,9 @@
 /**
- * Local music player configuration.
+ * 本地音乐播放器配置。
  *
- * Audio files live in public/Musics/. A build-time script
- * (scripts/generate-music-manifest.ts) scans the directory, reads ID3
- * metadata with music-metadata, and writes manifest.json.  The browser
- * fetches that manifest at runtime so it knows which tracks are available.
+ * 音频文件在 public/Musics/。构建期脚本
+ * (scripts/generate-music-manifest.ts) 扫描目录、用 music-metadata
+ * 读取 ID3 元数据并生成 manifest.json，浏览器运行时拉取。
  */
 
 export const musicConfig = {

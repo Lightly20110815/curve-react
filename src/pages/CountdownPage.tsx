@@ -1,26 +1,50 @@
+/**
+ * 花期 — 倒数日与人生进度。
+ *
+ * 上半：重要日子的倒计时卡片，每秒轻轻走一格；
+ * 下半：今天/本周/本月/今年/人生 五条进度。
+ */
 import { useEffect, useState } from "react";
-import { CalendarClock } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { Ornament } from "@/components/Editorial";
-import { LifeProgress } from "@/components/LifeProgress";
-import { TwikooComments } from "@/components/TwikooComments";
-import { formatArticleDateline } from "@/lib/han-date";
-import {
-  getCountdownStatuses,
-  type CountdownStatus,
-} from "@/lib/countdown";
-import { cn } from "@/lib/utils";
+import { getCountdownStatuses, type CountdownStatus } from "@/lib/countdown";
+import { getProgressItems, type ProgressItem } from "@/lib/progress";
+import { formatDotDate } from "@/lib/han-date";
 
-/** A single ticking time-unit cell. */
-function Unit({ value, label }: { value: number; label: string }) {
+export default function CountdownPage() {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const statuses = getCountdownStatuses(now);
+  const progress = getProgressItems(now);
+
   return (
-    <div className="flex flex-col items-center">
-      <span className="font-mono text-[clamp(28px,5vw,44px)] font-bold leading-none tabular-nums text-ink-strong">
-        {String(value).padStart(2, "0")}
-      </span>
-      <span className="mt-1.5 font-ui text-[11px] font-medium uppercase tracking-[0.14em] text-ink-muted">
-        {label}
-      </span>
+    <div>
+      <PageHeader
+        title="花期"
+        note="有些日子像花期一样，远远地看着它一天天近了。"
+      />
+      <div className="mx-auto max-w-5xl space-y-16 px-5 md:px-8">
+        <section className="grid gap-4 sm:grid-cols-2">
+          {statuses.map((s) => (
+            <CountdownCard key={s.event.title} status={s} />
+          ))}
+        </section>
+
+        <section>
+          <h2 className="mb-6 text-[15px] font-bold tracking-wide text-mist">
+            时间走到哪了
+          </h2>
+          <div className="space-y-7">
+            {progress.map((item) => (
+              <ProgressBar key={item.key} item={item} />
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
@@ -29,109 +53,68 @@ function CountdownCard({ status }: { status: CountdownStatus }) {
   const { event, days, hours, minutes, seconds, isPast, isToday } = status;
 
   return (
-    <article
-      className={cn(
-        "relative border border-rule-soft/60 bg-paper-soft/50 p-6 transition-colors sm:p-7",
-        isToday && "border-stamp bg-stamp/5",
-        isPast && "opacity-60",
-      )}
-    >
+    <article className="relative overflow-hidden rounded-2xl border border-line bg-surface/60 p-6">
       {event.emoji && (
-        <span className="absolute right-5 top-5 text-[22px] leading-none" aria-hidden="true">
+        <span aria-hidden className="absolute right-5 top-5 text-[20px] opacity-70">
           {event.emoji}
         </span>
       )}
+      <h3 className="text-[18px] text-ink-strong">{event.title}</h3>
+      {event.note && <p className="mt-1 text-[13.5px] text-mist">{event.note}</p>}
 
-      <div className="flex items-baseline gap-2 pr-8">
-        <h2 className="font-display text-[22px] font-bold text-ink-strong">{event.title}</h2>
-        {event.repeat === "yearly" && (
-          <span className="font-ui text-[10px] font-medium uppercase tracking-[0.12em] text-stamp">
-            每年
-          </span>
-        )}
-      </div>
-
-      {event.note && (
-        <p className="mt-1 font-serif text-[14px] leading-relaxed text-ink-muted">{event.note}</p>
-      )}
-
-      <p className="mt-2 font-ui text-[12px] tracking-wide text-ink-faded">
-        {formatArticleDateline(status.target)}
-      </p>
-
-      <div className="mt-5 border-t border-rule-soft/40 pt-5">
+      <div className="mt-5">
         {isToday ? (
-          <p className="font-display text-[26px] font-bold text-stamp">就是今天</p>
+          <p className="text-[26px] font-bold text-firefly">就是今天</p>
         ) : isPast ? (
-          <p className="font-ui text-[14px] font-medium uppercase tracking-[0.12em] text-ink-muted">
-            已过去 {days} 天
-          </p>
+          <p className="text-[20px] text-mist">已过去</p>
         ) : (
-          <div className="flex items-end gap-4 sm:gap-6">
-            <Unit value={days} label="Days" />
-            <span className="pb-5 font-mono text-[24px] text-ink-faded">:</span>
-            <Unit value={hours} label="Hrs" />
-            <span className="pb-5 font-mono text-[24px] text-ink-faded">:</span>
-            <Unit value={minutes} label="Min" />
-            <span className="pb-5 font-mono text-[24px] text-ink-faded">:</span>
-            <Unit value={seconds} label="Sec" />
-          </div>
+          <p className="flex items-baseline gap-2">
+            <span className="font-mono text-[38px] font-bold leading-none text-firefly">
+              {days}
+            </span>
+            <span className="text-[14px] text-ink">天</span>
+            <span className="font-mono text-[13px] tracking-wide text-mist">
+              {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:
+              {String(seconds).padStart(2, "0")}
+            </span>
+          </p>
         )}
       </div>
+
+      <p className="mt-4 font-mono text-[11px] tracking-wider text-mist">
+        {formatDotDate(status.target)}
+        {event.repeat === "yearly" ? " · 每年" : ""}
+      </p>
     </article>
   );
 }
 
-export default function CountdownPage() {
-  const [statuses, setStatuses] = useState<CountdownStatus[]>(() => getCountdownStatuses());
-
-  useEffect(() => {
-    const tick = () => setStatuses(getCountdownStatuses());
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const upcoming = statuses.filter((s) => !s.isPast);
+function ProgressBar({ item }: { item: ProgressItem }) {
+  const percent = Math.round(item.fraction * 1000) / 10;
 
   return (
-    <div className="container py-10 md:py-14">
-      <PageHeader
-        kicker="COUNTDOWN · 倒计时"
-        title="重要日期"
-        description="距离那些值得期待的日子，还有多久。"
-        align="center"
-      />
-
-      {statuses.length === 0 ? (
-        <div className="mt-16 flex flex-col items-center text-center text-ink-muted">
-          <CalendarClock className="h-10 w-10 text-ink-faded" />
-          <p className="mt-4 font-serif text-[16px]">还没有配置任何重要日期。</p>
-        </div>
-      ) : (
-        <>
-          {upcoming[0] && !upcoming[0].isToday && (
-            <p className="mt-8 text-center font-serif text-[15px] text-ink-body">
-              下一个：<span className="font-semibold text-stamp">{upcoming[0].event.title}</span>{" "}
-              还有 <span className="font-mono font-bold tabular-nums text-ink-strong">{upcoming[0].days}</span> 天
-            </p>
-          )}
-
-          <div className="mt-10 grid gap-5 sm:grid-cols-2">
-            {statuses.map((status) => (
-              <CountdownCard key={status.event.title} status={status} />
-            ))}
-          </div>
-        </>
-      )}
-
-      <div className="mt-12">
-        <LifeProgress />
+    <div>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-[15px] text-ink-strong">
+          {item.label}
+          <span className="ml-2 text-[12.5px] text-mist">{item.caption}</span>
+        </p>
+        <p className="font-mono text-[12.5px] text-firefly">{percent}%</p>
       </div>
-
-      <Ornament className="my-section" />
-
-      <TwikooComments pageKey="/pages/countdown" />
+      <div
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`${item.label}已过 ${percent}%`}
+        className="mt-2.5 h-[5px] overflow-hidden rounded-full bg-veil"
+      >
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-firefly/70 to-firefly transition-[width] duration-1000 ease-linear"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <p className="mt-2 text-[12.5px] text-mist">{item.remaining}</p>
     </div>
   );
 }

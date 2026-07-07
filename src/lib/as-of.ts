@@ -1,23 +1,14 @@
 /**
- * Time Machine — the "as-of" mechanism.
+ * 时光机 — "as-of" 机制。
  *
- * When `?as-of=YYYY-MM-DD` is present on any route, the site behaves as if
- * the reader is browsing the issue that was current at the end of that day:
- * later posts and notes vanish, "今年/累计" stats roll back, and articles
- * dated after the as-of show a "本期尚未刊登" placeholder.
- *
- * The time-aware theme and the editor's-desk quotes are intentionally NOT
- * rewound — the conceit is "you, now, holding an old paper", not "you, then".
+ * 任何路由带上 `?as-of=YYYY-MM-DD` 时，花园会退回那一天结束时的样子：
+ * 之后种下的文字消失，统计数字回卷。
+ * 主题与问候语刻意不回卷 — 设定是"现在的你，看当年的花园"。
  */
 
 const AS_OF_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-/**
- * Parse and validate a raw `?as-of=` value. Returns the canonical
- * `YYYY-MM-DD` string when valid; `null` otherwise.
- *
- * Invalid values are dropped silently — the banner simply doesn't appear.
- */
+/** 校验 `?as-of=` 原始值，合法则返回规范 `YYYY-MM-DD`，否则 null。 */
 export function parseAsOfParam(raw: string | null | undefined): string | null {
   if (!raw) return null;
   if (!AS_OF_PATTERN.test(raw)) return null;
@@ -26,12 +17,12 @@ export function parseAsOfParam(raw: string | null | undefined): string | null {
   return raw;
 }
 
-/** Inclusive end-of-day cutoff for an as-of date. */
+/** as-of 当日的包含式截止时刻。 */
 function asOfCutoffMs(asOf: string): number {
   return Date.parse(`${asOf}T23:59:59.999`);
 }
 
-/** Whether an item's date falls on or before the as-of cutoff. */
+/** 某条目日期是否落在 as-of 截止之前（含当天）。 */
 export function isBeforeAsOf(dateIso: string, asOf: string | null): boolean {
   if (!asOf) return true;
   const t = Date.parse(dateIso);
@@ -39,7 +30,7 @@ export function isBeforeAsOf(dateIso: string, asOf: string | null): boolean {
   return t <= asOfCutoffMs(asOf);
 }
 
-/** Filter any date-bearing collection (posts, notes) by the as-of cutoff. */
+/** 按 as-of 截止过滤任何带日期的集合（文章、随笔）。 */
 export function filterByAsOf<T extends { date: string }>(
   items: T[],
   asOf: string | null,

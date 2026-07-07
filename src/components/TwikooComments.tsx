@@ -1,3 +1,6 @@
+/**
+ * 访客留言 — Twikoo 评论，融进花园的皮。
+ */
 import { useEffect, useRef, useState } from "react";
 import { comments, siteContactMailHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -70,11 +73,7 @@ function loadTwikooScript(): Promise<TwikooGlobal> {
   return twikooLoader;
 }
 
-export function TwikooComments({ pageKey }: { pageKey: string }) {
-  return <TwikooCommentsPanel pageKey={pageKey} variant="article" />;
-}
-
-export function TwikooCommentsPanel({
+export function TwikooComments({
   pageKey,
   variant = "article",
 }: {
@@ -131,36 +130,34 @@ export function TwikooCommentsPanel({
     <section
       className={cn(
         articleVariant
-          ? "mt-16 border border-rule bg-paper-warm/40 px-5 py-10 md:px-10 md:py-12 lg:px-14"
-          : "mt-5 border-t border-dashed border-rule-soft/60 pt-5",
+          ? "mt-16 rounded-2xl border border-line bg-surface/60 p-6 md:p-8"
+          : "mt-6 border-t border-line pt-6",
       )}
     >
-      {articleVariant ? (
-        <div className="flex items-end justify-between gap-3 border-b border-rule pb-3">
+      {articleVariant && (
+        <div className="mb-6 flex items-end justify-between gap-3">
           <div>
-            <p className="font-ui text-[12px] font-semibold uppercase text-stamp">
-              Comments · 留言
-            </p>
-            <p className="mt-1 font-serif text-[14px] leading-[1.7] text-ink-muted">
-              可以直接在这里留言，也可以通过邮件联系。
+            <h2 className="text-[18px] font-bold text-ink-strong">访客留言</h2>
+            <p className="mt-1 text-[13.5px] text-mist">
+              路过说句话也好，安静看看也好。
             </p>
           </div>
           <a
             href={siteContactMailHref}
-            className="font-ui text-[12px] font-medium uppercase text-ink-muted transition-colors hover:text-stamp"
+            className="shrink-0 text-[13px] text-firefly transition-colors hover:text-firefly-deep"
           >
-            Email
+            写邮件
           </a>
         </div>
-      ) : null}
+      )}
 
-      <div className={cn(articleVariant ? "mt-6 min-h-[420px]" : "min-h-[320px]")}>
+      <div className={articleVariant ? "min-h-[360px]" : "min-h-[280px]"}>
         <div ref={containerRef} className="twikoo-thread" />
-        {status === "error" ? (
-          <p className="font-serif text-[15px] leading-[1.8] text-ink-muted">
-            评论系统暂时不可用。
+        {status === "error" && (
+          <p className="text-[14.5px] leading-relaxed text-mist">
+            留言板暂时没搭好，可以先写邮件给我。
           </p>
-        ) : null}
+        )}
       </div>
     </section>
   );

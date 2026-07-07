@@ -1,1054 +1,548 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+/* ============================================================
+   Sy 的数字花园 — 设计 token
+   两个时刻，同一片天空：
+   夜 (night) — 深靛夜空、月光暖白、萤火暖金
+   晨 (dawn)  — 黎明雾蓝、墨青、琥珀
+   ============================================================ */
 
-/*
- * Curve newspaper edition styles.
- *
- * Paper is the brand. Type is the voice. Color is one stamp of red.
- *
- * Dark mode: "暗房显影" — deep ink-green background with aged-paper-yellow text.
- * Like developing photographs in a darkroom, or the inside of a vinyl sleeve.
- */
-@layer base {
-  :root {
-    /* Surfaces */
-    --paper: 43 42% 90%;
-    --paper-warm: 39 38% 86%;
-    --paper-soft: 44 40% 93%;
-
-    /* Ink */
-    --ink: 28 12% 9%;
-    --ink-strong: 28 16% 5%;
-    --ink-body: 28 12% 17%;
-    --ink-muted: 28 9% 31%;
-    --ink-faded: 28 7% 43%;
-
-    /* Rules */
-    --rule: 28 14% 14%;
-    --rule-soft: 28 9% 28%;
-
-    /* Stamp red */
-    --stamp: 5 68% 36%;
-    --stamp-soft: 5 60% 92%;
-
-    color-scheme: light;
-  }
-
-  .dark {
-    /* Surfaces — neutral dark grey, like darkroom walls or a vinyl record */
-    --paper: 0 0% 9%;
-    --paper-warm: 0 0% 14%;
-    --paper-soft: 0 0% 11%;
-
-    /* Ink — clean warm white, high contrast for readability */
-    --ink: 40 16% 91%;
-    --ink-strong: 40 18% 96%;
-    --ink-body: 40 11% 85%;
-    --ink-muted: 38 8% 66%;
-    --ink-faded: 38 6% 52%;
-
-    /* Rules — subtle grey lines */
-    --rule: 0 0% 32%;
-    --rule-soft: 0 0% 24%;
-
-    /* Stamp — warm amber gold, replacing red which doesn't work on dark */
-    --stamp: 42 55% 58%;
-    --stamp-soft: 42 40% 20%;
-
-    color-scheme: dark;
-  }
-
-  :root[data-time-theme="dawn"] {
-    --paper: 43 54% 92%;
-    --paper-warm: 31 56% 88%;
-    --paper-soft: 45 68% 95%;
-    --ink: 28 13% 9%;
-    --ink-strong: 28 18% 5%;
-    --ink-body: 28 12% 18%;
-    --ink-muted: 24 11% 34%;
-    --ink-faded: 24 9% 46%;
-    --rule: 24 16% 16%;
-    --rule-soft: 24 11% 30%;
-    --stamp: 18 76% 44%;
-    --stamp-soft: 22 82% 93%;
-  }
-
-  :root[data-time-theme="dusk"] {
-    --paper: 37 45% 88%;
-    --paper-warm: 29 48% 83%;
-    --paper-soft: 40 50% 91%;
-    --ink: 25 13% 10%;
-    --ink-strong: 25 18% 6%;
-    --ink-body: 25 12% 18%;
-    --ink-muted: 25 10% 33%;
-    --ink-faded: 25 8% 45%;
-    --rule: 25 15% 15%;
-    --rule-soft: 25 11% 28%;
-    --stamp: 17 67% 40%;
-    --stamp-soft: 21 72% 90%;
-  }
-
-  :root[data-time-theme="deep-night"] {
-    --paper: 205 16% 88%;
-    --paper-warm: 210 15% 84%;
-    --paper-soft: 208 22% 93%;
-    --ink: 214 18% 12%;
-    --ink-strong: 214 24% 8%;
-    --ink-body: 214 14% 20%;
-    --ink-muted: 214 10% 35%;
-    --ink-faded: 214 8% 47%;
-    --rule: 214 16% 18%;
-    --rule-soft: 214 10% 31%;
-    --stamp: 198 44% 38%;
-    --stamp-soft: 198 42% 91%;
-  }
-
-  .dark[data-time-theme="dawn"] {
-    --paper: 31 17% 12%;
-    --paper-warm: 29 21% 15%;
-    --paper-soft: 31 16% 11%;
-    --ink: 40 18% 91%;
-    --ink-strong: 42 20% 96%;
-    --ink-body: 38 12% 85%;
-    --ink-muted: 33 10% 66%;
-    --ink-faded: 32 9% 52%;
-    --rule: 29 12% 32%;
-    --rule-soft: 29 11% 24%;
-    --stamp: 28 72% 62%;
-    --stamp-soft: 25 38% 20%;
-  }
-
-  .dark[data-time-theme="dusk"] {
-    --paper: 24 18% 11%;
-    --paper-warm: 22 21% 14%;
-    --paper-soft: 24 16% 10%;
-    --ink: 39 17% 91%;
-    --ink-strong: 40 20% 96%;
-    --ink-body: 37 12% 85%;
-    --ink-muted: 28 9% 65%;
-    --ink-faded: 28 8% 51%;
-    --rule: 22 12% 31%;
-    --rule-soft: 22 12% 23%;
-    --stamp: 18 74% 61%;
-    --stamp-soft: 18 34% 19%;
-  }
-
-  .dark[data-time-theme="deep-night"] {
-    --paper: 210 28% 10%;
-    --paper-warm: 212 24% 13%;
-    --paper-soft: 210 26% 11%;
-    --ink: 44 17% 91%;
-    --ink-strong: 48 22% 96%;
-    --ink-body: 42 12% 85%;
-    --ink-muted: 34 9% 65%;
-    --ink-faded: 34 8% 51%;
-    --rule: 210 16% 31%;
-    --rule-soft: 210 18% 23%;
-    --stamp: 195 50% 68%;
-    --stamp-soft: 198 34% 19%;
-  }
-
-  * { border-color: hsl(var(--rule-soft) / 0.48); }
-
-  html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
-    font-optical-sizing: auto;
-  }
-
-  body {
-    background-color: hsl(var(--paper));
-    color: hsl(var(--ink-body));
-    font-family: theme("fontFamily.serif");
-    font-size: 17px;
-    line-height: 1.75;
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.035) calc(50% - 1px),
-        hsl(var(--ink) / 0.035) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      linear-gradient(
-        180deg,
-        hsl(var(--paper-soft)) 0%,
-        hsl(var(--paper)) 14%,
-        hsl(var(--paper)) 86%,
-        hsl(var(--paper-warm)) 100%
-      ),
-      radial-gradient(hsl(var(--ink) / 0.014) 1px, transparent 1px),
-      radial-gradient(hsl(var(--ink) / 0.01) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 18px 18px, 30px 30px;
-    background-position: center top, 0 0, 0 0, 9px 9px;
-    box-shadow:
-      inset 0 0 0 1px hsl(var(--paper-warm) / 0.2),
-      inset 0 18px 48px hsl(var(--ink) / 0.018);
-    transition:
-      background-color 900ms ease,
-      background-image 900ms ease,
-      box-shadow 900ms ease,
-      color 220ms ease;
-  }
-
-  /* Dark mode body adjustments — strip paper-grain noise, keep a clean vignette */
-  .dark body {
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      radial-gradient(ellipse at 50% 0%, hsl(var(--paper-warm)) 0%, transparent 70%);
-    background-size: 100% 100%, 100% 60%;
-    box-shadow:
-      inset 0 0 0 1px hsl(var(--paper-warm) / 0.12),
-      inset 0 18px 48px hsl(var(--ink-strong) / 0.08);
-  }
-
-  :root[data-time-theme="dawn"] body {
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.035) calc(50% - 1px),
-        hsl(var(--ink) / 0.035) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      radial-gradient(circle at 50% 0%, hsl(33 92% 85% / 0.72) 0%, transparent 42%),
-      linear-gradient(
-        180deg,
-        hsl(var(--paper-soft)) 0%,
-        hsl(var(--paper)) 18%,
-        hsl(var(--paper)) 78%,
-        hsl(var(--paper-warm)) 100%
-      ),
-      radial-gradient(hsl(var(--ink) / 0.014) 1px, transparent 1px),
-      radial-gradient(hsl(var(--ink) / 0.01) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 58%, 100% 100%, 18px 18px, 30px 30px;
-    background-position: center top, center top, 0 0, 0 0, 9px 9px;
-  }
-
-  :root[data-time-theme="dusk"] body {
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      radial-gradient(circle at 50% 0%, hsl(24 86% 70% / 0.56) 0%, transparent 48%),
-      linear-gradient(
-        180deg,
-        hsl(var(--paper-soft)) 0%,
-        hsl(var(--paper)) 20%,
-        hsl(var(--paper-warm)) 100%
-      ),
-      radial-gradient(hsl(var(--ink) / 0.016) 1px, transparent 1px),
-      radial-gradient(hsl(var(--ink) / 0.01) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 56%, 100% 100%, 18px 18px, 30px 30px;
-    background-position: center top, center top, 0 0, 0 0, 9px 9px;
-  }
-
-  :root[data-time-theme="deep-night"] body {
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      radial-gradient(circle at 50% 0%, hsl(206 64% 84% / 0.55) 0%, transparent 40%),
-      linear-gradient(
-        180deg,
-        hsl(var(--paper-soft)) 0%,
-        hsl(var(--paper)) 18%,
-        hsl(var(--paper-warm)) 100%
-      ),
-      radial-gradient(hsl(var(--ink) / 0.014) 1px, transparent 1px),
-      radial-gradient(hsl(var(--ink) / 0.012) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 52%, 100% 100%, 18px 18px, 30px 30px;
-    background-position: center top, center top, 0 0, 0 0, 9px 9px;
-    box-shadow:
-      inset 0 0 0 1px hsl(var(--paper-warm) / 0.18),
-      inset 0 42px 100px hsl(209 45% 44% / 0.08);
-  }
-
-  .dark[data-time-theme="dawn"] body {
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      radial-gradient(ellipse at 50% 0%, hsl(28 64% 35% / 0.46) 0%, transparent 66%);
-    background-size: 100% 100%, 100% 62%;
-    box-shadow:
-      inset 0 0 0 1px hsl(var(--paper-warm) / 0.13),
-      inset 0 18px 60px hsl(var(--stamp) / 0.1);
-  }
-
-  .dark[data-time-theme="dusk"] body {
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% - 1px),
-        hsl(var(--ink) / 0.04) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      radial-gradient(ellipse at 50% 0%, hsl(17 66% 30% / 0.42) 0%, transparent 68%);
-    background-size: 100% 100%, 100% 60%;
-    box-shadow:
-      inset 0 0 0 1px hsl(var(--paper-warm) / 0.12),
-      inset 0 22px 64px hsl(var(--stamp) / 0.12);
-  }
-
-  .dark[data-time-theme="deep-night"] body {
-    background-image:
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(50% - 1px),
-        hsl(var(--ink) / 0.045) calc(50% - 1px),
-        hsl(var(--ink) / 0.045) calc(50% + 1px),
-        transparent calc(50% + 1px),
-        transparent 100%
-      ),
-      radial-gradient(ellipse at 50% 0%, hsl(202 48% 26% / 0.42) 0%, transparent 70%);
-    background-size: 100% 100%, 100% 64%;
-    box-shadow:
-      inset 0 0 0 1px hsl(var(--paper-warm) / 0.12),
-      inset 0 22px 72px hsl(203 72% 36% / 0.12);
-  }
-
-  ::selection {
-    background: hsl(var(--stamp) / 0.18);
-    color: hsl(var(--ink-strong));
-  }
-
-  .dark ::selection {
-    background: hsl(var(--stamp) / 0.25);
-    color: hsl(var(--ink-strong));
-  }
-
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--rule-soft) / 0.4);
-    border-radius: 3px; /* sharp edges; newspapers don't round */
-    border: 2px solid transparent;
-    background-clip: padding-box;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--rule-soft) / 0.7);
-    background-clip: padding-box;
-  }
-
-  a { color: inherit; text-decoration: none; }
+:root,
+[data-theme="night"] {
+  --g-page: #0a0f1e;
+  --g-surface: #111a30;
+  --g-veil: #16213c;
+  --g-ink-strong: #f2efe6;
+  --g-ink: #c8ccd6;
+  --g-mist: #8b94a9;
+  --g-firefly: #f2c57c;
+  --g-firefly-deep: #e0a94f;
+  --g-line: rgba(139, 148, 169, 0.22);
+  --g-glow: rgba(242, 197, 124, 0.14);
 }
 
-@layer components {
-  .prose-news {
-    max-width: 68ch;
-    color: hsl(var(--ink-body));
-    font-family: theme("fontFamily.serif");
-    font-size: 18.5px;
-    line-height: 1.88;
-    text-align: left;
-    text-justify: inter-ideograph;
-    hyphens: auto;
-    word-break: break-word;
-  }
-  .prose-news > :first-child { margin-top: 0; }
-  .prose-news > :last-child { margin-bottom: 0; }
-  .prose-news > * + * { margin-top: 0.95em; }
-  .prose-news p { margin: 0.95em 0; }
-  .prose-news p,
-  .prose-news li { text-wrap: pretty; }
-  .prose-news p { hanging-punctuation: first last; }
-
-  .prose-news-article > p:first-of-type {
-    font-size: 19.5px;
-    line-height: 1.95;
-    color: hsl(var(--ink-strong));
-  }
-  .prose-news-article > p:first-of-type::first-letter {
-    float: left;
-    margin-right: 0.12em;
-    font-family: theme("fontFamily.display");
-    font-size: 3.4em;
-    font-weight: 700;
-    line-height: 0.9;
-    color: hsl(var(--stamp));
-  }
-
-  .prose-news h1,
-  .prose-news h2,
-  .prose-news h3,
-  .prose-news h4 {
-    font-family: theme("fontFamily.display");
-    color: hsl(var(--ink-strong));
-    font-weight: 600;
-    text-align: left;
-    scroll-margin-top: 6rem;
-  }
-  .prose-news h1 {
-    font-size: 34px;
-    line-height: 1.2;
-    margin-top: 1.7em;
-    letter-spacing: 0;
-  }
-  .prose-news h2 {
-    font-size: 26px;
-    line-height: 1.3;
-    margin-top: 1.9em;
-    padding-top: 0.7em;
-    padding-bottom: 0;
-    border-bottom: none;
-    border-top: 1px solid hsl(var(--rule-soft) / 0.35);
-    letter-spacing: 0;
-  }
-  .prose-news h3 {
-    font-size: 21px;
-    line-height: 1.42;
-    margin-top: 1.55em;
-  }
-  .prose-news h4 {
-    font-size: 18px;
-    line-height: 1.5;
-    margin-top: 1.35em;
-    font-weight: 700;
-  }
-
-  .prose-news a {
-    color: hsl(var(--ink-strong));
-    border-bottom: 1px solid hsl(var(--ink-strong));
-    padding-bottom: 1px;
-    transition: color 150ms ease, border-color 150ms ease;
-  }
-  .prose-news a:hover {
-    color: hsl(var(--stamp));
-    border-bottom-color: hsl(var(--stamp));
-  }
-
-  .prose-news strong {
-    color: hsl(var(--ink-strong));
-    font-weight: 700;
-  }
-  .prose-news em { font-style: italic; }
-
-  .prose-news ul,
-  .prose-news ol { padding-left: 1.35em; }
-  .prose-news ul { list-style: disc; }
-  .prose-news ol { list-style: decimal; }
-  .prose-news ul li::marker,
-  .prose-news ol li::marker {
-    color: hsl(var(--stamp));
-    font-family: theme("fontFamily.mono");
-    font-size: 0.9em;
-  }
-  .prose-news li {
-    margin-top: 0.45em;
-    padding-left: 0.15em;
-    text-align: left;
-  }
-
-  .prose-news blockquote {
-    margin: 1.35em 0;
-    padding: 0.85em 1em;
-    border-left: 3px solid hsl(var(--stamp));
-    background: hsl(43 35% 96% / 0.95);
-    font-family: theme("fontFamily.serif");
-    font-size: 18px;
-    line-height: 1.78;
-    font-style: normal;
-    color: hsl(var(--ink-strong));
-    text-align: left;
-  }
-
-  /* Dark mode: blockquote becomes a slightly lifted panel */
-  .dark .prose-news blockquote {
-    background: hsl(var(--paper-warm) / 0.72);
-    border-left-color: hsl(var(--stamp) / 0.86);
-  }
-
-  .prose-news blockquote > :first-child { margin-top: 0; }
-  .prose-news blockquote > :last-child { margin-bottom: 0; }
-
-  .prose-news code:not(pre code) {
-    font-family: theme("fontFamily.mono");
-    font-size: 0.88em;
-    background: hsl(var(--paper-warm) / 0.8);
-    color: hsl(var(--ink-strong));
-    padding: 0.14em 0.42em;
-    border: 1px solid hsl(var(--rule-soft) / 0.34);
-    border-radius: 0;
-  }
-
-  .dark .prose-news code:not(pre code) {
-    background: hsl(var(--paper-warm) / 0.5);
-    border-color: hsl(var(--rule-soft) / 0.5);
-  }
-
-  .prose-news figure[data-rehype-pretty-code-figure] { margin: 1.8em 0; }
-  .prose-news pre {
-    background: #16110c;
-    color: #f1e7d3;
-    padding: 1.05rem 1.15rem;
-    overflow-x: auto;
-    font-family: theme("fontFamily.mono");
-    font-size: 14px;
-    line-height: 1.7;
-    border: 1px solid hsl(var(--rule) / 0.12);
-    border-radius: 0;
-    text-align: left;
-  }
-  .prose-news figure[data-rehype-pretty-code-figure] pre { margin: 0; }
-  .prose-news pre code {
-    background: transparent;
-    border: 0;
-    color: inherit;
-    padding: 0;
-  }
-
-  .prose-news img {
-    border: 1px solid hsl(var(--rule));
-    margin: 1.5em auto;
-    border-radius: 0;
-    filter: contrast(0.96) saturate(0.92);
-  }
-
-  /* Dark mode: images get a subtle warmth lift */
-  .dark .prose-news img {
-    filter: contrast(0.92) saturate(0.85) brightness(0.92);
-  }
-
-  .prose-news hr {
-    margin: 2.5em 0;
-    border: 0;
-    border-top: 1px solid hsl(var(--rule));
-    position: relative;
-  }
-  .prose-news hr::after {
-    content: "* * *";
-    position: absolute;
-    top: -0.8em;
-    left: 50%;
-    transform: translateX(-50%);
-    background: hsl(var(--paper));
-    padding: 0 0.4em;
-    color: hsl(var(--stamp));
-    font-size: 12px;
-  }
-
-  .prose-news table {
-    display: block;
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
-    margin: 1.5em 0;
-    border-top: 2px solid hsl(var(--rule));
-    border-bottom: 2px solid hsl(var(--rule));
-    overflow-x: auto;
-  }
-  .prose-news th,
-  .prose-news td {
-    border-bottom: 1px solid hsl(var(--rule-soft) / 0.4);
-    padding: 0.7em 0.8em;
-    text-align: left;
-  }
-  .prose-news th {
-    color: hsl(var(--ink));
-    font-weight: 600;
-    text-transform: none;
-    letter-spacing: 0;
-    font-size: 12px;
-  }
-
-  /* ───────────────────────────────────────────────────────────────────
-   * Interactive code blocks (decorated at runtime by useCodeBlockEnhancements)
-   * ─────────────────────────────────────────────────────────────────── */
-  .prose-news figure.code-block {
-    position: relative;
-    margin: 1.9em 0;
-    border: 1px solid hsl(var(--rule) / 0.18);
-    background: #16110c;
-    box-shadow: 0 1px 0 hsl(var(--rule-soft) / 0.18);
-  }
-
-  .code-block__toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.65em;
-    padding: 0.4em 0.7em 0.4em 0.95em;
-    background: linear-gradient(
-      180deg,
-      hsl(28 14% 14% / 1) 0%,
-      hsl(28 14% 11% / 1) 100%
-    );
-    border-bottom: 1px solid hsl(28 14% 6% / 1);
-    font-family: theme("fontFamily.mono");
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    color: hsl(38 18% 72%);
-  }
-
-  .code-block__lang {
-    text-transform: lowercase;
-    font-weight: 600;
-    color: hsl(var(--stamp));
-  }
-
-  .dark .code-block__lang {
-    color: hsl(42 70% 70%);
-  }
-
-  .code-block__meta {
-    color: hsl(38 8% 55%);
-    margin-right: auto;
-  }
-
-  .code-block__action {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35em;
-    padding: 0.22em 0.65em;
-    border: 1px solid hsl(38 12% 36% / 0.55);
-    background: transparent;
-    color: hsl(38 14% 78%);
-    font-family: inherit;
-    font-size: 11px;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
-  }
-
-  .code-block__action:hover {
-    border-color: hsl(var(--stamp));
-    color: hsl(var(--stamp));
-  }
-
-  .code-block__action[data-copied="true"] {
-    border-color: hsl(140 38% 52%);
-    color: hsl(140 38% 70%);
-    background: hsl(140 30% 20% / 0.4);
-  }
-
-  .code-block__body {
-    position: relative;
-    transition: max-height 320ms ease;
-  }
-
-  .code-block__body[data-collapsed="true"] {
-    max-height: 26em;
-    overflow: hidden;
-  }
-
-  .code-block__body[data-collapsed="true"]::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 8em;
-    pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      hsl(28 14% 10% / 0.6) 55%,
-      #16110c 100%
-    );
-  }
-
-  .code-block__expand {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    padding: 0.55em 1em;
-    background: hsl(28 14% 11% / 1);
-    border: 0;
-    border-top: 1px solid hsl(28 14% 6% / 1);
-    color: hsl(38 16% 75%);
-    font-family: theme("fontFamily.mono");
-    font-size: 11.5px;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: color 150ms ease, background-color 150ms ease;
-  }
-
-  .code-block__expand:hover {
-    color: hsl(var(--stamp));
-    background: hsl(28 14% 14% / 1);
-  }
-
-  .dark .code-block__expand:hover {
-    color: hsl(42 70% 70%);
-  }
-
-  /* The <pre> inside an enhanced figure has its margin reset and rounded
-   * corners disabled — the figure border handles framing. */
-  .prose-news figure.code-block pre {
-    border: 0;
-    margin: 0;
-    border-radius: 0;
-  }
+[data-theme="dawn"] {
+  --g-page: #f1f3f6;
+  --g-surface: #fbfcfd;
+  --g-veil: #e7ebf1;
+  --g-ink-strong: #1c2436;
+  --g-ink: #3d4759;
+  --g-mist: #5f6a83;
+  --g-firefly: #9a6519;
+  --g-firefly-deep: #7e5212;
+  --g-line: rgba(28, 36, 54, 0.16);
+  --g-glow: rgba(154, 101, 25, 0.1);
 }
 
-@layer utilities {
-  /* ───────────────────────────────────────────────────────────────────
-   * Zen mode — strip ornamentation, soften background, calm scrollbar.
-   * ─────────────────────────────────────────────────────────────────── */
-  body.zen-mode {
-    background-image: none;
-    background-color: hsl(var(--paper-soft));
-    box-shadow: none;
-  }
+@theme inline {
+  --color-page: var(--g-page);
+  --color-surface: var(--g-surface);
+  --color-veil: var(--g-veil);
+  --color-ink-strong: var(--g-ink-strong);
+  --color-ink: var(--g-ink);
+  --color-mist: var(--g-mist);
+  --color-firefly: var(--g-firefly);
+  --color-firefly-deep: var(--g-firefly-deep);
+  --color-line: var(--g-line);
+  --color-glow: var(--g-glow);
 
-  .dark body.zen-mode {
-    background-image: none;
-    background-color: hsl(var(--paper-soft));
-  }
+  --font-kai:
+    "LXGW WenKai Screen", "LXGW WenKai", "Kaiti SC", "STKaiti", "KaiTi",
+    "Noto Serif SC", serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas",
+    "Liberation Mono", monospace;
 
-  body.zen-mode .page-impression > *,
-  body.zen-mode .page-impression-header {
-    animation: none;
-    transform: none;
-    opacity: 1;
-    clip-path: none;
-    filter: none;
-  }
-  body.zen-mode .page-impression::after {
-    animation: none;
-    opacity: 0;
-  }
-
-  body.zen-mode ::-webkit-scrollbar { width: 6px; }
-  body.zen-mode ::-webkit-scrollbar-thumb {
-    background: hsl(var(--rule-soft) / 0.25);
-  }
-
-  .font-masthead { font-family: theme("fontFamily.masthead"); }
-  .font-display { font-family: theme("fontFamily.display"); }
-  .font-serif { font-family: theme("fontFamily.serif"); }
-  .font-ui { font-family: theme("fontFamily.sans"); }
-
-  .text-balance { text-wrap: balance; }
-  .text-pretty { text-wrap: pretty; }
-
-  /* Dark-mode masthead: warm gold glow, like a nocturnal newsstand sign */
-  .dark .text-glow-masthead {
-    text-shadow:
-      0 0 24px hsl(var(--stamp) / 0.28),
-      0 0 64px hsl(var(--stamp) / 0.14),
-      0 0 120px hsl(var(--stamp) / 0.06);
-  }
-
-  .dark .text-glow-sub {
-    text-shadow: 0 0 18px hsl(var(--stamp) / 0.18); /* unslop-ignore: deliberate nocturnal newsstand-sign concept */
-  }
-
-  .rule-double {
-    border-top: 1px solid hsl(var(--rule));
-    border-bottom: 1px solid hsl(var(--rule));
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-  .rule-double-thick {
-    border-top: 3px solid hsl(var(--rule));
-    border-bottom: 1px solid hsl(var(--rule));
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-
-  .writing-vertical {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-  }
-
-  .text-justify-news {
-    text-align: justify;
-    text-justify: inter-ideograph;
-  }
-
-  .page-impression {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-  }
-
-  /* Printing press: content is pressed out from the top roller. The reveal
-     sweeps top→bottom via clip-path while an ink-glow roller line rides ahead. */
-  .page-impression > * {
-    clip-path: inset(0 0 100% 0);
-    transform: translateY(10px);
-    opacity: 0;
-    animation: roller-press 440ms cubic-bezier(0.22, 1, 0.36, 1)
-      calc(90ms + var(--outlet-delay, 0ms)) both;
-  }
-
-  .page-impression::after {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--stamp) / 0.9) 18%,
-      hsl(var(--stamp) / 0.9) 82%,
-      transparent
-    );
-    box-shadow: 0 0 14px 2px hsl(var(--stamp) / 0.32); /* unslop-ignore: printing-press roller ink-glow, part of the page-impression animation */
-    opacity: 0;
-    pointer-events: none;
-    z-index: 5;
-    animation: roller-sweep 440ms cubic-bezier(0.22, 1, 0.36, 1)
-      calc(90ms + var(--outlet-delay, 0ms)) both;
-  }
-
-  /* Masthead/header: ink settles as the roller presses it out. */
-  .page-impression-header {
-    clip-path: none;
-    transform: none;
-    opacity: 1;
-    filter: none;
-    animation: ink-settle 360ms cubic-bezier(0.22, 1, 0.36, 1) 30ms backwards;
-  }
+  /* 全站统一动效曲线 — 强 ease-out，UI 反馈用 */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  /* 屏上移动 / 形变用 */
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+/* ============================================================
+   基底
+   ============================================================ */
 
-@keyframes visualizer-bounce {
-  0% { height: 3px; }
-  100% { height: 14px; }
-}
-
-@keyframes roller-press {
-  0% {
-    clip-path: inset(0 0 100% 0);
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  55% {
-    opacity: 1;
-  }
-  100% {
-    clip-path: inset(0 0 0 0);
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes roller-sweep {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  14% {
-    opacity: 1;
-  }
-  86% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-}
-
-@keyframes ink-settle {
-  0% {
-    clip-path: inset(0 0 100% 0);
-    transform: translateY(8px);
-    opacity: 0;
-    filter: contrast(1.18) saturate(0.7);
-  }
-  100% {
-    clip-path: inset(0 0 0 0);
-    transform: translateY(0);
-    opacity: 1;
-    filter: none;
-  }
-}
-
-@keyframes selection-popover-enter {
-  0% {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.selection-popover-enter {
-  transform-origin: top center;
-  animation: selection-popover-enter 180ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.terminal-overlay {
-  background:
-    radial-gradient(circle at 50% 10%, rgba(33, 255, 144, 0.08) 0%, transparent 34%),
-    linear-gradient(180deg, rgba(2, 10, 6, 0.94) 0%, rgba(1, 5, 3, 0.98) 100%);
-}
-
-.terminal-crt {
-  pointer-events: none;
-  background:
-    radial-gradient(circle at center, transparent 58%, rgba(0, 0, 0, 0.38) 100%),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(162, 255, 204, 0.08) 0,
-      rgba(162, 255, 204, 0.08) 1px,
-      transparent 1px,
-      transparent 4px
-    );
-  mix-blend-mode: screen;
-  opacity: 0.35;
-  animation: terminal-flicker 180ms steps(2) infinite;
-}
-
-.terminal-shell::before,
-.terminal-shell::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.terminal-shell::before {
-  background:
-    linear-gradient(90deg, rgba(255, 0, 0, 0.028), transparent 24%, transparent 74%, rgba(0, 180, 255, 0.028)),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(162, 255, 204, 0.05) 0,
-      rgba(162, 255, 204, 0.05) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-  opacity: 0.4;
-}
-
-.terminal-shell::after {
-  box-shadow:
-    inset 0 0 110px rgba(0, 0, 0, 0.78),
-    inset 0 0 16px rgba(29, 255, 143, 0.12);
-}
-
-.terminal-output {
-  text-shadow: 0 0 9px rgba(29, 255, 143, 0.14); /* unslop-ignore: intentional retro CRT terminal glow */
-}
-
-.terminal-line {
-  min-height: 1.8em;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.terminal-cursor {
-  display: inline-block;
-  width: 0.58rem;
-  height: 1.02em;
-  background: #9dffd1;
-  vertical-align: -0.15em;
-  animation: terminal-cursor-blink 1s step-end infinite;
-}
-
-@keyframes terminal-flicker {
-  0% { opacity: 0.28; }
-  50% { opacity: 0.35; }
-  100% { opacity: 0.31; }
-}
-
-@keyframes terminal-cursor-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+html {
+  background-color: var(--g-page);
+  scroll-behavior: smooth;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-impression > *,
-  .page-impression-header,
-  .selection-popover-enter,
-  .terminal-crt,
-  .terminal-cursor {
-    animation: none !important;
-    transform: none;
-    opacity: 1;
-    clip-path: none;
-    filter: none;
-  }
-  .page-impression::after {
-    animation: none !important;
-    opacity: 0;
+  html {
+    scroll-behavior: auto;
   }
 }
 
-/*
- * Theme switch animation — a circular reveal from the toggle click point,
- * like a darkroom lamp switching on or a press roller sweeping across.
- * Falls back to an instant swap where View Transitions is unavailable.
- */
-@supports (view-transition-name: root) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-    mix-blend-mode: normal;
-  }
+body {
+  font-family: var(--font-kai);
+  background-color: var(--g-page);
+  color: var(--g-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* 不做背景过渡：大面积图层的过渡会让合成器长期保留独立图层，
+     在 P3 屏上与未转换色彩空间的图层拼出可见色差缝 */
+}
 
-  ::view-transition-new(root) {
-    animation: theme-vt-reveal 460ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
+::selection {
+  background: var(--g-firefly);
+  color: var(--g-page);
+}
 
-  ::view-transition-old(root) {
-    animation: theme-vt-fade 460ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
+:focus-visible {
+  outline: 2px solid var(--g-firefly);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
-      animation: none !important;
+/* 触屏设备不触发 hover 态 */
+@media (hover: none) {
+  a:hover,
+  button:hover {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   环境天空 — 全站的背景质感层（内页不再是死平的纯色）
+   三层：视口天光渐变 + 稀疏星点（仅夜）+ 胶片颗粒
+   全部 fixed + pointer-events-none，静态零动效；
+   整层随主题均匀变化，不会产生跨图层色缝
+   ============================================================ */
+
+.ambient-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 夜：顶部一片清冷的月色青光，左下角极淡的萤火暖意 */
+[data-theme="night"] .ambient-sky {
+  background:
+    radial-gradient(1100px 520px at 82% -12%, rgba(96, 122, 210, 0.13), transparent 62%),
+    radial-gradient(880px 420px at -8% 110%, rgba(242, 197, 124, 0.05), transparent 60%),
+    linear-gradient(180deg, #0d1327 0%, var(--g-page) 38%);
+}
+
+/* 夜的星点 — 内联 SVG 平铺，静态、极稀疏 */
+[data-theme="night"] .ambient-sky::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-size: 720px 720px;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='720' height='720'><g fill='%23dfe5f2'><circle cx='23' cy='45' r='1' fill-opacity='.55'/><circle cx='88' cy='190' r='.7' fill-opacity='.35'/><circle cx='140' cy='80' r='.8' fill-opacity='.5'/><circle cx='210' cy='300' r='1.1' fill-opacity='.6'/><circle cx='260' cy='40' r='.6' fill-opacity='.3'/><circle cx='330' cy='150' r='.9' fill-opacity='.45'/><circle cx='400' cy='60' r='.7' fill-opacity='.5'/><circle cx='470' cy='210' r='1.2' fill-opacity='.6'/><circle cx='520' cy='120' r='.6' fill-opacity='.35'/><circle cx='600' cy='30' r='.9' fill-opacity='.5'/><circle cx='660' cy='180' r='.7' fill-opacity='.4'/><circle cx='700' cy='90' r='1' fill-opacity='.55'/><circle cx='60' cy='340' r='.8' fill-opacity='.45'/><circle cx='180' cy='420' r='.6' fill-opacity='.3'/><circle cx='300' cy='380' r='1' fill-opacity='.5'/><circle cx='430' cy='330' r='.7' fill-opacity='.4'/><circle cx='560' cy='300' r='.9' fill-opacity='.55'/><circle cx='640' cy='410' r='.6' fill-opacity='.3'/><circle cx='30' cy='520' r='.9' fill-opacity='.5'/><circle cx='150' cy='600' r='.7' fill-opacity='.4'/><circle cx='280' cy='540' r='1.1' fill-opacity='.6'/><circle cx='390' cy='480' r='.6' fill-opacity='.35'/><circle cx='500' cy='570' r='.8' fill-opacity='.45'/><circle cx='620' cy='520' r='1' fill-opacity='.5'/><circle cx='690' cy='640' r='.7' fill-opacity='.35'/><circle cx='90' cy='680' r='.8' fill-opacity='.5'/><circle cx='240' cy='660' r='.6' fill-opacity='.3'/><circle cx='360' cy='620' r='.9' fill-opacity='.55'/><circle cx='480' cy='690' r='.7' fill-opacity='.4'/><circle cx='590' cy='650' r='.6' fill-opacity='.3'/><circle cx='710' cy='560' r='.8' fill-opacity='.45'/><circle cx='110' cy='260' r='.6' fill-opacity='.3'/><circle cx='350' cy='260' r='.6' fill-opacity='.35'/><circle cx='570' cy='440' r='.7' fill-opacity='.4'/><circle cx='200' cy='150' r='.7' fill-opacity='.4'/><circle cx='450' cy='140' r='.6' fill-opacity='.3'/></g></svg>");
+}
+
+/* 晨：清晨的天光从右上落下，地平线处一点极淡的暖 */
+[data-theme="dawn"] .ambient-sky {
+  background:
+    radial-gradient(1050px 500px at 80% -12%, rgba(255, 255, 255, 0.8), transparent 62%),
+    radial-gradient(860px 400px at 6% -6%, rgba(154, 101, 25, 0.06), transparent 55%),
+    linear-gradient(180deg, #e4eaf2 0%, var(--g-page) 42%);
+}
+
+/* 胶片颗粒 — 盖在最上层，杀掉「数字平面感」 */
+.film-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-size: 240px 240px;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+[data-theme="dawn"] .film-grain {
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+}
+
+/* ============================================================
+   文章正文（构建期管线生成的 HTML）
+   ============================================================ */
+
+.prose {
+  font-size: 17px;
+  line-height: 1.95;
+  color: var(--g-ink);
+}
+
+.prose > * + * {
+  margin-top: 1.25em;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: var(--g-ink-strong);
+  font-weight: 700;
+  line-height: 1.45;
+  scroll-margin-top: 96px;
+}
+
+.prose h2 {
+  font-size: 1.45em;
+  margin-top: 2.2em;
+}
+
+.prose h3 {
+  font-size: 1.2em;
+  margin-top: 1.8em;
+}
+
+.prose h4 {
+  font-size: 1.05em;
+  margin-top: 1.6em;
+}
+
+.prose a {
+  color: var(--g-firefly);
+  text-decoration: underline;
+  text-decoration-color: var(--g-glow);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 200ms var(--ease-out-strong);
+}
+
+.prose a:hover {
+  text-decoration-color: var(--g-firefly);
+}
+
+.prose strong {
+  color: var(--g-ink-strong);
+  font-weight: 700;
+}
+
+.prose blockquote {
+  border-left: 2px solid var(--g-firefly);
+  padding: 0.25em 0 0.25em 1.25em;
+  color: var(--g-mist);
+}
+
+.prose blockquote > * + * {
+  margin-top: 0.75em;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5em;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li + li {
+  margin-top: 0.4em;
+}
+
+.prose li::marker {
+  color: var(--g-mist);
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--g-line);
+  margin: 2.5em auto;
+  width: 60%;
+}
+
+.prose img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--g-line);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--g-line);
+  padding: 0.5em 0.9em;
+  text-align: left;
+}
+
+.prose th {
+  color: var(--g-ink-strong);
+  background: var(--g-veil);
+}
+
+/* 行内代码 */
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--g-veil);
+  border: 1px solid var(--g-line);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
+  color: var(--g-ink-strong);
+}
+
+/* 代码块（shiki 双主题输出） */
+.prose pre {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.75;
+  background: var(--g-surface);
+  border: 1px solid var(--g-line);
+  border-radius: 12px;
+  padding: 1.1em 1.3em;
+  overflow-x: auto;
+}
+
+.prose pre code {
+  display: grid;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* shiki 双主题：晨用 light 变量，夜用 dark 变量 */
+[data-theme="dawn"] .prose code[data-theme*=" "],
+[data-theme="dawn"] .prose code[data-theme*=" "] span {
+  color: var(--shiki-light);
+}
+
+[data-theme="night"] .prose code[data-theme*=" "],
+[data-theme="night"] .prose code[data-theme*=" "] span {
+  color: var(--shiki-dark);
+}
+
+/* ============================================================
+   代码块增强（useCodeBlockEnhancements 运行时注入的结构）
+   ============================================================ */
+
+.code-block {
+  margin: 1.5em 0;
+}
+
+.code-block__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  border: 1px solid var(--g-line);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  background: var(--g-veil);
+  padding: 0.45em 1em;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--g-mist);
+}
+
+.code-block__toolbar + .code-block__body pre {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.code-block__lang {
+  color: var(--g-firefly);
+  text-transform: uppercase;
+}
+
+.code-block__action {
+  margin-left: auto;
+  cursor: pointer;
+  color: var(--g-mist);
+  transition: color 200ms var(--ease-out-strong);
+}
+
+.code-block__action:hover {
+  color: var(--g-firefly);
+}
+
+.code-block__action[data-copied="true"] {
+  color: var(--g-firefly);
+}
+
+.code-block__body[data-collapsed="true"] {
+  position: relative;
+  max-height: 30em;
+  overflow: hidden;
+}
+
+.code-block__body[data-collapsed="true"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 6em;
+  background: linear-gradient(180deg, transparent, var(--g-page));
+  pointer-events: none;
+}
+
+.code-block__expand {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  border: 1px dashed var(--g-line);
+  border-radius: 0 0 12px 12px;
+  margin-top: -1px;
+  padding: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--g-mist);
+  transition: color 200ms var(--ease-out-strong), border-color 200ms var(--ease-out-strong);
+}
+
+.code-block__expand:hover {
+  color: var(--g-firefly);
+  border-color: var(--g-firefly);
+}
+
+/* ============================================================
+   阅读进度 — CSS scroll-driven，无 JS 监听；不支持则隐藏
+   ============================================================ */
+
+.reading-progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reading-progress {
+      display: block;
+      transform-origin: left center;
+      animation: reading-grow linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes reading-grow {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
     }
   }
 }
 
-@keyframes theme-vt-reveal {
-  from {
-    clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%));
+/* ============================================================
+   Twikoo 评论区 — 融入花园
+   ============================================================ */
+
+.twikoo-thread .tk-comments-title,
+.twikoo-thread .tk-nick,
+.twikoo-thread .tk-content {
+  color: var(--g-ink);
+}
+
+.twikoo-thread .el-textarea__inner,
+.twikoo-thread .el-input__inner {
+  background: var(--g-surface) !important;
+  border-color: var(--g-line) !important;
+  color: var(--g-ink) !important;
+  font-family: var(--font-kai) !important;
+}
+
+.twikoo-thread .tk-meta-input .el-input .el-input-group__prepend {
+  background: var(--g-veil) !important;
+  border-color: var(--g-line) !important;
+  color: var(--g-mist) !important;
+}
+
+.twikoo-thread .el-button {
+  font-family: var(--font-kai) !important;
+}
+
+.twikoo-thread .el-button--primary {
+  background: var(--g-firefly) !important;
+  border-color: var(--g-firefly) !important;
+  color: var(--g-page) !important;
+}
+
+.twikoo-thread .el-button--primary:hover {
+  background: var(--g-firefly-deep) !important;
+  border-color: var(--g-firefly-deep) !important;
+}
+
+.twikoo-thread .tk-action-link,
+.twikoo-thread a {
+  color: var(--g-firefly);
+}
+
+/* ============================================================
+   入场动效 — 页面级淡入上浮，一次性、克制
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* fill-mode 用 backwards：动画结束后不保留 transform，
+     元素回到自然状态，合成器可以及时回收独立图层（避免 P3 色差缝） */
+  .rise-in {
+    animation: rise-in 640ms var(--ease-out-strong) backwards;
   }
-  to {
-    clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%));
+
+  .rise-in-late {
+    animation: rise-in 640ms var(--ease-out-strong) 120ms backwards;
+  }
+
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
-@keyframes theme-vt-fade {
-  from { opacity: 1; }
-  to { opacity: 0; }
+/* 移动端菜单项逐个浮现 */
+@media (prefers-reduced-motion: no-preference) {
+  .menu-item-rise {
+    animation: rise-in 420ms var(--ease-out-strong) backwards;
+  }
+}
+
+/* 可按下元素的触觉反馈 */
+.pressable {
+  transition: transform 160ms var(--ease-out-strong);
+}
+
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* 夜半电台 — 唱片旋转与面板浮现 */
+@media (prefers-reduced-motion: no-preference) {
+  .disc-spin {
+    animation: disc-spin 14s linear infinite;
+  }
+
+  @keyframes disc-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .dock-panel-rise {
+    animation: dock-rise 260ms var(--ease-out-strong) both;
+    transform-origin: bottom right;
+  }
+
+  @keyframes dock-rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 }

@@ -1,13 +1,9 @@
 node_modules
 dist
-dist-ssr
+src/content/generated
+public/Musics/manifest.json
+public/rss.xml
 .DS_Store
 *.local
-*.log
 .env
-.env.local
 .vercel
-*-check.png
-src/content/generated/
-public/rss.xml
-public/Musics/manifest.json
