@@ -1,8 +1,9 @@
 /**
- * 模块级单例音频控制器，供夜半电台 UI 读写。
+ * Module-level singleton audio controller for the NowPlaying widget.
  *
- * <audio> 元素只创建一次并挂在 document.body 上，
- * 播放不会随 React 组件卸载而中断。UI 组件是纯壳。
+ * The <audio> element is created once and lives on document.body so that
+ * playback survives the ContextMenu mount/unmount cycle.  The NowPlaying
+ * React component is a pure UI shell that reads/writes this controller.
  */
 import { loadTracks, type TrackInfo } from "./music-config";
 
@@ -67,7 +68,7 @@ function updateMediaSession(): void {
   navigator.mediaSession.metadata = new MediaMetadata({
     title: track.name,
     artist: track.artist,
-    album: "夜半电台",
+    album: "Curve Radio",
     artwork,
   });
 }
@@ -91,7 +92,7 @@ function notify(): void {
   _listeners.forEach((fn) => fn());
 }
 
-// 模块被 import 时立即开始加载曲目。
+// Kick off loading as soon as the module is imported.
 loadTracks()
   .then((tracks) => {
     _tracks = tracks;

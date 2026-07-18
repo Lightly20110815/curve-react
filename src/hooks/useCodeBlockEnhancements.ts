@@ -4,12 +4,14 @@ const LINE_THRESHOLD = 22;
 const ENHANCED_FLAG = "data-code-enhanced";
 
 /**
- * 给 rehype-pretty-code 的 <figure> 代码块加装：
- *  - 工具条：语言名 + 行数 + 一键「复制」
- *  - 超过 LINE_THRESHOLD 行的块折叠在渐隐后面，「展开 N 行」按需展开
+ * Decorate rehype-pretty-code `<figure>` blocks with:
+ *  - A toolbar showing language + a one-click "复制" button
+ *  - For long blocks (> LINE_THRESHOLD), an "展开 N 行" toggle that
+ *    collapses the body behind a fade and reveals it on demand
  *
- * 在 dangerouslySetInnerHTML 之后做一次运行时 DOM 处理，
- * 构建管线保持不动。事件委托：容器上一个 click 监听处理所有块。
+ * Implemented as a runtime DOM pass (post dangerouslySetInnerHTML) so the
+ * build pipeline stays untouched. Uses event delegation — a single click
+ * listener on the container handles every figure inside.
  */
 export function useCodeBlockEnhancements(
   containerRef: RefObject<HTMLElement>,
@@ -45,13 +47,15 @@ export function useCodeBlockEnhancements(
 
       figure.classList.add("code-block");
 
-      // 把 <pre> 包进 body wrapper，折叠时约束高度而不动 <pre> 自身样式
+      // Wrap the <pre> in a body wrapper so we can constrain its height
+      // for the collapse effect without disturbing <pre>'s own styling.
       const body = document.createElement("div");
       body.className = "code-block__body";
       if (isLong) body.setAttribute("data-collapsed", "true");
       figure.insertBefore(body, pre);
       body.appendChild(pre);
 
+      // Toolbar
       const toolbar = document.createElement("div");
       toolbar.className = "code-block__toolbar";
       toolbar.innerHTML = `
@@ -63,6 +67,7 @@ export function useCodeBlockEnhancements(
       `.trim();
       figure.insertBefore(toolbar, body);
 
+      // Expand button at the bottom of the body (only for long blocks)
       if (isLong) {
         const expand = document.createElement("button");
         expand.type = "button";
@@ -138,7 +143,7 @@ async function copyText(text: string): Promise<boolean> {
       return true;
     }
   } catch {
-    // 走兜底路径
+    // fall through to legacy path
   }
   try {
     const textarea = document.createElement("textarea");

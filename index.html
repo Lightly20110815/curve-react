@@ -1,51 +1,83 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="night">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0a0f1e" />
-    <title>Sy 的数字花园</title>
-    <meta name="description" content="一座深夜的数字花园。写给某个深夜路过的你。" />
+    <meta name="theme-color" content="#e3d3ab" />
+    <title>The Curve Times · 曲線時報</title>
+    <meta name="description" content="一份个人早报。一个用代码与文字搭起来的家。" />
 
     <!--
       Fonts:
-      - LXGW WenKai Screen (霞鹜文楷屏幕阅读版) → 全站主字体，手写楷体的日记感
-      - 系统等宽栈 → 日期、元信息、代码
-      字体按 unicode-range 分包加载，font-display: swap；
-      CDN 失效时优雅回退到本机楷体（Kaiti SC / KaiTi）。
+      - Playfair Display → masthead + headlines (dramatic serif)
+      - Noto Serif SC → readable mixed Chinese/Latin headlines + prose
+      - Inter + Noto Sans SC → UI sans (buttons, nav)
+      - JetBrains Mono → dates, classifieds, code
     -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap"
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css"
     />
 
-    <!-- Theme initializer — 主题跟随时辰，React 挂载前执行以避免闪烁 -->
+    <!-- Theme initializer — runs before React hydrates to prevent flash -->
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem("garden-theme");
+          var stored = localStorage.getItem("curve-theme");
+          var pref =
+            stored === "auto" || stored === "light" || stored === "dark"
+              ? stored
+              : "auto";
+          var dark =
+            pref === "dark" ||
+            (pref === "auto" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
           var hour = new Date().getHours();
-          var timeTheme = hour >= 18 || hour < 6 ? "night" : "dawn";
-          var theme =
-            stored === "night" || stored === "dawn" ? stored : timeTheme;
-          document.documentElement.dataset.theme = theme;
-          document.documentElement.style.colorScheme =
-            theme === "night" ? "dark" : "light";
-          var chrome = theme === "night" ? "#0a0f1e" : "#f1f3f6";
-          document
-            .querySelector('meta[name="theme-color"]')
-            .setAttribute("content", chrome);
+          var timeTheme =
+            hour >= 5 && hour < 8 ? "dawn" :
+            hour >= 17 && hour < 20 ? "dusk" :
+            (hour >= 22 || hour < 5) ? "deep-night" :
+            "day";
+          var lightChrome =
+            timeTheme === "dawn" ? "#efe1be" :
+            timeTheme === "dusk" ? "#dcc197" :
+            timeTheme === "deep-night" ? "#d8dbdf" :
+            "#e3d3ab";
+          var darkChrome =
+            timeTheme === "dawn" ? "#241b14" :
+            timeTheme === "dusk" ? "#21160f" :
+            timeTheme === "deep-night" ? "#10191d" :
+            "#1a1a1a";
+
+          document.documentElement.dataset.timeTheme = timeTheme;
+
+          if (dark) {
+            document.documentElement.classList.add("dark");
+            document.documentElement.style.colorScheme = "dark";
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", darkChrome);
+          } else {
+            document.documentElement.classList.remove("dark");
+            document.documentElement.style.colorScheme = "light";
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", lightChrome);
+          }
         } catch (_) {
-          document.documentElement.style.colorScheme = "dark";
+          document.documentElement.style.colorScheme = "light";
         }
       })();
     </script>
 
     <style>
-      html { background-color: #0a0f1e; }
-      html[data-theme="dawn"] { background-color: #f1f3f6; }
+      html { background-color: #e3d3ab; }
+      html[data-time-theme="dawn"] { background-color: #efe1be; }
+      html[data-time-theme="dusk"] { background-color: #dcc197; }
+      html[data-time-theme="deep-night"] { background-color: #d8dbdf; }
+      html.dark { background-color: #1a1a1a; }
+      html.dark[data-time-theme="dawn"] { background-color: #241b14; }
+      html.dark[data-time-theme="dusk"] { background-color: #21160f; }
+      html.dark[data-time-theme="deep-night"] { background-color: #10191d; }
     </style>
   </head>
   <body>

@@ -3,10 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import { parseAsOfParam } from "@/lib/as-of";
 
 export interface AsOfState {
-  /** 激活时为规范 YYYY-MM-DD，否则 null。 */
+  /** Canonical YYYY-MM-DD when active, else null. */
   asOf: string | null;
   isActive: boolean;
-  /** 移除 as-of 参数，保留其他 query。 */
+  /** Remove the as-of param without disturbing other query params. */
   exit: () => void;
 }
 

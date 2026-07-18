@@ -1,9 +1,11 @@
 /**
- * 汉字日期格式化。
+ * Newspaper-style date / number formatters.
  *
- * 花园里的日期有两种声音：
- * - 汉字长款（"二〇二六年七月七日"）用在需要仪式感的地方
- * - 短款点分（"2026.07.07"）用在列表元信息，等宽字体
+ * Chinese newspapers traditionally use 汉数字 (Han numerals) in masthead dates:
+ *   "二〇二六年五月二十日 星期三"
+ *
+ * These helpers produce that voice; Latin/Arabic versions are kept for the
+ * issue-number line where mono digits look right.
  */
 const HAN_DIGITS = ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九"] as const;
 const HAN_WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"] as const;
@@ -15,7 +17,7 @@ function hanDigits(n: number): string {
     .join("");
 }
 
-/** 1..99 — 口语化汉字数字（"十"、"二十一"）。 */
+/** 1..10..99 — colloquial Chinese number form ("十", "二十一" etc.). */
 function hanNumber(n: number): string {
   if (n < 10) return HAN_DIGITS[n];
   if (n < 20) return n === 10 ? "十" : `十${HAN_DIGITS[n - 10]}`;
@@ -24,8 +26,8 @@ function hanNumber(n: number): string {
   return ones === 0 ? `${HAN_DIGITS[tens]}十` : `${HAN_DIGITS[tens]}十${HAN_DIGITS[ones]}`;
 }
 
-/** "二〇二六年七月七日 星期二" */
-export function formatHanDate(iso: string | Date = new Date()): string {
+/** "二〇二六年五月二十日 星期三" */
+export function formatMastheadDate(iso: string | Date = new Date()): string {
   const d = typeof iso === "string" ? new Date(iso) : iso;
   const year = hanDigits(d.getFullYear());
   const month = hanNumber(d.getMonth() + 1);
@@ -34,15 +36,16 @@ export function formatHanDate(iso: string | Date = new Date()): string {
   return `${year}年${month}月${day}日 星期${weekday}`;
 }
 
-/** "2026.07.07" — 列表元信息用，等宽。 */
-export function formatDotDate(iso: string | Date): string {
+/** "二〇二六年春季号" */
+export function formatIssueSeason(iso: string | Date = new Date()): string {
   const d = typeof iso === "string" ? new Date(iso) : iso;
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}.${m}.${day}`;
+  const y = hanDigits(d.getFullYear());
+  const m = d.getMonth() + 1;
+  const season = m <= 3 ? "冬季" : m <= 6 ? "春季" : m <= 9 ? "夏季" : "秋季";
+  return `${y}年${season}号`;
 }
 
-/** "二〇二六年七月七日" — 文章落款。 */
+/** "贰〇贰陆 · 五月" — used in article datelines */
 export function formatArticleDateline(iso: string | Date): string {
   const d = typeof iso === "string" ? new Date(iso) : iso;
   const y = hanDigits(d.getFullYear());

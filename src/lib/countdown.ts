@@ -1,24 +1,25 @@
 /**
- * 花期 — 配置的重要日子。
+ * Countdown column — configured important dates.
  *
- * 编辑下方 `countdownEvents` 来增改 /countdown 页展示的日期。
- * 一次性的过去事件沉到底部标"已过去"；`repeat: "yearly"` 的事件
- * （生日、节日）总是滚动到下一次。
+ * Edit `countdownEvents` below to add or change the dates shown on the
+ * /countdown page. Each entry is a single important moment; past one-off
+ * events fall to the bottom as "已过去", while `repeat: "yearly"` events
+ * (birthdays, anniversaries) always roll forward to their next occurrence.
  */
 export interface CountdownEvent {
-  /** 展示标题，如"高考"或"春节"。 */
+  /** Display title, e.g. "高考" or "春节". */
   title: string;
-  /** 标题下方的一行小注。 */
+  /** Optional one-line note shown under the title. */
   note?: string;
-  /** 目标日期，ISO 形式："2026-06-07" 或 "2026-06-07T09:00"。 */
+  /** Target date in ISO form: "2026-06-07" or "2026-06-07T09:00". */
   date: string;
-  /** 每年重复（生日、节日）— 总是数到下一次。 */
+  /** Repeat yearly (birthdays, festivals) — always counts to next occurrence. */
   repeat?: "yearly";
-  /** 卡片角落的小字符。 */
+  /** Small emoji/glyph shown in the corner of the card. */
   emoji?: string;
 }
 
-/** ✏️ 在这里配置你的重要日子。 */
+/** ✏️ Configure your important dates here. */
 export const countdownEvents: CountdownEvent[] = [
   {
     title: "元旦",
@@ -38,31 +39,32 @@ export const countdownEvents: CountdownEvent[] = [
 
 export interface CountdownStatus {
   event: CountdownEvent;
-  /** 该倒计时实际指向的具体日期（yearly 滚动之后）。 */
+  /** The concrete target date this countdown points at (after yearly roll-forward). */
   target: Date;
-  /** 剩余整天数（>= 0），0 表示就是今天。 */
+  /** Whole days remaining (>= 0). 0 means it is today. */
   days: number;
   hours: number;
   minutes: number;
   seconds: number;
-  /** 剩余毫秒数；一次性事件已过去时为负。 */
+  /** Total milliseconds remaining; negative if the (one-off) event has passed. */
   diffMs: number;
-  /** 一次性事件的日期已过去。 */
+  /** True when a one-off event's date is in the past. */
   isPast: boolean;
-  /** 目标就是今天。 */
+  /** True when the target is the current calendar day. */
   isToday: boolean;
 }
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-/** date 当天的本地零点。 */
+/** Midnight (local) of the day `date` falls on. */
 function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 /**
- * 相对 now 解析事件的具体目标日期。
- * yearly 事件把月/日滚动到下一次未来（或今天）的出现。
+ * Resolve the concrete target date for an event relative to `now`.
+ * For `repeat: "yearly"` events this rolls the month/day forward to the
+ * next future (or today) occurrence.
  */
 function resolveTarget(event: CountdownEvent, now: Date): Date {
   const base = new Date(event.date);
@@ -76,7 +78,7 @@ function resolveTarget(event: CountdownEvent, now: Date): Date {
   return candidate;
 }
 
-/** 计算单个事件的实时状态。 */
+/** Compute the live status for a single event. */
 export function getCountdownStatus(event: CountdownEvent, now: Date = new Date()): CountdownStatus {
   const target = resolveTarget(event, now);
   const diffMs = target.getTime() - now.getTime();
@@ -94,8 +96,8 @@ export function getCountdownStatus(event: CountdownEvent, now: Date = new Date()
 }
 
 /**
- * 所有事件的状态，按紧迫度排序：
- * 今天的最前，然后是最近的将来，一次性的过去事件最后。
+ * Status for every configured event, sorted by urgency:
+ * today first, then nearest upcoming, then past one-off events last.
  */
 export function getCountdownStatuses(now: Date = new Date()): CountdownStatus[] {
   return countdownEvents

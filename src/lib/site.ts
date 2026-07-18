@@ -1,8 +1,7 @@
 export const site = {
-  name: "Sy 的数字花园",
-  nameEn: "Sy's Digital Garden",
-  url: "https://404yann.com",
-  description: "一座深夜的数字花园。写给某个深夜路过的你。",
+  name: "The Curve Times",
+  url: "https://chiyu.it",
+  description: "A quiet corner built with code and words.",
   author: "Sy",
   githubUrl: "https://github.com/lightly20110815/",
   email: "swanyang7@gmail.com",
@@ -11,7 +10,7 @@ export const site = {
 
 export const siteEmailHref = `mailto:${site.email}`;
 export const siteContactMailHref =
-  `${siteEmailHref}?subject=${encodeURIComponent("来自花园访客的一封信")}`;
+  `${siteEmailHref}?subject=${encodeURIComponent("A letter to The Curve Times")}`;
 
 const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env ?? {};
 

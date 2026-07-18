@@ -1,134 +1,145 @@
-/**
- * 顶部导航 — 安静的一行。
- *
- * 首页顶部透明地浮在夜空上，滚动后贴顶并加毛玻璃。
- * 移动端汉堡展开为全屏遮罩，链接逐个浮现。
- */
 import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { List, X } from "@phosphor-icons/react";
+import { Link, NavLink } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { to: "/", label: "首页", end: true },
-  { to: "/archives", label: "文字", end: false },
-  { to: "/notes", label: "随笔", end: false },
-  { to: "/countdown", label: "花期", end: false },
-  { to: "/links", label: "友邻", end: false },
-  { to: "/about", label: "关于", end: false },
+  { to: "/", label: "FRONT", subLabel: "头版", end: true, width: "min-w-[68px]" },
+  { to: "/archives", label: "ARCHIVES", subLabel: "存档", end: false, width: "min-w-[82px]" },
+  { to: "/categories", label: "SECTIONS", subLabel: "版块", end: false, width: "min-w-[74px]" },
+  { to: "/tags", label: "INDEX", subLabel: "索引", end: false, width: "min-w-[72px]" },
+  { to: "/notes", label: "OPINION", subLabel: "随笔", end: false, width: "min-w-[78px]" },
+  { to: "/countdown", label: "COUNTDOWN", subLabel: "倒计时", end: false, width: "min-w-[84px]" },
+  { to: "/links", label: "LINKS", subLabel: "友链", end: false, width: "min-w-[68px]" },
+  { to: "/about", label: "MASTHEAD", subLabel: "编者", end: false, width: "min-w-[70px]" },
 ] as const;
 
+/**
+ * Sub-navigation strip — sits under the masthead.
+ * Sticky on scroll. Newspaper section labels with Chinese sub-labels.
+ */
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setScrolled(window.scrollY > 24));
-    };
+    const onScroll = () => setScrolled(window.scrollY > 200);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // 路由变化时收起移动端菜单
   useEffect(() => {
-    setOpen(false);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [mobileOpen]);
 
   return (
-    <header
+    <nav
       className={cn(
-        // 只过渡颜色，不过渡 backdrop-filter —— 滤镜过渡会让合成器持续持有快照图层
-        "fixed inset-x-0 top-0 z-40 transition-[background-color,border-color] duration-300",
-        scrolled
-          ? "border-b border-line bg-page/85 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent",
+        "sticky top-0 z-40 border-b border-rule bg-paper/95 backdrop-blur transition-shadow",
+        scrolled && "shadow-[0_2px_0_0_hsl(var(--rule)/0.3)]",
       )}
     >
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 md:px-8">
-        <Link
-          to="/"
-          className="text-[17px] font-bold tracking-wide text-ink-strong transition-colors hover:text-firefly"
-        >
-          Sy 的数字花园
+      <div className="container flex items-center justify-between gap-4">
+        {/* Tiny sticky title when scrolled */}
+        <Link to="/" className="font-masthead text-[16px] font-bold tracking-tight text-ink transition-colors hover:text-stamp text-glow-sub">
+          Curve
         </Link>
 
-        {/* 桌面端链接 */}
-        <nav className="hidden items-center gap-1 md:flex" aria-label="主导航">
+        {/* Desktop links */}
+        <ul className="hidden items-end gap-2 md:flex">
           {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={({ isActive }) =>
-                cn(
-                  "rounded-full px-3.5 py-1.5 text-[14.5px] transition-colors duration-200",
-                  isActive
-                    ? "text-firefly"
-                    : "text-mist hover:bg-veil hover:text-ink-strong",
-                )
-              }
-            >
-              {l.label}
-            </NavLink>
-          ))}
-          <span className="mx-2 h-4 w-px bg-line" aria-hidden />
-          <ThemeToggle />
-        </nav>
-
-        {/* 移动端按钮 */}
-        <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-label={open ? "收起菜单" : "展开菜单"}
-            className="pressable flex h-10 w-10 items-center justify-center rounded-full text-ink-strong"
-          >
-            {open ? <X size={22} weight="light" /> : <List size={22} weight="light" />}
-          </button>
-        </div>
-      </div>
-
-      {/* 移动端全屏菜单 */}
-      {open && (
-        <div className="fixed inset-0 top-16 z-40 bg-page/95 backdrop-blur-xl md:hidden">
-          <nav className="flex flex-col gap-1 px-8 pt-10" aria-label="移动端导航">
-            {links.map((l, i) => (
+            <li key={l.to}>
               <NavLink
-                key={l.to}
                 to={l.to}
                 end={l.end}
                 className={({ isActive }) =>
                   cn(
-                    "menu-item-rise rounded-xl px-4 py-3.5 text-[22px]",
-                    isActive ? "text-firefly" : "text-ink-strong",
+                    "group flex flex-col items-center border-b-[3px] border-transparent px-3 py-1.5 transition-colors",
+                    l.width,
+                    isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
                   )
                 }
-                style={{ animationDelay: `${i * 45}ms` }}
               >
-                {l.label}
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={cn(
+                        "font-ui text-[13px] tracking-[0.1em]",
+                        isActive
+                          ? "font-black text-stamp"
+                          : "font-semibold text-ink-strong group-hover:text-stamp",
+                      )}
+                    >
+                      {l.subLabel}
+                    </span>
+                    <span
+                      className={cn(
+                        "mt-1 font-ui text-[11px] font-medium uppercase tracking-[0.14em]",
+                        isActive ? "text-stamp/85" : "text-ink-muted group-hover:text-stamp/70",
+                      )}
+                    >
+                      {l.label}
+                    </span>
+                  </>
+                )}
               </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        {/* Theme toggle (desktop) */}
+        <div className="hidden md:block">
+          <ThemeToggle className="h-9 w-9" />
+        </div>
+
+        {/* Mobile toggle */}
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center text-ink"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="切换菜单"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile sheet */}
+      {mobileOpen && (
+        <div className="absolute left-0 top-full w-full border-b border-rule bg-paper shadow-lg md:hidden">
+          <ul className="container divide-y divide-rule-soft/30 py-2">
+            {links.map((l) => (
+              <li key={l.to}>
+                <NavLink
+                  to={l.to}
+                  end={l.end}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-baseline justify-between border-l-2 border-transparent py-3 pl-2 transition-colors",
+                      isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
+                    )
+                  }
+                >
+                  <span className="font-ui text-[13px] font-semibold">
+                    {l.subLabel}
+                  </span>
+                  <span className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
+                    {l.label}
+                  </span>
+                </NavLink>
+              </li>
             ))}
-          </nav>
+          </ul>
         </div>
       )}
-    </header>
+    </nav>
   );
 }

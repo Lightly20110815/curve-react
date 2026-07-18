@@ -3,12 +3,14 @@ import RootLayout from "@/layouts/RootLayout";
 import HomePage from "@/pages/HomePage";
 import PostPage from "@/pages/PostPage";
 import ArchivesPage from "@/pages/ArchivesPage";
+import CategoriesPage from "@/pages/CategoriesPage";
 import TagsPage from "@/pages/TagsPage";
-import TermDetailPage from "@/pages/TermDetailPage";
+import CategoryDetailPage from "@/pages/CategoryDetailPage";
+import TagDetailPage from "@/pages/TagDetailPage";
 import NotesPage from "@/pages/NotesPage";
 import CountdownPage from "@/pages/CountdownPage";
-import LinksPage from "@/pages/LinksPage";
 import AboutPage from "@/pages/AboutPage";
+import LinksPage from "@/pages/LinksPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 
 export default function App() {
@@ -18,9 +20,10 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="posts/:slug" element={<PostPage />} />
         <Route path="archives" element={<ArchivesPage />} />
+        <Route path="categories" element={<CategoriesPage />} />
+        <Route path="categories/:name" element={<CategoryDetailPage />} />
         <Route path="tags" element={<TagsPage />} />
-        <Route path="tags/:name" element={<TermDetailPage kind="tag" />} />
-        <Route path="categories/:name" element={<TermDetailPage kind="category" />} />
+        <Route path="tags/:name" element={<TagDetailPage />} />
         <Route path="notes" element={<NotesPage />} />
         <Route path="countdown" element={<CountdownPage />} />
         <Route path="links" element={<LinksPage />} />
