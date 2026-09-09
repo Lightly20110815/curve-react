@@ -61,12 +61,24 @@ function Lightbox({
 }) {
   const [loaded, setLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     setLoaded(false);
     setHasError(false);
+
+    // A cached image can finish before React attaches the onLoad listener,
+    // notably on mobile Safari and Chrome. Check the rendered image as well.
+    const image = imgRef.current;
+    if (image?.complete) {
+      if (image.naturalWidth > 0) {
+        setLoaded(true);
+      } else {
+        setHasError(true);
+      }
+    }
   }, [photo.src]);
 
   useEffect(() => {
@@ -171,33 +183,17 @@ function Lightbox({
 
       {/* Content Container */}
       <figure
-        className="relative z-10 flex flex-col items-center max-h-[92dvh] w-full max-w-4xl overflow-y-auto px-1 py-1 sm:max-h-full sm:overflow-visible"
+        className="relative z-10 flex max-h-[92dvh] w-full max-w-4xl flex-col items-center overflow-y-auto px-1 py-1 sm:max-h-full sm:overflow-visible"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Photo Image Frame with Loading Skeleton */}
-        <div className="relative flex items-center justify-center shrink-0 max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh] w-full">
-          {!loaded && !hasError && (
-            <div
-              className="flex flex-col items-center justify-center rounded-xs border border-white/10 bg-white/5 backdrop-blur-sm"
-              style={{
-                aspectRatio: `${photo.width} / ${photo.height}`,
-                maxHeight: "52dvh",
-                maxWidth: "100%",
-                minWidth: "200px",
-                minHeight: "220px",
-              }}
-            >
-              <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/20 border-t-stamp" />
-              <span className="mt-2.5 font-mono text-[11px] text-white/50">载入中...</span>
-            </div>
-          )}
-
+        {/* Photo Image Frame */}
+        <div className="relative flex w-full shrink-0 items-center justify-center">
           {hasError && (
             <div
               className="flex flex-col items-center justify-center rounded-xs border border-white/15 bg-white/5 p-6 text-center backdrop-blur-sm"
               style={{
                 aspectRatio: `${photo.width} / ${photo.height}`,
-                maxHeight: "52dvh",
+                maxHeight: "58dvh",
                 minWidth: "200px",
               }}
             >
@@ -216,19 +212,35 @@ function Lightbox({
             </div>
           )}
 
-          <img
-            key={photo.src}
-            src={photo.src}
-            alt={photo.title}
-            loading="eager"
-            decoding="async"
-            onLoad={() => setLoaded(true)}
-            onError={() => setHasError(true)}
-            className={`max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh] w-auto max-w-full rounded-xs border border-white/20 object-contain shadow-2xl transition-opacity duration-300 ${
-              loaded ? "opacity-100" : "opacity-0 absolute pointer-events-none"
-            }`}
-            style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
-          />
+          {!hasError && (
+            <div className="relative inline-flex items-center justify-center">
+              <img
+                key={photo.src}
+                ref={imgRef}
+                src={photo.src}
+                alt={photo.title}
+                loading="eager"
+                decoding="async"
+                onLoad={() => {
+                  setHasError(false);
+                  setLoaded(true);
+                }}
+                onError={() => {
+                  setLoaded(false);
+                  setHasError(true);
+                }}
+                className="max-h-[58dvh] sm:max-h-[68vh] lg:max-h-[74vh] w-auto max-w-full rounded-xs border border-white/20 object-contain shadow-2xl transition-opacity duration-300"
+                style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
+              />
+
+              {!loaded && (
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center rounded-xs bg-black/40 backdrop-blur-xs">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-stamp" />
+                  <span className="mt-2.5 font-mono text-[11px] text-white/70">载入中...</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Polaroid/Gallery Details Caption */}
