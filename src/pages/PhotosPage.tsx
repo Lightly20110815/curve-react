@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Camera, ChevronLeft, ChevronRight, MapPin, X } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { TwikooComments } from "@/components/TwikooComments";
@@ -46,15 +46,22 @@ function PhotoCard({
 
 function Lightbox({
   photo,
+  currentIndex,
+  total,
   onClose,
   onPrev,
   onNext,
 }: {
   photo: Photo;
+  currentIndex: number;
+  total: number;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -69,57 +76,79 @@ function Lightbox({
     };
   }, [onClose, onPrev, onNext]);
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Horizontal swipe: threshold 40px with horizontal dominance
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      if (deltaX < 0) {
+        onNext();
+      } else {
+        onPrev();
+      }
+    } else if (deltaY > 80 && Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+      // Pull down gesture to close
+      onClose();
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/90 p-4 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/92 backdrop-blur-md animate-fade-in select-none px-3 py-10 sm:p-6"
       onClick={onClose}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
       role="dialog"
       aria-modal="true"
     >
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center border border-paper/30 text-paper transition-colors hover:border-stamp hover:text-stamp"
-        aria-label="关闭"
+      {/* Top Bar: Counter & Close Button (Safe-Area Aware) */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4"
+        style={{
+          paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+        }}
       >
-        <X className="h-5 w-5" />
-      </button>
+        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-paper/20 bg-ink/60 px-3 py-1 font-mono text-[11px] sm:text-[12px] tracking-widest text-paper/85 backdrop-blur-md">
+          <Camera className="h-3.5 w-3.5 text-stamp" />
+          <span>
+            {String(currentIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          </span>
+        </div>
 
+        <button
+          type="button"
+          onClick={onClose}
+          className="pointer-events-auto inline-flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-paper/30 bg-ink/60 text-paper backdrop-blur-md transition-all hover:border-stamp hover:text-stamp active:scale-95"
+          aria-label="关闭"
+        >
+          <X className="h-4 w-4 sm:h-5 sm:w-5" />
+        </button>
+      </div>
+
+      {/* Desktop Floating Navigation Arrows (hidden on mobile to prevent blocking photo) */}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           onPrev();
         }}
-        className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-paper/30 text-paper transition-colors hover:border-stamp hover:text-stamp sm:left-6"
+        className="hidden sm:inline-flex absolute left-4 lg:left-8 top-1/2 z-30 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-paper/30 bg-ink/60 text-paper backdrop-blur-md transition-all hover:border-stamp hover:text-stamp hover:scale-110 active:scale-95"
         aria-label="上一张"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-6 w-6" />
       </button>
-
-      <figure
-        className="max-h-full max-w-5xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <img
-          src={photo.src}
-          alt={photo.title}
-          className="mx-auto max-h-[78vh] w-auto border border-paper/20 object-contain"
-        />
-        <figcaption className="mt-4 border-t border-paper/25 pt-3 text-center">
-          <p className="font-display text-[20px] font-bold text-paper">{photo.title}</p>
-          <p className="mt-1 font-ui text-[12px] uppercase tracking-[0.12em] text-paper/65">
-            {formatArticleDateline(photo.date)}
-            {photo.location ? ` · ${photo.location}` : ""}
-            {photo.camera ? ` · ${photo.camera}` : ""}
-          </p>
-          {photo.desc && (
-            <p className="mx-auto mt-2 max-w-xl font-serif text-[15px] leading-relaxed text-paper/80">
-              {photo.desc}
-            </p>
-          )}
-        </figcaption>
-      </figure>
 
       <button
         type="button"
@@ -127,11 +156,89 @@ function Lightbox({
           e.stopPropagation();
           onNext();
         }}
-        className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-paper/30 text-paper transition-colors hover:border-stamp hover:text-stamp sm:right-6"
+        className="hidden sm:inline-flex absolute right-4 lg:right-8 top-1/2 z-30 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-paper/30 bg-ink/60 text-paper backdrop-blur-md transition-all hover:border-stamp hover:text-stamp hover:scale-110 active:scale-95"
         aria-label="下一张"
       >
-        <ChevronRight className="h-5 w-5" />
+        <ChevronRight className="h-6 w-6" />
       </button>
+
+      {/* Content Container */}
+      <figure
+        className="relative z-10 flex flex-col items-center max-h-[92dvh] w-full max-w-4xl overflow-y-auto px-1 py-1 sm:max-h-full sm:overflow-visible"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Photo Image Frame */}
+        <div className="relative flex items-center justify-center shrink-0 max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh]">
+          <img
+            src={photo.src}
+            alt={photo.title}
+            className="max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh] w-auto max-w-full rounded-xs border border-paper/20 object-contain shadow-2xl"
+          />
+        </div>
+
+        {/* Polaroid/Gallery Details Caption */}
+        <figcaption className="mt-3 w-full max-w-2xl border-t border-paper/25 pt-2.5 text-center sm:mt-4 sm:pt-3">
+          <p className="font-display text-[18px] sm:text-[22px] font-bold text-paper">
+            {photo.title}
+          </p>
+
+          <p className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 font-ui text-[11px] sm:text-[12px] uppercase tracking-[0.1em] text-paper/70">
+            <span>{formatArticleDateline(photo.date)}</span>
+            {photo.location && (
+              <>
+                <span className="text-paper/40">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3 w-3 text-stamp" />
+                  {photo.location}
+                </span>
+              </>
+            )}
+            {photo.camera && (
+              <>
+                <span className="text-paper/40">·</span>
+                <span>{photo.camera}</span>
+              </>
+            )}
+          </p>
+
+          {photo.desc && (
+            <p className="mx-auto mt-2 max-w-xl font-serif text-[13px] sm:text-[15px] leading-relaxed text-paper/85 px-2">
+              {photo.desc}
+            </p>
+          )}
+
+          {/* Mobile Bottom Switcher Toolbar */}
+          <div className="flex sm:hidden items-center justify-center gap-6 mt-3.5 pt-2.5 border-t border-paper/15">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrev();
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-paper/25 bg-paper/10 text-paper font-ui text-[12px] font-medium active:scale-95 transition-all"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>上一张</span>
+            </button>
+
+            <span className="font-mono text-[10px] uppercase tracking-wider text-paper/50">
+              左右滑动切换
+            </span>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNext();
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-paper/25 bg-paper/10 text-paper font-ui text-[12px] font-medium active:scale-95 transition-all"
+            >
+              <span>下一张</span>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </figcaption>
+      </figure>
     </div>
   );
 }
@@ -246,7 +353,14 @@ export default function PhotosPage() {
       <TwikooComments pageKey="/pages/photos" />
 
       {current && (
-        <Lightbox photo={current} onClose={close} onPrev={prev} onNext={next} />
+        <Lightbox
+          photo={current}
+          currentIndex={lightboxIndex ?? 0}
+          total={total}
+          onClose={close}
+          onPrev={prev}
+          onNext={next}
+        />
       )}
     </div>
   );
