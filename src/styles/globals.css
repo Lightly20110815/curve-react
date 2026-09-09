@@ -1052,3 +1052,73 @@
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+/* Gallery Promo Modal entrance animations */
+@keyframes modal-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) rotate(-2deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.01) rotate(0.4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes tilt-snap-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(-220px, -150px, 0) rotate(-22deg) scale(0.8);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(12px, 8px, 0) rotate(-1deg) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(-3.5deg) scale(1);
+  }
+}
+
+@keyframes tilt-snap-right {
+  0% {
+    opacity: 0;
+    transform: translate3d(240px, -160px, 0) rotate(26deg) scale(0.8);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(-14px, 8px, 0) rotate(1.5deg) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(5deg) scale(1);
+  }
+}
+
+.animate-modal-burst {
+  animation: modal-burst 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-tilt-snap-left {
+  animation: tilt-snap-left 650ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+  transform-origin: top left;
+}
+
+.animate-tilt-snap-right {
+  animation: tilt-snap-right 680ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+  transform-origin: top right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-modal-burst,
+  .animate-tilt-snap-left,
+  .animate-tilt-snap-right {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

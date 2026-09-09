@@ -1,0 +1,258 @@
+export interface Photo {
+  id: string;
+  title: string;
+  date: string;
+  src: string;
+  width: number;
+  height: number;
+  location?: string;
+  camera?: string;
+  desc?: string;
+}
+
+export interface PhotoAlbum {
+  id: string;
+  name: string;
+  nameEn: string;
+  desc: string;
+  cover?: string;
+  photos: Photo[];
+}
+
+export const photoAlbums: PhotoAlbum[] = [
+  {
+    id: "citywalk",
+    name: "城市漫游",
+    nameEn: "CITY WALK",
+    desc: "穿行在楼宇与街角之间，定格城市的心跳与流光。",
+    photos: [
+      {
+        id: "city-01",
+        title: "悦方夜流光",
+        date: "2026-08-13",
+        src: "/images/gallery/IMG_20260813_194020~2.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "暮色合拢时，悦方外立面的光带在夜空下流淌，晚风里满是人间烟火。",
+      },
+      {
+        id: "city-02",
+        title: "万象华灯初上",
+        date: "2026-08-19",
+        src: "/images/gallery/IMG_20260819_195833.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "潜山路旁的万象城亮起发光的标志，玻璃幕墙倒映着都市繁华与归人的脚步。",
+      },
+      {
+        id: "city-03",
+        title: "立体峡谷与徽韵",
+        date: "2026-08-19",
+        src: "/images/gallery/IMG_20260819_203528.jpg",
+        width: 2448,
+        height: 3264,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "错落的天桥在半空中交织，现代连廊深处藏着徽派山水壁画，一步一景皆是巧思。",
+      },
+      {
+        id: "city-04",
+        title: "烈日下的斑马线",
+        date: "2026-08-22",
+        src: "/images/gallery/IMG_20260822_143504.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "蔚蓝晴空与如洗白云下，撑着阳伞穿过马路的身影，是盛夏合肥最鲜活的日常记号。",
+      },
+      {
+        id: "city-05",
+        title: "镜面光影与喜茶",
+        date: "2026-08-27",
+        src: "/images/gallery/IMG_20260827_184305.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "光洁的地砖倒映着明净的店招与行人碎步，把傍晚商场里的慢调时光折叠成双份。",
+      },
+      {
+        id: "city-06",
+        title: "商厦穹顶与流线层楼",
+        date: "2026-09-01",
+        src: "/images/gallery/IMG_20260901_175414.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "天光从天顶的格栅倾泻而下，环形回廊如水波般一层层向外荡开，交织出富有韵律的空间美感。",
+      },
+      {
+        id: "city-07",
+        title: "打烊后的万象长廊",
+        date: "2026-09-02",
+        src: "/images/gallery/IMG_20260902_220225.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "十点后的商场归于沉寂，垂幔在空旷的中庭悬挂，地面反射着微弱的光，那是热闹褪去后的宁静。",
+      },
+    ],
+  },
+  {
+    id: "landscape",
+    name: "晴空原野",
+    nameEn: "SKY & NATURE",
+    desc: "走出喧嚣，拥抱夏末的风、晴空的云与蜿蜒的道路。",
+    photos: [
+      {
+        id: "land-01",
+        title: "晴空下的绿茵场",
+        date: "2026-08-17",
+        src: "/images/gallery/IMG_20260817_100748.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "立秋后的晴天格外清透，站在教学楼高处看操场，跑道和远处的积云一样安静。",
+      },
+      {
+        id: "land-02",
+        title: "天鹅湖畔的城市筑迹",
+        date: "2026-08-22",
+        src: "/images/gallery/IMG_20260822_142340.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "盛夏午后的烈日将广电大厦的金属曲线晒得滚烫，地铁站旁的机械正伴随城市一起生长。",
+      },
+      {
+        id: "land-03",
+        title: "通往夏天的彩虹公路",
+        date: "2026-08-24",
+        src: "/images/gallery/IMG_20260824_154423.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "红黄蓝的标线在草木清香中蜿蜒起伏，顺着这条路开下去，仿佛就能撞进蓝天与白云的怀里。",
+      },
+      {
+        id: "land-04",
+        title: "村道尽头的远山与云",
+        date: "2026-09-07",
+        src: "/images/gallery/IMG_20260907_124159.jpg",
+        width: 2448,
+        height: 3264,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "人字砖巷道两旁是新旧交织的屋檐，仰头是纵横的电线与碧空，道路的尽头，青山正如黛。",
+      },
+    ],
+  },
+  {
+    id: "night",
+    name: "庐州夜色",
+    nameEn: "LUZHOU NIGHT",
+    desc: "当暮色笼罩庐州大地，万家灯火在晚风里轻声低语。",
+    photos: [
+      {
+        id: "night-01",
+        title: "四十六中的夏夜",
+        date: "2026-08-17",
+        src: "/images/gallery/IMG_20260817_210045.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "晚自习散尽后的校门口，红色的校名在深蓝夜幕下长亮，守着一届又一届的青春。",
+      },
+      {
+        id: "night-02",
+        title: "俯瞰庐州夜未央",
+        date: "2026-08-18",
+        src: "/images/gallery/IMG_20260818_212946.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "登上天台，整座城市的骨骼被金色的车流勾勒出来，夜色如海，车灯如潮。",
+      },
+      {
+        id: "night-03",
+        title: "街角暖光麦当劳",
+        date: "2026-08-20",
+        src: "/images/gallery/IMG_20260820_204435_1.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "暖黄色的落地窗格挡开夜的清冷，亮着红黄标志的转角，总有一处让人停留的温热。",
+      },
+      {
+        id: "night-04",
+        title: "广电大厦的篆书墨夜",
+        date: "2026-08-21",
+        src: "/images/gallery/IMG_20260821_204545.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "篆书汉字被镌刻在巨大的弧形外墙上，泛着金石般的光泽，与夜空中的发射塔遥相呼应。",
+      },
+      {
+        id: "night-05",
+        title: "夜引天桥一盏灯",
+        date: "2026-08-29",
+        src: "/images/gallery/IMG_20260829_212617.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "路灯将天桥引道晕染成温暖的金黄，夜风拂过空旷的高架，指引着回家的方向。",
+      },
+      {
+        id: "night-06",
+        title: "经开区的迎宾之门",
+        date: "2026-08-31",
+        src: "/images/gallery/IMG_20260831_203859.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "耸立的弧形门塔上印着经开区的英文字样，夜色苍茫间，电子屏的光亮照亮了路边的青葱树影。",
+      },
+      {
+        id: "night-07",
+        title: "方圆荟外的街市夜巡",
+        date: "2026-08-31",
+        src: "/images/gallery/IMG_20260831_204752.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "井盖、护栏与路树构成了街道的节奏，对街方圆荟的巨幕光芒，把夏末的夜色染成深蓝。",
+      },
+      {
+        id: "night-08",
+        title: "宿松路下的深夜星芒",
+        date: "2026-09-08",
+        src: "/images/gallery/IMG_20260908_212602.jpg",
+        width: 3072,
+        height: 4096,
+        location: "安徽 合肥",
+        camera: "REDMI Turbo 5",
+        desc: "高架桥向着远方延伸，头顶的灯光在枝叶间散成一簇星芒，静候着每一个夜归的人。",
+      },
+    ],
+  },
+];
+
+export const allPhotos: Photo[] = photoAlbums.flatMap((a) => a.photos);

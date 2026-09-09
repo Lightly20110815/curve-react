@@ -8,6 +8,7 @@ import TagsPage from "@/pages/TagsPage";
 import CategoryDetailPage from "@/pages/CategoryDetailPage";
 import TagDetailPage from "@/pages/TagDetailPage";
 import NotesPage from "@/pages/NotesPage";
+import PhotosPage from "@/pages/PhotosPage";
 import CountdownPage from "@/pages/CountdownPage";
 import AboutPage from "@/pages/AboutPage";
 import LinksPage from "@/pages/LinksPage";
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="tags" element={<TagsPage />} />
         <Route path="tags/:name" element={<TagDetailPage />} />
         <Route path="notes" element={<NotesPage />} />
+        <Route path="photos" element={<PhotosPage />} />
         <Route path="countdown" element={<CountdownPage />} />
         <Route path="links" element={<LinksPage />} />
         <Route path="about" element={<AboutPage />} />

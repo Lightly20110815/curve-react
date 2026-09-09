@@ -11,6 +11,7 @@ import { useAsOf } from "@/hooks/useAsOf";
 import { filterByAsOf } from "@/lib/as-of";
 import { formatArticleDateline, hanNumber } from "@/lib/han-date";
 import { cn } from "@/lib/utils";
+import { GalleryPromoModal } from "@/components/GalleryPromoModal";
 
 export default function HomePage() {
   const { asOf } = useAsOf();
@@ -65,6 +66,7 @@ export default function HomePage() {
 
   return (
     <div className="container py-5 md:py-7">
+      <GalleryPromoModal />
       <HomeTerminalEasterEgg />
 
       {/* LEAD STORY — front page hero */}
