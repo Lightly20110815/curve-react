@@ -16,31 +16,68 @@ function PhotoCard({
   onOpen: (index: number) => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onOpen(index)}
-      className="group relative block w-full break-inside-avoid overflow-hidden border border-rule-soft/60 bg-paper-soft/50 text-left"
-    >
-      <img
-        src={photo.src}
-        alt={photo.title}
-        loading="lazy"
-        className="w-full transition-transform duration-700 group-hover:scale-105"
-        style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
-      />
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/25 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        <span className="font-display text-[17px] font-bold text-white">
-          {photo.title}
-        </span>
-        <span className="mt-0.5 font-ui text-[11px] uppercase tracking-[0.12em] text-white/80">
-          {formatArticleDateline(photo.date)}
-          {photo.location ? ` · ${photo.location}` : ""}
+    <div className="group relative block w-full break-inside-avoid overflow-hidden border border-rule-soft/60 bg-paper-soft/50 text-left">
+      <div
+        onClick={() => onOpen(index)}
+        className="relative block w-full overflow-hidden cursor-default sm:cursor-pointer"
+      >
+        <img
+          src={photo.src}
+          alt={photo.title}
+          loading="lazy"
+          className="w-full transition-transform duration-700 sm:group-hover:scale-105"
+          style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
+        />
+        {/* Desktop hover overlay */}
+        <div className="pointer-events-none absolute inset-0 hidden sm:flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/25 to-transparent p-4 opacity-0 transition-opacity duration-300 sm:group-hover:opacity-100">
+          <span className="font-display text-[17px] font-bold text-white">
+            {photo.title}
+          </span>
+          <span className="mt-0.5 font-ui text-[11px] uppercase tracking-[0.12em] text-white/80">
+            {formatArticleDateline(photo.date)}
+            {photo.location ? ` · ${photo.location}` : ""}
+          </span>
+        </div>
+        <span className="absolute right-3 top-3 hidden sm:inline-block border border-white/20 bg-black/40 font-ui text-[10px] font-medium uppercase tracking-[0.14em] text-white opacity-0 transition-all duration-300 sm:group-hover:opacity-100 px-2 py-1 backdrop-blur-sm">
+          Photo {String(index + 1).padStart(2, "0")}
         </span>
       </div>
-      <span className="absolute right-3 top-3 border border-white/20 bg-black/40 font-ui text-[10px] font-medium uppercase tracking-[0.14em] text-white opacity-0 transition-all duration-300 group-hover:opacity-100 px-2 py-1 backdrop-blur-sm">
-        Photo {String(index + 1).padStart(2, "0")}
-      </span>
-    </button>
+
+      {/* Mobile-only inline details caption (mobile lightbox disabled) */}
+      <div className="block sm:hidden p-3.5 border-t border-rule-soft/40">
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="font-display text-[16px] font-bold text-ink-strong leading-snug">
+            {photo.title}
+          </h3>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-ink-faded shrink-0">
+            #{String(index + 1).padStart(2, "0")}
+          </span>
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-ui text-[11px] text-ink-muted">
+          <span>{formatArticleDateline(photo.date)}</span>
+          {photo.location && (
+            <>
+              <span className="text-rule">·</span>
+              <span className="inline-flex items-center gap-0.5 text-stamp">
+                <MapPin className="h-3 w-3" />
+                {photo.location}
+              </span>
+            </>
+          )}
+          {photo.camera && (
+            <>
+              <span className="text-rule">·</span>
+              <span>{photo.camera}</span>
+            </>
+          )}
+        </div>
+        {photo.desc && (
+          <p className="mt-2 font-serif text-[13px] leading-relaxed text-ink-body">
+            {photo.desc}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -123,7 +160,7 @@ function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in select-none px-3 py-10 sm:p-6"
+      className="hidden sm:flex fixed inset-0 z-[100] items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in select-none px-3 py-10 sm:p-6"
       onClick={onClose}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -314,7 +351,11 @@ export default function PhotosPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const total = allPhotos.length;
 
-  const openAt = useCallback((index: number) => setLightboxIndex(index), []);
+  const openAt = useCallback((index: number) => {
+    // 移动端完全禁用点击查看大图功能，防止黑屏或异常弹窗
+    if (typeof window !== "undefined" && window.innerWidth < 640) return;
+    setLightboxIndex(index);
+  }, []);
   const close = useCallback(() => setLightboxIndex(null), []);
   const prev = useCallback(
     () => setLightboxIndex((i) => (i === null ? i : (i - 1 + total) % total)),
