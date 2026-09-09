@@ -28,16 +28,16 @@ function PhotoCard({
         className="w-full transition-transform duration-700 group-hover:scale-105"
         style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
       />
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/85 via-ink/20 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        <span className="font-display text-[17px] font-bold text-paper">
+      <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/25 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <span className="font-display text-[17px] font-bold text-white">
           {photo.title}
         </span>
-        <span className="mt-0.5 font-ui text-[11px] uppercase tracking-[0.12em] text-paper/75">
+        <span className="mt-0.5 font-ui text-[11px] uppercase tracking-[0.12em] text-white/80">
           {formatArticleDateline(photo.date)}
           {photo.location ? ` · ${photo.location}` : ""}
         </span>
       </div>
-      <span className="absolute right-3 top-3 border border-paper/0 font-ui text-[10px] font-medium uppercase tracking-[0.14em] text-paper opacity-0 transition-all duration-300 group-hover:border-paper/40 group-hover:opacity-100 group-hover:bg-ink/30 px-2 py-1 backdrop-blur-sm">
+      <span className="absolute right-3 top-3 border border-white/20 bg-black/40 font-ui text-[10px] font-medium uppercase tracking-[0.14em] text-white opacity-0 transition-all duration-300 group-hover:opacity-100 px-2 py-1 backdrop-blur-sm">
         Photo {String(index + 1).padStart(2, "0")}
       </span>
     </button>
@@ -59,8 +59,15 @@ function Lightbox({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const [loaded, setLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    setLoaded(false);
+    setHasError(false);
+  }, [photo.src]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -104,7 +111,7 @@ function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/92 backdrop-blur-md animate-fade-in select-none px-3 py-10 sm:p-6"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in select-none px-3 py-10 sm:p-6"
       onClick={onClose}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -120,7 +127,7 @@ function Lightbox({
           paddingRight: "max(1rem, env(safe-area-inset-right))",
         }}
       >
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-paper/20 bg-ink/60 px-3 py-1 font-mono text-[11px] sm:text-[12px] tracking-widest text-paper/85 backdrop-blur-md">
+        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/20 bg-black/70 px-3 py-1 font-mono text-[11px] sm:text-[12px] tracking-widest text-white/90 backdrop-blur-md shadow-lg">
           <Camera className="h-3.5 w-3.5 text-stamp" />
           <span>
             {String(currentIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
@@ -130,7 +137,7 @@ function Lightbox({
         <button
           type="button"
           onClick={onClose}
-          className="pointer-events-auto inline-flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-paper/30 bg-ink/60 text-paper backdrop-blur-md transition-all hover:border-stamp hover:text-stamp active:scale-95"
+          className="pointer-events-auto inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-white/30 bg-black/70 text-white backdrop-blur-md transition-all hover:border-stamp hover:text-stamp active:scale-95 shadow-lg"
           aria-label="关闭"
         >
           <X className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -144,7 +151,7 @@ function Lightbox({
           e.stopPropagation();
           onPrev();
         }}
-        className="hidden sm:inline-flex absolute left-4 lg:left-8 top-1/2 z-30 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-paper/30 bg-ink/60 text-paper backdrop-blur-md transition-all hover:border-stamp hover:text-stamp hover:scale-110 active:scale-95"
+        className="hidden sm:inline-flex absolute left-4 lg:left-8 top-1/2 z-30 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/70 text-white backdrop-blur-md transition-all hover:border-stamp hover:text-stamp hover:scale-110 active:scale-95 shadow-lg"
         aria-label="上一张"
       >
         <ChevronLeft className="h-6 w-6" />
@@ -156,7 +163,7 @@ function Lightbox({
           e.stopPropagation();
           onNext();
         }}
-        className="hidden sm:inline-flex absolute right-4 lg:right-8 top-1/2 z-30 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-paper/30 bg-ink/60 text-paper backdrop-blur-md transition-all hover:border-stamp hover:text-stamp hover:scale-110 active:scale-95"
+        className="hidden sm:inline-flex absolute right-4 lg:right-8 top-1/2 z-30 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/70 text-white backdrop-blur-md transition-all hover:border-stamp hover:text-stamp hover:scale-110 active:scale-95 shadow-lg"
         aria-label="下一张"
       >
         <ChevronRight className="h-6 w-6" />
@@ -167,26 +174,74 @@ function Lightbox({
         className="relative z-10 flex flex-col items-center max-h-[92dvh] w-full max-w-4xl overflow-y-auto px-1 py-1 sm:max-h-full sm:overflow-visible"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Photo Image Frame */}
-        <div className="relative flex items-center justify-center shrink-0 max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh]">
+        {/* Photo Image Frame with Loading Skeleton */}
+        <div className="relative flex items-center justify-center shrink-0 max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh] w-full">
+          {!loaded && !hasError && (
+            <div
+              className="flex flex-col items-center justify-center rounded-xs border border-white/10 bg-white/5 backdrop-blur-sm"
+              style={{
+                aspectRatio: `${photo.width} / ${photo.height}`,
+                maxHeight: "52dvh",
+                maxWidth: "100%",
+                minWidth: "200px",
+                minHeight: "220px",
+              }}
+            >
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/20 border-t-stamp" />
+              <span className="mt-2.5 font-mono text-[11px] text-white/50">载入中...</span>
+            </div>
+          )}
+
+          {hasError && (
+            <div
+              className="flex flex-col items-center justify-center rounded-xs border border-white/15 bg-white/5 p-6 text-center backdrop-blur-sm"
+              style={{
+                aspectRatio: `${photo.width} / ${photo.height}`,
+                maxHeight: "52dvh",
+                minWidth: "200px",
+              }}
+            >
+              <p className="font-ui text-[13px] text-red-400">图片加载失败</p>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setHasError(false);
+                  setLoaded(false);
+                }}
+                className="mt-3 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 font-ui text-[12px] text-white transition-all hover:bg-white/20 active:scale-95"
+              >
+                重试
+              </button>
+            </div>
+          )}
+
           <img
+            key={photo.src}
             src={photo.src}
             alt={photo.title}
-            className="max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh] w-auto max-w-full rounded-xs border border-paper/20 object-contain shadow-2xl"
+            loading="eager"
+            decoding="async"
+            onLoad={() => setLoaded(true)}
+            onError={() => setHasError(true)}
+            className={`max-h-[52dvh] sm:max-h-[66vh] lg:max-h-[72vh] w-auto max-w-full rounded-xs border border-white/20 object-contain shadow-2xl transition-opacity duration-300 ${
+              loaded ? "opacity-100" : "opacity-0 absolute pointer-events-none"
+            }`}
+            style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
           />
         </div>
 
         {/* Polaroid/Gallery Details Caption */}
-        <figcaption className="mt-3 w-full max-w-2xl border-t border-paper/25 pt-2.5 text-center sm:mt-4 sm:pt-3">
-          <p className="font-display text-[18px] sm:text-[22px] font-bold text-paper">
+        <figcaption className="mt-3 w-full max-w-2xl border-t border-white/25 pt-2.5 text-center sm:mt-4 sm:pt-3">
+          <p className="font-display text-[18px] sm:text-[22px] font-bold text-white">
             {photo.title}
           </p>
 
-          <p className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 font-ui text-[11px] sm:text-[12px] uppercase tracking-[0.1em] text-paper/70">
+          <p className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 font-ui text-[11px] sm:text-[12px] uppercase tracking-[0.1em] text-white/70">
             <span>{formatArticleDateline(photo.date)}</span>
             {photo.location && (
               <>
-                <span className="text-paper/40">·</span>
+                <span className="text-white/40">·</span>
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3 w-3 text-stamp" />
                   {photo.location}
@@ -195,33 +250,33 @@ function Lightbox({
             )}
             {photo.camera && (
               <>
-                <span className="text-paper/40">·</span>
+                <span className="text-white/40">·</span>
                 <span>{photo.camera}</span>
               </>
             )}
           </p>
 
           {photo.desc && (
-            <p className="mx-auto mt-2 max-w-xl font-serif text-[13px] sm:text-[15px] leading-relaxed text-paper/85 px-2">
+            <p className="mx-auto mt-2 max-w-xl font-serif text-[13px] sm:text-[15px] leading-relaxed text-white/85 px-2">
               {photo.desc}
             </p>
           )}
 
           {/* Mobile Bottom Switcher Toolbar */}
-          <div className="flex sm:hidden items-center justify-center gap-6 mt-3.5 pt-2.5 border-t border-paper/15">
+          <div className="flex sm:hidden items-center justify-center gap-6 mt-3.5 pt-2.5 border-t border-white/15">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onPrev();
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-paper/25 bg-paper/10 text-paper font-ui text-[12px] font-medium active:scale-95 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-white/25 bg-white/10 text-white font-ui text-[12px] font-medium active:scale-95 transition-all shadow-sm"
             >
               <ChevronLeft className="h-4 w-4" />
               <span>上一张</span>
             </button>
 
-            <span className="font-mono text-[10px] uppercase tracking-wider text-paper/50">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-white/50">
               左右滑动切换
             </span>
 
@@ -231,7 +286,7 @@ function Lightbox({
                 e.stopPropagation();
                 onNext();
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-paper/25 bg-paper/10 text-paper font-ui text-[12px] font-medium active:scale-95 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-white/25 bg-white/10 text-white font-ui text-[12px] font-medium active:scale-95 transition-all shadow-sm"
             >
               <span>下一张</span>
               <ChevronRight className="h-4 w-4" />
