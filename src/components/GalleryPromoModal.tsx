@@ -160,11 +160,15 @@ export function GalleryPromoModal() {
   const [colorScheme, setColorScheme] = useState<ColorScheme>(COLOR_SCHEMES[0]);
   const [showNeverAgain, setShowNeverAgain] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hasMouse, setHasMouse] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const photoContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      setHasMouse(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+    }
 
     // Check if user has permanently dismissed the promo
     const dismissed = localStorage.getItem(STORAGE_DISMISSED_KEY) === "true";
@@ -216,6 +220,7 @@ export function GalleryPromoModal() {
     if (!isOpen) return;
 
     const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
       if (!containerRef.current) return;
 
       containerRef.current.style.setProperty("--mouse-x", `${e.clientX}px`);
@@ -272,29 +277,33 @@ export function GalleryPromoModal() {
   return createPortal(
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[100] flex h-screen w-screen items-center justify-center overflow-y-auto overflow-x-hidden p-6 sm:p-12 lg:p-20"
+      className="fixed inset-0 z-[100] flex min-h-[100dvh] w-screen items-center justify-center overflow-y-auto overflow-x-hidden p-4 py-8 sm:p-8 sm:py-12 lg:p-14"
       role="dialog"
       aria-modal="true"
       aria-labelledby="gallery-promo-title"
     >
       {/* 1. Real Frosted Glass (毛玻璃) Backdrop Layer with dynamic Peep-Hole cutout */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 bg-ink/30 backdrop-blur-[14px] backdrop-saturate-[150%] dark:bg-black/45"
-        style={{
-          maskImage:
-            "radial-gradient(circle var(--cutout-radius, 125px) at var(--mouse-x, -999px) var(--mouse-y, -999px), transparent 0px, transparent calc(var(--cutout-radius, 125px) * 0.48), rgba(0,0,0,0.5) calc(var(--cutout-radius, 125px) * 0.8), black var(--cutout-radius, 125px))",
-          WebkitMaskImage:
-            "radial-gradient(circle var(--cutout-radius, 125px) at var(--mouse-x, -999px) var(--mouse-y, -999px), transparent 0px, transparent calc(var(--cutout-radius, 125px) * 0.48), rgba(0,0,0,0.5) calc(var(--cutout-radius, 125px) * 0.8), black var(--cutout-radius, 125px))",
-        }}
+        className="pointer-events-none fixed inset-0 z-0 bg-ink/35 backdrop-blur-[14px] backdrop-saturate-[150%] dark:bg-black/50"
+        style={
+          hasMouse
+            ? {
+                maskImage:
+                  "radial-gradient(circle var(--cutout-radius, 125px) at var(--mouse-x, -999px) var(--mouse-y, -999px), transparent 0px, transparent calc(var(--cutout-radius, 125px) * 0.48), rgba(0,0,0,0.5) calc(var(--cutout-radius, 125px) * 0.8), black var(--cutout-radius, 125px))",
+                WebkitMaskImage:
+                  "radial-gradient(circle var(--cutout-radius, 125px) at var(--mouse-x, -999px) var(--mouse-y, -999px), transparent 0px, transparent calc(var(--cutout-radius, 125px) * 0.48), rgba(0,0,0,0.5) calc(var(--cutout-radius, 125px) * 0.8), black var(--cutout-radius, 125px))",
+              }
+            : undefined
+        }
       >
         {/* Frosted glass surface grain and soft specular reflection sheen */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/[0.04] to-transparent opacity-90" />
         <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]" />
       </div>
 
-      {/* 2. Interactive Peep-hole Lens Follower Ring */}
+      {/* 2. Interactive Peep-hole Lens Follower Ring (Desktop pointer only) */}
       <div
-        className="pointer-events-none fixed z-20 h-[150px] w-[150px] rounded-full border border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.3),inset_0_0_15px_rgba(255,255,255,0.2)] transition-opacity duration-300 ease-out"
+        className="pointer-events-none fixed z-20 hidden lg:block h-[150px] w-[150px] rounded-full border border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.3),inset_0_0_15px_rgba(255,255,255,0.2)] transition-opacity duration-300 ease-out"
         style={{
           left: 0,
           top: 0,
@@ -308,19 +317,23 @@ export function GalleryPromoModal() {
       <button
         type="button"
         onClick={handleClose}
-        className="group fixed right-6 top-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/15 text-paper shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_10px_25px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all hover:scale-110 hover:border-stamp hover:bg-stamp hover:text-paper sm:right-10 sm:top-10"
+        className="group fixed right-4 top-4 z-50 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/40 bg-white/20 text-paper shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_10px_25px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all hover:scale-110 hover:border-stamp hover:bg-stamp hover:text-paper sm:right-8 sm:top-8"
+        style={{
+          top: "max(1rem, env(safe-area-inset-top))",
+          right: "max(1rem, env(safe-area-inset-right))",
+        }}
         aria-label="关闭"
       >
-        <X className="h-6 w-6 transition-transform group-hover:rotate-90" />
+        <X className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:rotate-90" />
       </button>
 
       {/* 4. Full-bleed Content Layout directly on screen */}
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
-        {/* Left: Promotional typography written DIRECTLY on screen, tilted & animated */}
-        <div className="animate-tilt-snap-left flex flex-col justify-center text-left">
+      <div className="relative z-10 my-auto mx-auto w-full max-w-6xl lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-14">
+        {/* Promotional typography written DIRECTLY on screen */}
+        <div className="animate-tilt-snap-left flex flex-col justify-center text-center lg:text-left">
           {/* Section Kicker */}
-          <div className="flex items-center gap-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.28em] sm:text-[13px]">
-            <Camera className={cn("h-4 w-4", colorScheme.kickerIcon)} />
+          <div className="flex items-center justify-center lg:justify-start gap-2 font-mono text-[11px] sm:text-[13px] font-bold uppercase tracking-[0.22em] sm:tracking-[0.28em]">
+            <Camera className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", colorScheme.kickerIcon)} />
             <span className={cn("font-bold", colorScheme.kickerText)}>
               CURVE GALLERY · 新板块公布
             </span>
@@ -329,12 +342,12 @@ export function GalleryPromoModal() {
           {/* Giant Headline with dynamic randomized chromatic gradient */}
           <h1
             id="gallery-promo-title"
-            className="mt-5 font-display text-[48px] font-bold leading-[1.05] tracking-tight sm:text-[64px] lg:text-[76px]"
+            className="mt-3 sm:mt-5 font-display text-[32px] sm:text-[52px] lg:text-[72px] font-bold leading-[1.1] tracking-tight"
           >
             <span className={colorScheme.title1}>新板块 </span>
             <span
               className={cn(
-                "font-masthead italic underline underline-offset-8",
+                "font-masthead italic underline underline-offset-4 sm:underline-offset-8",
                 colorScheme.title2,
                 colorScheme.titleUnderline,
               )}
@@ -344,16 +357,25 @@ export function GalleryPromoModal() {
           </h1>
 
           {/* Subtitle with dynamic gradient */}
-          <p className="mt-6 font-serif text-[22px] font-semibold leading-[1.6] sm:text-[26px] lg:text-[30px]">
+          <p className="mt-2.5 sm:mt-4 font-serif text-[15px] sm:text-[22px] lg:text-[26px] font-semibold leading-relaxed">
             <span className={colorScheme.subtitle}>
               我的足迹，生活与琐碎的日常
             </span>
           </p>
 
-          {/* Photo Excerpt Box with dynamic color scheme */}
+          {/* Mobile-only featured photo stack (centered between title and action buttons) */}
+          <div className="my-5 flex w-full items-center justify-center lg:hidden">
+            <RingPhotoStack
+              photo={randomPhoto}
+              photoTagClass={colorScheme.photoTag}
+              isMobile
+            />
+          </div>
+
+          {/* Photo Excerpt Box with dynamic color scheme (Desktop only to prevent redundant duplicate on mobile) */}
           <div
             className={cn(
-              "mt-8 max-w-xl rounded-sm border border-l-4 p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_12px_28px_rgba(0,0,0,0.35)] backdrop-blur-md",
+              "hidden lg:block mt-8 max-w-xl rounded-sm border border-l-4 p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_12px_28px_rgba(0,0,0,0.35)] backdrop-blur-md",
               colorScheme.excerptBorder,
               colorScheme.excerptBorderL,
               colorScheme.excerptBg,
@@ -388,33 +410,35 @@ export function GalleryPromoModal() {
           </div>
 
           {/* Action Buttons styled like Windows Dialog / MessageBox Push-Buttons */}
-          <div className="mt-10 flex flex-wrap items-center gap-4 sm:gap-5">
-            {/* Primary Action Button (Windows Default / OK Dialog Push-Button) */}
-            <button
-              type="button"
-              onClick={handleGoToGallery}
-              className={cn(
-                "group relative flex h-13 sm:h-14 min-w-[160px] sm:min-w-[185px] items-center justify-center gap-2.5 rounded-[5px] px-8 sm:px-10 font-ui text-[15px] sm:text-[16px] font-bold tracking-wider text-white transition-all duration-150 cursor-pointer select-none",
-                "border-2 active:translate-y-[1.5px] active:brightness-90 active:scale-[0.99]",
-                colorScheme.primaryBtn,
-              )}
-            >
-              <span>带我去看</span>
-              <ArrowRight className="h-4.5 w-4.5 transition-transform duration-200 group-hover:translate-x-1" />
-            </button>
+          <div className="mt-5 sm:mt-8 lg:mt-10 flex w-full flex-col items-center sm:flex-row sm:flex-wrap justify-center lg:justify-start gap-2.5 sm:gap-4">
+            <div className="grid w-full grid-cols-2 gap-2.5 sm:flex sm:w-auto sm:gap-4">
+              {/* Primary Action Button (Windows Default / OK Dialog Push-Button) */}
+              <button
+                type="button"
+                onClick={handleGoToGallery}
+                className={cn(
+                  "group relative flex h-11 sm:h-13 sm:min-w-[170px] items-center justify-center gap-2 rounded-[5px] px-3 sm:px-8 font-ui text-[14px] sm:text-[16px] font-bold tracking-wider text-white transition-all duration-150 cursor-pointer select-none",
+                  "border-2 active:translate-y-[1.5px] active:brightness-90 active:scale-[0.99]",
+                  colorScheme.primaryBtn,
+                )}
+              >
+                <span>带我去看</span>
+                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+              </button>
 
-            {/* Secondary Action Button (Windows Cancel / Dismiss Push-Button) */}
-            <button
-              type="button"
-              onClick={handleClose}
-              className={cn(
-                "flex h-13 sm:h-14 min-w-[140px] sm:min-w-[160px] items-center justify-center rounded-[5px] px-8 sm:px-10 font-ui text-[15px] sm:text-[16px] font-semibold tracking-wider transition-all duration-150 cursor-pointer select-none backdrop-blur-md",
-                "border active:translate-y-[1.5px] active:brightness-90 active:scale-[0.99]",
-                colorScheme.secondaryBtn,
-              )}
-            >
-              <span>暂时算了</span>
-            </button>
+              {/* Secondary Action Button (Windows Cancel / Dismiss Push-Button) */}
+              <button
+                type="button"
+                onClick={handleClose}
+                className={cn(
+                  "flex h-11 sm:h-13 sm:min-w-[140px] items-center justify-center rounded-[5px] px-3 sm:px-8 font-ui text-[14px] sm:text-[16px] font-semibold tracking-wider transition-all duration-150 cursor-pointer select-none backdrop-blur-md",
+                  "border active:translate-y-[1.5px] active:brightness-90 active:scale-[0.99]",
+                  colorScheme.secondaryBtn,
+                )}
+              >
+                <span>暂时算了</span>
+              </button>
+            </div>
 
             {/* 3rd Button: Never Show Again (Windows 3rd Dialog Choice Push-Button) */}
             {showNeverAgain && (
@@ -422,21 +446,21 @@ export function GalleryPromoModal() {
                 type="button"
                 onClick={handleNeverShowAgain}
                 className={cn(
-                  "flex h-13 sm:h-14 min-w-[130px] sm:min-w-[145px] items-center justify-center rounded-[5px] px-6 sm:px-8 font-ui text-[14px] sm:text-[15px] font-medium tracking-wider transition-all duration-150 cursor-pointer select-none backdrop-blur-md",
+                  "flex h-9 sm:h-13 w-full sm:w-auto sm:min-w-[130px] items-center justify-center rounded-[5px] px-3 sm:px-6 font-ui text-[12px] sm:text-[14px] font-medium tracking-wider transition-all duration-150 cursor-pointer select-none backdrop-blur-md",
                   "border active:translate-y-[1.5px] active:brightness-90 active:scale-[0.99]",
                   colorScheme.dismissBtn,
                 )}
               >
-                <span>不再显示</span>
+                <span>不再显示此弹窗</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Right: Tilted photo bundle floating DIRECTLY on screen */}
+        {/* Right: Tilted photo bundle floating DIRECTLY on screen (desktop only) */}
         <div
           ref={photoContainerRef}
-          className="animate-tilt-snap-right flex items-center justify-center py-6"
+          className="animate-tilt-snap-right hidden lg:flex lg:items-center lg:justify-center py-6"
         >
           <RingPhotoStack photo={randomPhoto} photoTagClass={colorScheme.photoTag} />
         </div>
@@ -450,17 +474,159 @@ export function GalleryPromoModal() {
  * RingPhotoStack:
  * Giant photo stack floating directly on screen, hooked by a metallic binder ring.
  * Underneath photos are fanned out and covered; only the top randomly selected photo is shown.
+ * Supports isMobile prop for a compact, proportional layout on mobile devices.
  */
 function RingPhotoStack({
   photo,
   photoTagClass = "bg-gradient-to-r from-rose-500 to-amber-500 text-white",
+  isMobile = false,
 }: {
   photo: Photo;
   photoTagClass?: string;
+  isMobile?: boolean;
 }) {
-  // Center of punch hole is anchored at (48px, 44px)
+  if (isMobile) {
+    return (
+      <div className="group relative h-[360px] w-[260px] select-none">
+        {/* Ring Back Segment */}
+        <svg
+          className="pointer-events-none absolute -top-6 left-1 z-0 h-[72px] w-[72px] overflow-visible"
+          viewBox="0 0 72 72"
+          fill="none"
+        >
+          <defs>
+            <linearGradient id="ring-back-metal-mob" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#334155" />
+              <stop offset="40%" stopColor="#64748b" />
+              <stop offset="70%" stopColor="#94a3b8" />
+              <stop offset="100%" stopColor="#1e293b" />
+            </linearGradient>
+          </defs>
+          <circle
+            cx="36"
+            cy="36"
+            r="27"
+            stroke="url(#ring-back-metal-mob)"
+            strokeWidth="5.5"
+            className="opacity-95"
+          />
+        </svg>
+
+        {/* Card 3 (Bottom card: rotated -4.5deg) */}
+        <div
+          className="absolute inset-x-0 top-2 h-[320px] rounded-xs border-2 border-black/30 bg-[#e4ded0] shadow-[0_15px_30px_rgba(0,0,0,0.55)] dark:border-white/10 dark:bg-[#1a1a1a]"
+          style={{
+            transformOrigin: "36px 33px",
+            transform: "rotate(-4.5deg)",
+          }}
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-black/[0.06] to-black/[0.18]" />
+        </div>
+
+        {/* Card 2 (Middle card: rotated +4deg) */}
+        <div
+          className="absolute inset-x-0 top-2 h-[320px] rounded-xs border-2 border-black/30 bg-[#ede6d8] shadow-[0_18px_35px_rgba(0,0,0,0.6)] dark:border-white/10 dark:bg-[#222222]"
+          style={{
+            transformOrigin: "36px 33px",
+            transform: "rotate(4deg)",
+          }}
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-black/[0.04] to-black/[0.12]" />
+        </div>
+
+        {/* Card 1 (Top card: display random photo) */}
+        <div
+          className="absolute inset-x-0 top-2 z-10 flex h-[320px] flex-col rounded-xs border-2 border-black/40 bg-[#fefdfa] p-2.5 pb-3.5 shadow-[0_22px_45px_rgba(0,0,0,0.8)] dark:border-white/20 dark:bg-[#181818]"
+          style={{
+            transformOrigin: "36px 33px",
+            transform: "rotate(-1deg)",
+          }}
+        >
+          {/* Photo Image Frame */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden border border-black/15 bg-paper-warm shadow-inner">
+            <img
+              src={photo.src}
+              alt={photo.title}
+              className="h-full w-full object-cover"
+            />
+            <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_12px_rgba(0,0,0,0.25)]" />
+          </div>
+
+          {/* Polaroid Style Label */}
+          <div className="mt-2 flex flex-1 flex-col justify-between px-0.5">
+            <div>
+              <div className="flex items-baseline justify-between gap-1.5">
+                <p className="truncate font-display text-[16px] font-bold text-ink-strong">
+                  {photo.title}
+                </p>
+                <span
+                  className={cn(
+                    "shrink-0 font-mono text-[9px] uppercase tracking-wider rounded-xs px-1.5 py-0.5 shadow-sm",
+                    photoTagClass,
+                  )}
+                >
+                  {photo.camera ? photo.camera.split(" ")[0] : "PHOTO"}
+                </span>
+              </div>
+              <p className="mt-0.5 truncate font-ui text-[11px] uppercase tracking-[0.1em] text-ink-muted">
+                {photo.location ? `${photo.location} · ` : ""}
+                {formatArticleDateline(photo.date)}
+              </p>
+            </div>
+
+            {photo.desc && (
+              <p className="line-clamp-2 font-serif text-[12px] italic leading-snug text-ink-body/85 mt-1">
+                "{photo.desc}"
+              </p>
+            )}
+          </div>
+
+          {/* Punch Hole Grommet / Metal Eyelet */}
+          <div
+            className="pointer-events-none absolute left-[26px] top-[23px] z-20 flex h-[20px] w-[20px] items-center justify-center rounded-full border-[2.5px] border-amber-700 bg-paper-warm shadow-inner dark:border-amber-400"
+            aria-hidden="true"
+          >
+            <div className="h-[9px] w-[9px] rounded-full bg-ink shadow-[inset_0_1px_3px_rgba(0,0,0,0.9)]" />
+          </div>
+        </div>
+
+        {/* Ring Front Segment */}
+        <svg
+          className="pointer-events-none absolute -top-6 left-1 z-30 h-[72px] w-[72px] overflow-visible"
+          viewBox="0 0 72 72"
+          fill="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="ring-front-metal-mob" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="25%" stopColor="#e2e8f0" />
+              <stop offset="50%" stopColor="#94a3b8" />
+              <stop offset="75%" stopColor="#cbd5e1" />
+              <stop offset="100%" stopColor="#475569" />
+            </linearGradient>
+            <filter id="ring-shadow-mob" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="2" dy="3" stdDeviation="2" floodColor="#000000" floodOpacity="0.6" />
+            </filter>
+          </defs>
+          <path
+            d="M 14 27 A 27 27 0 0 1 63 36 A 27 27 0 0 1 36 63"
+            stroke="url(#ring-front-metal-mob)"
+            strokeWidth="5.5"
+            strokeLinecap="round"
+            filter="url(#ring-shadow-mob)"
+          />
+          <circle cx="63" cy="36" r="3" fill="#e2e8f0" stroke="#334155" strokeWidth="1" />
+        </svg>
+      </div>
+    );
+  }
+
+  // Desktop full size stack
   return (
-    <div className="group relative h-[430px] w-[310px] select-none sm:h-[490px] sm:w-[360px] lg:h-[540px] lg:w-[410px]">
+    <div className="group relative h-[490px] w-[360px] select-none lg:h-[540px] lg:w-[410px]">
       {/* 1. Ring Back Segment (Layer 0: rendered behind all cards) */}
       <svg
         className="pointer-events-none absolute -top-8 left-1 z-0 h-[96px] w-[96px] overflow-visible"
@@ -488,7 +654,7 @@ function RingPhotoStack({
 
       {/* 2. Card 3 (Bottom card: rotated -8.5deg, completely covered) */}
       <div
-        className="absolute inset-x-0 top-3 h-[380px] rounded-xs border-2 border-black/30 bg-[#e4ded0] shadow-[0_20px_45px_rgba(0,0,0,0.6)] transition-transform duration-500 ease-out group-hover:-rotate-[12deg] dark:border-white/10 dark:bg-[#1a1a1a] sm:h-[440px] lg:h-[480px]"
+        className="absolute inset-x-0 top-3 h-[440px] rounded-xs border-2 border-black/30 bg-[#e4ded0] shadow-[0_20px_45px_rgba(0,0,0,0.6)] transition-transform duration-500 ease-out group-hover:-rotate-[12deg] dark:border-white/10 dark:bg-[#1a1a1a] lg:h-[480px]"
         style={{
           transformOrigin: "48px 44px",
           transform: "rotate(-8.5deg)",
@@ -500,7 +666,7 @@ function RingPhotoStack({
 
       {/* 3. Card 2 (Middle card: rotated +7deg, completely covered) */}
       <div
-        className="absolute inset-x-0 top-3 h-[380px] rounded-xs border-2 border-black/30 bg-[#ede6d8] shadow-[0_25px_50px_rgba(0,0,0,0.7)] transition-transform duration-500 ease-out group-hover:rotate-[10deg] dark:border-white/10 dark:bg-[#222222] sm:h-[440px] lg:h-[480px]"
+        className="absolute inset-x-0 top-3 h-[440px] rounded-xs border-2 border-black/30 bg-[#ede6d8] shadow-[0_25px_50px_rgba(0,0,0,0.7)] transition-transform duration-500 ease-out group-hover:rotate-[10deg] dark:border-white/10 dark:bg-[#222222] lg:h-[480px]"
         style={{
           transformOrigin: "48px 44px",
           transform: "rotate(7deg)",
@@ -512,7 +678,7 @@ function RingPhotoStack({
 
       {/* 4. Card 1 (Top card: large photographic print displaying the random photo) */}
       <div
-        className="absolute inset-x-0 top-3 z-10 flex h-[380px] flex-col rounded-xs border-2 border-black/40 bg-[#fefdfa] p-3.5 pb-5 shadow-[0_30px_70px_rgba(0,0,0,0.85)] transition-transform duration-500 ease-out group-hover:-rotate-[0.5deg] dark:border-white/20 dark:bg-[#181818] sm:h-[440px] lg:h-[480px]"
+        className="absolute inset-x-0 top-3 z-10 flex h-[440px] flex-col rounded-xs border-2 border-black/40 bg-[#fefdfa] p-3.5 pb-5 shadow-[0_30px_70px_rgba(0,0,0,0.85)] transition-transform duration-500 ease-out group-hover:-rotate-[0.5deg] dark:border-white/20 dark:bg-[#181818] lg:h-[480px]"
         style={{
           transformOrigin: "48px 44px",
           transform: "rotate(-1.5deg)",
@@ -532,7 +698,7 @@ function RingPhotoStack({
         <div className="mt-3.5 flex flex-1 flex-col justify-between px-1">
           <div>
             <div className="flex items-baseline justify-between gap-2">
-              <p className="truncate font-display text-[18px] font-bold text-ink-strong sm:text-[21px]">
+              <p className="truncate font-display text-[19px] font-bold text-ink-strong lg:text-[21px]">
                 {photo.title}
               </p>
               <span

@@ -1103,14 +1103,35 @@
   animation: modal-burst 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.animate-tilt-snap-left {
-  animation: tilt-snap-left 650ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
-  transform-origin: top left;
+@media (max-width: 1023px) {
+  .animate-tilt-snap-left,
+  .animate-tilt-snap-right {
+    animation: mobile-modal-fade 450ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    transform: none !important;
+  }
 }
 
-.animate-tilt-snap-right {
-  animation: tilt-snap-right 680ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
-  transform-origin: top right;
+@keyframes mobile-modal-fade {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (min-width: 1024px) {
+  .animate-tilt-snap-left {
+    animation: tilt-snap-left 650ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+    transform-origin: top left;
+  }
+
+  .animate-tilt-snap-right {
+    animation: tilt-snap-right 680ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+    transform-origin: top right;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
