@@ -12,6 +12,7 @@ import PhotosPage from "@/pages/PhotosPage";
 import CountdownPage from "@/pages/CountdownPage";
 import AboutPage from "@/pages/AboutPage";
 import LinksPage from "@/pages/LinksPage";
+import EpheiaPage from "@/pages/EpheiaPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
     <Routes>
       <Route element={<RootLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="epheia" element={<EpheiaPage />} />
         <Route path="posts/:slug" element={<PostPage />} />
         <Route path="archives" element={<ArchivesPage />} />
         <Route path="categories" element={<CategoriesPage />} />

@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const links = [
+  { to: "/epheia", label: "EPHEIA", subLabel: "依菲雅", end: false, width: "min-w-[76px]" },
   { to: "/", label: "FRONT", subLabel: "头版", end: true, width: "min-w-[68px]" },
   { to: "/archives", label: "ARCHIVES", subLabel: "存档", end: false, width: "min-w-[82px]" },
   { to: "/categories", label: "SECTIONS", subLabel: "版块", end: false, width: "min-w-[74px]" },

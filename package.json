@@ -11,7 +11,7 @@
     "build": "pnpm run content && pnpm run manifest && vite build",
     "check": "pnpm run typecheck && pnpm run build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "pnpm run content && pnpm run manifest && tsc --noEmit"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
