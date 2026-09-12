@@ -5,7 +5,7 @@
  * playback survives the ContextMenu mount/unmount cycle.  The NowPlaying
  * React component is a pure UI shell that reads/writes this controller.
  */
-import { loadTracks, type TrackInfo } from "./music-config";
+import { epheiaTrack, loadTracks, type TrackInfo } from "./music-config";
 
 type Listener = () => void;
 
@@ -14,6 +14,10 @@ let _tracks: TrackInfo[] | null = null;
 let _isLoading = true;
 let _error = false;
 let _trackIndex = 0;
+let _sharedTracks: TrackInfo[] | null = null;
+let _sharedTrackIndex = 0;
+let _epheiaMode = false;
+let _cancelAutoPlay: (() => void) | null = null;
 const _listeners = new Set<Listener>();
 
 function getAudio(): HTMLAudioElement {
@@ -61,8 +65,10 @@ function updateMediaSession(): void {
 
   const artwork: MediaImage[] = [];
   if (track.pic) {
-    const mime = track.pic.slice(5, track.pic.indexOf(";"));
-    artwork.push({ src: track.pic, sizes: "512x512", type: mime || "image/jpeg" });
+    const mime = track.pic.startsWith("data:")
+      ? track.pic.slice(5, track.pic.indexOf(";"))
+      : "image/jpeg";
+    artwork.push({ src: track.pic, type: mime || "image/jpeg" });
   }
 
   navigator.mediaSession.metadata = new MediaMetadata({
@@ -79,13 +85,20 @@ function syncPlaybackState(): void {
 }
 
 function scheduleAutoPlay(): void {
+  _cancelAutoPlay?.();
   const audio = _audio;
   if (!audio) return;
   const onReady = () => {
     audio.removeEventListener("canplay", onReady);
+    _cancelAutoPlay = null;
     audio.play().then(() => syncPlaybackState()).catch(() => {});
   };
+  _cancelAutoPlay = () => {
+    audio.removeEventListener("canplay", onReady);
+    _cancelAutoPlay = null;
+  };
   audio.addEventListener("canplay", onReady);
+  if (audio.readyState >= 3) onReady();
 }
 
 function notify(): void {
@@ -95,10 +108,11 @@ function notify(): void {
 // Kick off loading as soon as the module is imported.
 loadTracks()
   .then((tracks) => {
-    _tracks = tracks;
+    _sharedTracks = tracks;
     _isLoading = false;
-    if (tracks.length > 0) {
-      getAudio().src = tracks[0].url;
+    if (!_epheiaMode) {
+      _tracks = tracks;
+      if (tracks.length > 0) getAudio().src = tracks[_trackIndex].url;
     }
     updateMediaSession();
     notify();
@@ -114,10 +128,10 @@ export const nowPlaying = {
     return _tracks;
   },
   get isLoading(): boolean {
-    return _isLoading;
+    return !_epheiaMode && _isLoading;
   },
   get error(): boolean {
-    return _error;
+    return !_epheiaMode && _error;
   },
   get trackIndex(): number {
     return _trackIndex;
@@ -130,6 +144,26 @@ export const nowPlaying = {
   },
   get isPlaying(): boolean {
     return _audio ? !_audio.paused : false;
+  },
+
+  setEpheiaMode(enabled: boolean): void {
+    if (_epheiaMode === enabled) return;
+    const wasPlaying = Boolean(_audio && !_audio.paused) || _cancelAutoPlay !== null;
+    _cancelAutoPlay?.();
+    if (enabled) _sharedTrackIndex = _trackIndex;
+    _epheiaMode = enabled;
+    _tracks = enabled ? [epheiaTrack] : _sharedTracks;
+    _trackIndex = enabled ? 0 : _sharedTrackIndex;
+    const audio = getAudio();
+    audio.pause();
+    const track = _tracks?.[_trackIndex];
+    if (track) audio.src = track.url;
+    else audio.removeAttribute("src");
+    audio.load();
+    updateMediaSession();
+    syncPlaybackState();
+    if (wasPlaying && track) scheduleAutoPlay();
+    notify();
   },
 
   subscribe(fn: Listener): () => void {
@@ -148,6 +182,7 @@ export const nowPlaying = {
         notify();
       }).catch(() => {});
     } else {
+      _cancelAutoPlay?.();
       audio.pause();
       syncPlaybackState();
       notify();

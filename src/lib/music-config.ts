@@ -21,6 +21,14 @@ export interface TrackInfo {
 
 const MANIFEST_URL = "/Musics/manifest.json";
 
+// Kept outside Musics so the shared manifest never includes this page-only track.
+export const epheiaTrack: TrackInfo = {
+  name: "リリィ",
+  artist: "",
+  url: "/audio/epheia/lily.mp3",
+  pic: "/audio/epheia/lily.jpg",
+};
+
 export async function loadTracks(): Promise<TrackInfo[]> {
   const response = await fetch(MANIFEST_URL);
   if (!response.ok) {

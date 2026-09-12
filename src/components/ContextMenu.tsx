@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   Archive,
@@ -136,13 +137,13 @@ export function ContextMenu() {
     setSelectionSnapshot(null);
   };
 
-  return (
+  return createPortal(
     <div
       ref={ref}
       role="menu"
       style={{ left: pos.x, top: pos.y }}
       onContextMenu={(event) => event.preventDefault()}
-      className="fixed z-[100] w-[248px] animate-fade-in border-2 border-ink bg-paper shadow-[4px_4px_0_0_hsl(var(--ink))]"
+      className="fixed z-[999] w-[248px] animate-fade-in border-2 border-ink bg-paper shadow-[4px_4px_0_0_hsl(var(--ink))]"
     >
       <div className="border-b-2 border-ink bg-ink px-3 py-2 text-paper">
         <p className="font-masthead text-[15px] font-black leading-none">THE CURVE TIMES</p>
@@ -193,7 +194,8 @@ export function ContextMenu() {
       <p className="border-t border-rule bg-paper-warm/50 px-3 py-1.5 text-center font-ui text-[11px] font-medium uppercase text-ink-faded">
         Right-click anywhere · ESC to close
       </p>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
