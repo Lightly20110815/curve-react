@@ -70,6 +70,16 @@
     </script>
 
     <style>
+      html, body, * {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      ::-webkit-scrollbar,
+      *::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+      }
       html { background-color: #e3d3ab; }
       html[data-time-theme="dawn"] { background-color: #efe1be; }
       html[data-time-theme="dusk"] { background-color: #dcc197; }

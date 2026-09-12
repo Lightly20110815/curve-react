@@ -21,13 +21,23 @@ export interface TrackInfo {
 
 const MANIFEST_URL = "/Musics/manifest.json";
 
-// Kept outside Musics so the shared manifest never includes this page-only track.
-export const epheiaTrack: TrackInfo = {
-  name: "リリィ",
-  artist: "",
-  url: "/audio/epheia/lily.mp3",
-  pic: "/audio/epheia/lily.jpg",
-};
+// Kept outside Musics so the shared manifest never includes these page-only tracks.
+export const epheiaTracks: TrackInfo[] = [
+  {
+    name: "リリィ",
+    artist: "",
+    url: "/audio/epheia/lily.mp3",
+    pic: "/audio/epheia/lily.jpg",
+  },
+  {
+    name: "还愿",
+    artist: "草东没有派对",
+    url: "/audio/epheia/huanyuan.mp3",
+    pic: "/audio/epheia/huanyuan.jpg",
+  },
+];
+
+export const epheiaTrack: TrackInfo = epheiaTracks[0];
 
 export async function loadTracks(): Promise<TrackInfo[]> {
   const response = await fetch(MANIFEST_URL);

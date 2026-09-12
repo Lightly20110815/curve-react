@@ -41,6 +41,7 @@ export function NowPlaying() {
   // Check marquee + cover when track changes
   const track = nowPlaying.currentTrack;
   useEffect(() => {
+    setProgress(0);
     setNeedsMarquee(false);
     const id = setTimeout(() => {
       if (wrapperRef.current && nameTextRef.current) {

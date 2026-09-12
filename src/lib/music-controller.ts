@@ -5,7 +5,7 @@
  * playback survives the ContextMenu mount/unmount cycle.  The NowPlaying
  * React component is a pure UI shell that reads/writes this controller.
  */
-import { epheiaTrack, loadTracks, type TrackInfo } from "./music-config";
+import { epheiaTracks, loadTracks, type TrackInfo } from "./music-config";
 
 type Listener = () => void;
 
@@ -16,6 +16,7 @@ let _error = false;
 let _trackIndex = 0;
 let _sharedTracks: TrackInfo[] | null = null;
 let _sharedTrackIndex = 0;
+let _epheiaTrackIndex = 0;
 let _epheiaMode = false;
 let _cancelAutoPlay: (() => void) | null = null;
 const _listeners = new Set<Listener>();
@@ -30,6 +31,9 @@ function getAudio(): HTMLAudioElement {
         _trackIndex = (_trackIndex + 1) % _tracks.length;
         const next = _tracks[_trackIndex];
         if (next) {
+          try {
+            _audio!.currentTime = 0;
+          } catch {}
           _audio!.src = next.url;
           _audio!.load();
         }
@@ -150,10 +154,15 @@ export const nowPlaying = {
     if (_epheiaMode === enabled) return;
     const wasPlaying = Boolean(_audio && !_audio.paused) || _cancelAutoPlay !== null;
     _cancelAutoPlay?.();
-    if (enabled) _sharedTrackIndex = _trackIndex;
+    if (enabled) {
+      _sharedTrackIndex = _trackIndex;
+      _trackIndex = _epheiaTrackIndex;
+    } else {
+      _epheiaTrackIndex = _trackIndex;
+      _trackIndex = _sharedTrackIndex;
+    }
     _epheiaMode = enabled;
-    _tracks = enabled ? [epheiaTrack] : _sharedTracks;
-    _trackIndex = enabled ? 0 : _sharedTrackIndex;
+    _tracks = enabled ? epheiaTracks : _sharedTracks;
     const audio = getAudio();
     audio.pause();
     const track = _tracks?.[_trackIndex];
@@ -194,6 +203,9 @@ export const nowPlaying = {
     const audio = getAudio();
     const wasPlaying = !audio.paused;
     _trackIndex = (_trackIndex - 1 + _tracks.length) % _tracks.length;
+    try {
+      audio.currentTime = 0;
+    } catch {}
     audio.src = _tracks[_trackIndex].url;
     audio.load();
     updateMediaSession();
@@ -206,6 +218,9 @@ export const nowPlaying = {
     const audio = getAudio();
     const wasPlaying = !audio.paused;
     _trackIndex = (_trackIndex + 1) % _tracks.length;
+    try {
+      audio.currentTime = 0;
+    } catch {}
     audio.src = _tracks[_trackIndex].url;
     audio.load();
     updateMediaSession();

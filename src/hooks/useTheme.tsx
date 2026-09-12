@@ -108,13 +108,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
 
     firstApply.current = false;
+    root.classList.add("theme-transitioning");
     const vt = document.startViewTransition(apply);
+    vt.finished.finally(() => {
+      root.classList.remove("theme-transitioning");
+    });
+
     return () => {
       try {
         vt.skipTransition();
       } catch {
         // Transition may already be finished — safe to ignore.
       }
+      root.classList.remove("theme-transitioning");
     };
   }, [resolvedTheme, timeTheme]);
 

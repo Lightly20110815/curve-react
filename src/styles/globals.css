@@ -158,9 +158,13 @@
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
     font-optical-sizing: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     background-color: hsl(var(--paper));
     color: hsl(var(--ink-body));
     font-family: theme("fontFamily.serif");
@@ -191,10 +195,16 @@
       inset 0 0 0 1px hsl(var(--paper-warm) / 0.2),
       inset 0 18px 48px hsl(var(--ink) / 0.018);
     transition:
-      background-color 900ms ease,
-      background-image 900ms ease,
-      box-shadow 900ms ease,
-      color 220ms ease;
+      background-color 240ms ease,
+      color 200ms ease;
+  }
+
+  /* View Transition 进行中时强制关闭 DOM 内部过渡，避免与全局图层双缓冲动画竞争重绘 */
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition: none !important;
   }
 
   /* Dark mode body adjustments — strip paper-grain noise, keep a clean vignette */
@@ -356,17 +366,16 @@
     color: hsl(var(--ink-strong));
   }
 
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--rule-soft) / 0.4);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
+  /* 全站隐藏滚动条，保持页面平滑滚动能力 */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--rule-soft) / 0.7);
-    background-clip: padding-box;
+  ::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
   a { color: inherit; text-decoration: none; }
@@ -746,9 +755,9 @@
     opacity: 0;
   }
 
-  body.zen-mode ::-webkit-scrollbar { width: 6px; }
-  body.zen-mode ::-webkit-scrollbar-thumb {
-    background: hsl(var(--rule-soft) / 0.25);
+  body.zen-mode ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
   }
 
   .font-masthead { font-family: theme("fontFamily.masthead"); }
@@ -1021,14 +1030,19 @@
   ::view-transition-new(root) {
     animation: none;
     mix-blend-mode: normal;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* 标志性暗房显影光圈洞：旧视图优雅淡出，新视图圆形光环同步扩散 */
+  ::view-transition-old(root) {
+    animation: theme-vt-fade 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity;
   }
 
   ::view-transition-new(root) {
-    animation: theme-vt-reveal 460ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  ::view-transition-old(root) {
-    animation: theme-vt-fade 460ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: theme-vt-reveal 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: clip-path;
   }
 
   @media (prefers-reduced-motion: reduce) {

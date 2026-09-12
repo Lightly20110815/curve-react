@@ -160,11 +160,12 @@ export default function EpheiaPage() {
         {/* 贯穿屏幕两端的绳子容器（紧凑高度，消灭下方多余留白） */}
         <div className="relative h-[375px] w-full">
           {/* 1. 悬挂在绳子上的照片卡片（位于底层 z-10，绝不可能反遮挡绳子） */}
-          <div className="absolute inset-x-0 top-[26px] z-10 flex justify-center">
+          <div className="absolute inset-x-0 top-[26px] z-10 flex justify-center gap-3 sm:gap-6 md:gap-8 lg:gap-10">
+            {/* 照片 1：百合动漫 */}
             <div
               className="group relative"
               style={{
-                transform: "rotate(-2deg)",
+                transform: "rotate(-3deg)",
                 transformOrigin: "top center",
               }}
             >
@@ -176,7 +177,7 @@ export default function EpheiaPage() {
                 className="relative block origin-top transition-transform duration-300 hover:scale-[1.03]"
               >
                 {/* 拍立得边框 */}
-                <div className="w-[200px] rounded-xs border-2 border-black/20 bg-[#fdfbf7] p-3 pb-4 shadow-[0_12px_24px_rgba(0,0,0,0.12)] transition-shadow duration-300 group-hover:shadow-[0_20px_35px_rgba(0,0,0,0.22)] dark:border-white/20 dark:bg-[#1a1a1a] sm:w-[220px]">
+                <div className="w-[110px] rounded-xs border-2 border-black/20 bg-[#fdfbf7] p-2 pb-2.5 shadow-[0_12px_24px_rgba(0,0,0,0.12)] transition-shadow duration-300 group-hover:shadow-[0_20px_35px_rgba(0,0,0,0.22)] dark:border-white/20 dark:bg-[#1a1a1a] sm:w-[170px] sm:p-2.5 sm:pb-3.5 md:w-[195px] md:p-3 md:pb-4 lg:w-[210px]">
                   {/* 照片画面 */}
                   <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xs border border-black/10 bg-paper-warm">
                     <img
@@ -188,13 +189,96 @@ export default function EpheiaPage() {
                   </div>
 
                   {/* 边框上的文字手写注释 */}
-                  <div className="mt-3 px-1 text-center">
-                    <p className="font-serif text-[13px] font-medium text-ink-strong transition-colors group-hover:text-stamp">
+                  <div className="mt-2 px-1 text-center sm:mt-2.5">
+                    <p className="font-serif text-[10.5px] font-medium text-ink-strong transition-colors group-hover:text-stamp sm:text-[12px] md:text-[13px]">
                       Epheia 最喜欢的百合动漫
                     </p>
-                    <p className="mt-1 flex items-center justify-center gap-1 font-ui text-[10px] tracking-wider text-ink-muted">
-                      <span>《私を喰べたい、ひとでなし》</span>
-                      <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                    <p className="mt-0.5 flex items-center justify-center gap-1 font-ui text-[8px] tracking-wider text-ink-muted sm:text-[9px] md:text-[10px]">
+                      <span className="truncate max-w-[90px] sm:max-w-none">《私を喰べたい、ひとでなし》</span>
+                      <ExternalLink className="h-2 w-2 opacity-60 sm:h-2.5 sm:w-2.5" />
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            {/* 照片 2：Euro Truck Simulator 2 游戏 */}
+            <div
+              className="group relative"
+              style={{
+                transform: "rotate(-0.5deg)",
+                transformOrigin: "top center",
+              }}
+            >
+              {/* 拍立得照片卡片 */}
+              <a
+                href="https://store.steampowered.com/app/227300/Euro_Truck_Simulator_2/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative block origin-top transition-transform duration-300 hover:scale-[1.03]"
+              >
+                {/* 拍立得边框 */}
+                <div className="w-[110px] rounded-xs border-2 border-black/20 bg-[#fdfbf7] p-2 pb-2.5 shadow-[0_12px_24px_rgba(0,0,0,0.12)] transition-shadow duration-300 group-hover:shadow-[0_20px_35px_rgba(0,0,0,0.22)] dark:border-white/20 dark:bg-[#1a1a1a] sm:w-[170px] sm:p-2.5 sm:pb-3.5 md:w-[195px] md:p-3 md:pb-4 lg:w-[210px]">
+                  {/* 照片画面 */}
+                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xs border border-black/10 bg-paper-warm">
+                    <img
+                      src="/images/epheia/ets2.jpg"
+                      alt="Epheia 喜欢的游戏 · Euro Truck Simulator 2"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
+
+                  {/* 边框上的文字手写注释 */}
+                  <div className="mt-2 px-1 text-center sm:mt-2.5">
+                    <p className="font-serif text-[10.5px] font-medium text-ink-strong transition-colors group-hover:text-stamp sm:text-[12px] md:text-[13px]">
+                      Epheia 喜欢的游戏
+                    </p>
+                    <p className="mt-0.5 flex items-center justify-center gap-1 font-ui text-[8px] tracking-wider text-ink-muted sm:text-[9px] md:text-[10px]">
+                      <span>Euro Truck Simulator 2</span>
+                      <ExternalLink className="h-2 w-2 opacity-60 sm:h-2.5 sm:w-2.5" />
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            {/* 照片 3：优米雅的炼金工房 */}
+            <div
+              className="group relative"
+              style={{
+                transform: "rotate(3deg)",
+                transformOrigin: "top center",
+              }}
+            >
+              {/* 拍立得照片卡片 */}
+              <a
+                href="https://store.steampowered.com/app/3123410/Atelier_Yumia_The_Alchemist_of_Memories__the_Envisioned_Land/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative block origin-top transition-transform duration-300 hover:scale-[1.03]"
+                title="优米雅的炼金工房 ～追忆之炼金术士与幻创之国～"
+              >
+                {/* 拍立得边框 */}
+                <div className="w-[110px] rounded-xs border-2 border-black/20 bg-[#fdfbf7] p-2 pb-2.5 shadow-[0_12px_24px_rgba(0,0,0,0.12)] transition-shadow duration-300 group-hover:shadow-[0_20px_35px_rgba(0,0,0,0.22)] dark:border-white/20 dark:bg-[#1a1a1a] sm:w-[170px] sm:p-2.5 sm:pb-3.5 md:w-[195px] md:p-3 md:pb-4 lg:w-[210px]">
+                  {/* 照片画面 */}
+                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xs border border-black/10 bg-paper-warm">
+                    <img
+                      src="/images/epheia/yumia.jpg"
+                      alt="Epheia 喜欢的，，· 买断制原神？"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
+
+                  {/* 边框上的文字手写注释 */}
+                  <div className="mt-2 px-1 text-center sm:mt-2.5">
+                    <p className="font-serif text-[10.5px] font-medium text-ink-strong transition-colors group-hover:text-stamp sm:text-[12px] md:text-[13px]">
+                      Epheia 喜欢的，，
+                    </p>
+                    <p className="mt-0.5 flex items-center justify-center gap-1 font-ui text-[8px] tracking-wider text-ink-muted sm:text-[9px] md:text-[10px]">
+                      <span>买断制原神？</span>
+                      <ExternalLink className="h-2 w-2 opacity-60 sm:h-2.5 sm:w-2.5" />
                     </p>
                   </div>
                 </div>
@@ -236,10 +320,38 @@ export default function EpheiaPage() {
           </div>
 
           {/* 3. 木夹子：图层 z-30，最外层，正正好好夹在绳索与相框交界处 */}
-          <div className="pointer-events-none absolute inset-x-0 top-[30px] z-30 flex justify-center">
+          <div className="pointer-events-none absolute inset-x-0 top-[30px] z-30 flex justify-center gap-3 sm:gap-6 md:gap-8 lg:gap-10">
+            {/* 夹子 1（动漫） */}
             <div
+              className="flex w-[110px] justify-center sm:w-[170px] md:w-[195px] lg:w-[210px]"
               style={{
-                transform: "rotate(-2deg)",
+                transform: "rotate(-3deg)",
+                transformOrigin: "top center",
+              }}
+            >
+              <div className="-mt-[16px]">
+                <Clothespin />
+              </div>
+            </div>
+
+            {/* 夹子 2（欧卡游戏） */}
+            <div
+              className="flex w-[110px] justify-center sm:w-[170px] md:w-[195px] lg:w-[210px]"
+              style={{
+                transform: "rotate(-0.5deg)",
+                transformOrigin: "top center",
+              }}
+            >
+              <div className="-mt-[16px]">
+                <Clothespin />
+              </div>
+            </div>
+
+            {/* 夹子 3（优米雅） */}
+            <div
+              className="flex w-[110px] justify-center sm:w-[170px] md:w-[195px] lg:w-[210px]"
+              style={{
+                transform: "rotate(3deg)",
                 transformOrigin: "top center",
               }}
             >
@@ -252,119 +364,185 @@ export default function EpheiaPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 1. 右侧斜着滑入的小弹窗（无关闭按钮，展示两个倒计时） */}
+      {/* ========================================================================= */}
+      {/* 1. 右侧小卡片（默认缩在右上角落，微露尖角，鼠标悬浮向左滑出，点击展开时光详情） */}
       {/* ========================================================================= */}
       <aside
-        onClick={() => setModalOpen(true)}
+        onClick={() => {
+          setModalFocus("all");
+          setModalOpen(true);
+        }}
         className={cn(
-          "fixed right-4 top-28 z-30 w-[290px] cursor-pointer select-none rounded-xs border-2 border-rule-strong bg-paper p-5 sm:right-8 sm:w-[320px]",
-          "shadow-[0_20px_45px_rgba(0,0,0,0.12),0_6px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_45px_rgba(0,0,0,0.45)]",
-          "transition-all duration-700 ease-out",
-          // 斜着出来的入场动效：从右侧平移并带有斜切角度；弹窗展开时平滑隐去
+          "group fixed right-0 top-24 z-30 w-[290px] cursor-pointer select-none rounded-xs border-2 border-rule-strong bg-paper p-5 sm:top-28 sm:w-[320px]",
+          "shadow-[-8px_16px_36px_rgba(0,0,0,0.12),-2px_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[-8px_16px_36px_rgba(0,0,0,0.45)]",
+          "transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)",
+          // 触控与鼠标延展区，防止滑出过程中由于边缘位移导致丢失 hover
+          "after:absolute after:inset-y-0 after:left-full after:w-16 after:pointer-events-auto",
           modalOpen
-            ? "pointer-events-none translate-x-28 opacity-0"
+            ? "pointer-events-none translate-x-full opacity-0"
             : cardMounted
-              ? "translate-x-0 -rotate-3 opacity-100 hover:rotate-0 hover:scale-[1.02] hover:border-stamp"
-              : "translate-x-36 rotate-12 opacity-0",
+              ? "translate-x-[calc(100%-28px)] -rotate-6 opacity-95 hover:-translate-x-4 hover:rotate-0 hover:opacity-100 hover:border-stamp hover:shadow-[0_24px_50px_rgba(0,0,0,0.18)] sm:translate-x-[calc(100%-32px)] sm:hover:-translate-x-6"
+              : "translate-x-full rotate-12 opacity-0",
         )}
         style={{ transformOrigin: "top right" }}
-        title="点击展开时光详情"
+        title="点击展开两段光阴对望"
         role="button"
         tabIndex={0}
       >
-        {/* 复古挂扣 / 图章条 */}
-        <div className="flex items-center justify-between border-b border-dashed border-rule-soft/80 pb-3">
-          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
-            <Compass className="h-3.5 w-3.5 text-stamp" />
-            <span>EPHEIA · CHRONO</span>
-          </div>
-          <span className="flex items-center gap-1 rounded-full bg-stamp/10 px-2 py-0.5 font-ui text-[10px] font-semibold text-stamp">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-stamp" />
-            <span>实时跳动</span>
+        {/* 缩在角落时露出的微型图章标签（滑出时淡出） */}
+        <div className="pointer-events-none absolute left-1.5 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1.5 text-stamp opacity-80 transition-opacity duration-300 group-hover:opacity-0">
+          <Compass className="h-3.5 w-3.5 animate-pulse" />
+          <span className="font-mono text-[9px] font-bold uppercase tracking-widest [writing-mode:vertical-lr] text-ink-muted">
+            刻度
           </span>
         </div>
 
-        {/* 倒计时 1：Epheia 离开 Sy */}
-        <div className="group/item mt-4 rounded-xs p-2 transition-colors hover:bg-paper-warm/50">
-          <p className="font-serif text-[13px] italic text-ink-muted">
-            Epheia 离开 Sy 已
-          </p>
-          <div className="mt-1 flex items-baseline justify-between">
-            <div className="flex items-baseline gap-1.5 text-stamp">
-              <span className="font-display text-[34px] font-bold leading-none tabular-nums">
-                {daysEpheiaLeavesSy}
-              </span>
-              <span className="font-serif text-[14px] text-ink-muted">天</span>
+        {/* 卡片完整内容（悬浮滑出时淡入呈现） */}
+        <div className="opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          {/* 复古挂扣 / 图章条 */}
+          <div className="flex items-center justify-between border-b border-dashed border-rule-soft/80 pb-3">
+            <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
+              <Compass className="h-3.5 w-3.5 text-stamp" />
+              <span>EPHEIA · CHRONO</span>
             </div>
-            <span className="font-mono text-[10px] text-ink-faded">2026.07.24</span>
+            <span className="flex items-center gap-1 rounded-full bg-stamp/10 px-2 py-0.5 font-ui text-[10px] font-semibold text-stamp">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-stamp" />
+              <span>实时跳动</span>
+            </span>
           </div>
-        </div>
 
-        <div className="my-2.5 border-t border-dashed border-rule-soft/50" />
-
-        {/* 倒计时 2：Epheia 离开这个世界（按秒跳动） */}
-        <div className="group/item rounded-xs p-2 transition-colors hover:bg-paper-warm/50">
-          <p className="font-serif text-[13px] italic text-ink-muted">
-            Epheia 离开这个世界已
-          </p>
-          <div className="mt-1 flex items-baseline justify-between text-stamp">
-            <div className="flex items-baseline gap-1">
-              <span className="font-display text-[26px] font-bold leading-none tabular-nums">
-                {epheiaWorldTime.days}
+          {/* 倒计时 1：Epheia 离开 Sy（独立点击切换为单独该板块详情） */}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalFocus("epheia_sy");
+              setModalOpen(true);
+            }}
+            className="group/item mt-4 cursor-pointer rounded-xs p-2 transition-all hover:bg-paper-warm/80 hover:shadow-xs active:scale-[0.99]"
+            title="点击查看「Epheia 离开 Sy」详情"
+            role="button"
+            tabIndex={0}
+          >
+            <div className="flex items-center justify-between">
+              <p className="font-serif text-[13px] italic text-ink-muted group-hover/item:text-stamp">
+                Epheia 离开 Sy 已
+              </p>
+              <span className="font-mono text-[9px] uppercase text-ink-faded opacity-0 transition-opacity group-hover/item:opacity-100">
+                查看单项 →
               </span>
-              <span className="font-serif text-[12px] text-ink-muted mr-1">天</span>
-              <span className="font-mono text-[18px] font-bold tabular-nums">
-                {String(epheiaWorldTime.hours).padStart(2, "0")}:
-                {String(epheiaWorldTime.minutes).padStart(2, "0")}:
-                <span className="animate-pulse text-stamp">
-                  {String(epheiaWorldTime.seconds).padStart(2, "0")}
+            </div>
+            <div className="mt-1 flex items-baseline justify-between">
+              <div className="flex items-baseline gap-1.5 text-stamp">
+                <span className="font-display text-[34px] font-bold leading-none tabular-nums">
+                  {daysEpheiaLeavesSy}
                 </span>
-              </span>
+                <span className="font-serif text-[14px] text-ink-muted">天</span>
+              </div>
+              <span className="font-mono text-[10px] text-ink-faded">2026.07.24</span>
             </div>
           </div>
-          <p className="mt-1 font-mono text-[10px] text-ink-faded">
-            累计 {epheiaWorldTime.totalSeconds.toLocaleString()} 秒
-          </p>
-        </div>
 
-        {/* 底部点击提示栏 */}
-        <div className="mt-3 flex items-center justify-between border-t border-rule-soft/40 pt-2.5 font-ui text-[11px] font-semibold text-stamp">
-          <span>点击日期查看详情</span>
-          <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+          <div className="my-2.5 border-t border-dashed border-rule-soft/50" />
+
+          {/* 倒计时 2：Epheia 离开这个世界（独立点击切换为单独该板块秒表详情） */}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalFocus("epheia_world");
+              setModalOpen(true);
+            }}
+            className="group/item cursor-pointer rounded-xs p-2 transition-all hover:bg-paper-warm/80 hover:shadow-xs active:scale-[0.99]"
+            title="点击查看「Epheia 离开这个世界」秒表详情"
+            role="button"
+            tabIndex={0}
+          >
+            <div className="flex items-center justify-between">
+              <p className="font-serif text-[13px] italic text-ink-muted group-hover/item:text-stamp">
+                Epheia 离开这个世界已
+              </p>
+              <span className="font-mono text-[9px] uppercase text-ink-faded opacity-0 transition-opacity group-hover/item:opacity-100">
+                查看单项 →
+              </span>
+            </div>
+            <div className="mt-1 flex items-baseline justify-between text-stamp">
+              <div className="flex items-baseline gap-1">
+                <span className="font-display text-[26px] font-bold leading-none tabular-nums">
+                  {epheiaWorldTime.days}
+                </span>
+                <span className="font-serif text-[12px] text-ink-muted mr-1">天</span>
+                <span className="font-mono text-[18px] font-bold tabular-nums">
+                  {String(epheiaWorldTime.hours).padStart(2, "0")}:
+                  {String(epheiaWorldTime.minutes).padStart(2, "0")}:
+                  <span className="animate-pulse text-stamp">
+                    {String(epheiaWorldTime.seconds).padStart(2, "0")}
+                  </span>
+                </span>
+              </div>
+            </div>
+            <p className="mt-1 font-mono text-[10px] text-ink-faded">
+              累计 {epheiaWorldTime.totalSeconds.toLocaleString()} 秒
+            </p>
+          </div>
+
+          {/* 底部点击提示栏：点击展开光阴对望总览 */}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalFocus("all");
+              setModalOpen(true);
+            }}
+            className="mt-3 flex cursor-pointer items-center justify-between border-t border-rule-soft/40 pt-2.5 font-ui text-[11px] font-semibold text-stamp transition-colors hover:text-ink-strong"
+            title="点击展开两段光阴对望总览"
+          >
+            <span>点击日期查看详情</span>
+            <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+          </div>
         </div>
       </aside>
 
       {/* ========================================================================= */}
-      {/* 2. 左侧注脚小卡片（在左侧面，向右微倾，小小的，记录着夏天的三句话） */}
+      {/* 2. 左侧注脚小卡片（默认缩在左上角落，微露尖角，鼠标悬浮向右滑出） */}
       {/* ========================================================================= */}
       <aside
         className={cn(
-          "fixed left-4 top-28 z-30 w-[240px] select-none rounded-xs border border-rule-strong/80 bg-paper p-5 sm:left-8 sm:top-28 sm:w-[268px] sm:p-6",
-          "shadow-[0_12px_28px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.04)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.35)]",
-          "transition-all duration-700 ease-out",
-          // 悬挂在左上侧面，与右侧计时器对称，完全在全屏绳索上方，绝不遮挡绳子
+          "group fixed left-0 top-24 z-30 w-[240px] select-none rounded-xs border-2 border-rule-strong/80 bg-paper p-5 sm:top-28 sm:w-[268px] sm:p-6",
+          "shadow-[8px_16px_36px_rgba(0,0,0,0.08),2px_4px_12px_rgba(0,0,0,0.04)] dark:shadow-[8px_16px_36px_rgba(0,0,0,0.35)]",
+          "transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)",
+          // 触控与鼠标延展区，防止滑出过程中由于边缘位移导致丢失 hover
+          "before:absolute before:inset-y-0 before:right-full before:w-16 before:pointer-events-auto",
           modalOpen
-            ? "pointer-events-none -translate-x-12 opacity-0"
+            ? "pointer-events-none -translate-x-full opacity-0"
             : cardMounted
-              ? "translate-x-0 rotate-[4.5deg] opacity-100 hover:rotate-1 hover:border-stamp"
-              : "-translate-x-16 -rotate-6 opacity-0",
+              ? "translate-x-[calc(-100%+28px)] rotate-6 opacity-95 hover:translate-x-4 hover:rotate-0 hover:opacity-100 hover:border-stamp hover:shadow-[0_24px_50px_rgba(0,0,0,0.18)] sm:translate-x-[calc(-100%+32px)] sm:hover:translate-x-6"
+              : "-translate-x-full -rotate-12 opacity-0",
         )}
-        style={{ transformOrigin: "bottom left" }}
+        style={{ transformOrigin: "top left" }}
         aria-label="时光注脚"
       >
-        <div className="flex items-center justify-between border-b border-dashed border-rule-soft/60 pb-2.5">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
-            FOOTNOTE · 注脚
-          </span>
-          <span className="font-ui text-[9px] font-semibold uppercase tracking-wider text-stamp">
-            2026 夏末
+        {/* 缩在角落时露出的微型图章标签（滑出时淡出） */}
+        <div className="pointer-events-none absolute right-1.5 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1.5 text-stamp opacity-80 transition-opacity duration-300 group-hover:opacity-0">
+          <Bookmark className="h-3.5 w-3.5" />
+          <span className="font-mono text-[9px] font-bold uppercase tracking-widest [writing-mode:vertical-lr] text-ink-muted">
+            注脚
           </span>
         </div>
 
-        <div className="mt-4 space-y-2 font-serif text-[13.5px] leading-relaxed sm:text-[14px]">
-          <p className="text-ink-body">“夏天结束了。”</p>
-          <p className="pl-3 text-ink-muted">“还会再来吗？”</p>
-          <p className="pl-6 font-medium text-stamp">“还会，但 Epheia 不会了”</p>
+        {/* 卡片完整内容（悬浮滑出时淡入呈现） */}
+        <div className="opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="flex items-center justify-between border-b border-dashed border-rule-soft/60 pb-2.5">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
+              FOOTNOTE · 注脚
+            </span>
+            <span className="font-ui text-[9px] font-semibold uppercase tracking-wider text-stamp">
+              2026 夏末
+            </span>
+          </div>
+
+          <div className="mt-4 space-y-2 font-serif text-[13.5px] leading-relaxed sm:text-[14px]">
+            <p className="text-ink-body">“夏天结束了。”</p>
+            <p className="pl-3 text-ink-muted">“还会再来吗？”</p>
+            <p className="pl-6 font-medium text-stamp">“还会，但 Epheia 不会了”</p>
+          </div>
         </div>
       </aside>
       {/* 2. 独立弹窗：从右往左平滑滑入到屏幕正中间 */}
