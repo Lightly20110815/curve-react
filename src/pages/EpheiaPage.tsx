@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Compass,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nowPlaying } from "@/lib/music-controller";
+import FreefallDarkroom from "@/components/FreefallDarkroom";
 
 // 两个关键时间坐标
 const DATE_EPHEIA_LEAVES_SY = "2026-07-24T00:00:00+08:00";
@@ -66,6 +67,135 @@ function Clothespin({ className }: { className?: string }) {
   );
 }
 
+/** 挂在绳索上的复古耳机线与 3.5mm 镀金音频插头挂件 */
+function HeadphoneCordHang({
+  isPlaying,
+  isOpen,
+  onClick,
+  className,
+}: {
+  isPlaying: boolean;
+  isOpen: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      className={cn(
+        "group/cord relative flex flex-col items-center cursor-pointer select-none",
+        className,
+      )}
+      style={{
+        transformOrigin: "top center",
+      }}
+      title="急需耳机线输液给心脏 · 进入文字 PV"
+      aria-label="进入自由落体文字 PV"
+      aria-haspopup="dialog"
+      aria-expanded={isOpen}
+      role="button"
+      tabIndex={0}
+    >
+      {/* 悬垂晃动的耳机线与金属插头（悬停时轻柔钟摆摆动） */}
+      <div className="relative -mt-1 pt-0 flex flex-col items-center origin-top transition-transform duration-500 ease-out group-hover/cord:rotate-6 group-hover/cord:scale-105">
+        {/* 白灰色耳机曲线 (SVG 物理垂坠感) */}
+        <svg width="44" height="120" viewBox="0 0 44 120" fill="none" className="overflow-visible drop-shadow-sm">
+          {/* 线条自然柔韧弧线：线底柔和投影 */}
+          <path
+            d="M 22 -4 C 22 12, 11 22, 13 38 C 15 54, 32 65, 28 86 C 25 102, 22 110, 22 118"
+            stroke="rgba(0, 0, 0, 0.15)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            className="dark:stroke-black/50"
+          />
+          {/* 线体主色：日间为深炭黑橡胶线（浅色纸上清晰可读），夜间回到浅灰白亮线 */}
+          <path
+            d="M 22 -5 C 22 11, 11 21, 13 37 C 15 53, 32 64, 28 85 C 25 101, 22 109, 22 117"
+            stroke="#1e293b"
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="dark:stroke-[#cbd5e1]"
+          />
+          {/* 日间：圆柱高光细线，模拟橡胶线反光（夜间隐藏，改用编织纹理虚线） */}
+          <path
+            d="M 22 -5 C 22 11, 11 21, 13 37 C 15 53, 32 64, 28 85 C 25 101, 22 109, 22 117"
+            stroke="#475569"
+            strokeWidth="0.9"
+            strokeLinecap="round"
+            className="opacity-90 dark:hidden"
+          />
+          {/* 夜间：编织纹理虚线（日间隐藏） */}
+          <path
+            d="M 22 -5 C 22 11, 11 21, 13 37 C 15 53, 32 64, 28 85 C 25 101, 22 109, 22 117"
+            stroke="#94a3b8"
+            strokeWidth="0.8"
+            strokeDasharray="2 3"
+            strokeLinecap="round"
+            className="hidden opacity-40 dark:block dark:stroke-[#64748b]"
+          />
+        </svg>
+
+        {/* 3.5mm 经典镀金音频插头 */}
+        <div className="relative -mt-1 flex flex-col items-center">
+          {/* 播放时的微小律动光环 */}
+          {isPlaying && (
+            <div className="pointer-events-none absolute -inset-2 animate-ping rounded-full bg-stamp/25" />
+          )}
+
+          <svg width="18" height="42" viewBox="0 0 18 42" fill="none" className="drop-shadow-md">
+            {/* 橡胶防折护套 */}
+            <rect x="7" y="0" width="4" height="6" rx="1" fill="#334155" />
+            <line x1="6" y1="2" x2="12" y2="2" stroke="#475569" strokeWidth="1" />
+            <line x1="6" y1="4" x2="12" y2="4" stroke="#475569" strokeWidth="1" />
+
+            {/* 金属滚花手柄套筒 */}
+            <rect
+              x="5"
+              y="6"
+              width="8"
+              height="15"
+              rx="1.5"
+              fill={isOpen ? "#991b1b" : "#1e293b"}
+              stroke="#0f172a"
+              strokeWidth="0.8"
+              className="transition-colors duration-300"
+            />
+            <line x1="5.5" y1="10" x2="12.5" y2="10" stroke="#64748b" strokeWidth="0.8" />
+            <line x1="5.5" y1="14" x2="12.5" y2="14" stroke="#64748b" strokeWidth="0.8" />
+            <line x1="5.5" y1="17" x2="12.5" y2="17" stroke="#64748b" strokeWidth="0.8" />
+
+            {/* 3.5mm 镀金公头插针 */}
+            <rect x="6.5" y="21" width="5" height="3" fill="#d97706" />
+            {/* 绝缘环 1 */}
+            <rect x="6.5" y="24" width="5" height="1" fill="#0f172a" />
+            {/* 环段接触 (金色) */}
+            <rect x="6.5" y="25" width="5" height="4" fill="#f59e0b" />
+            {/* 绝缘环 2 */}
+            <rect x="6.5" y="29" width="5" height="1" fill="#0f172a" />
+            {/* 尖段接触 (高光金) */}
+            <rect x="6.5" y="30" width="5" height="5" fill="#fbbf24" />
+            {/* 倒角针尖 */}
+            <path d="M 6.5 35 L 9 41 L 11.5 35 Z" fill="#d97706" stroke="#b45309" strokeWidth="0.5" />
+          </svg>
+
+          {/* 极其克制微弱的悬停小提示 */}
+          <div className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 transition-opacity duration-300 group-hover/cord:opacity-100">
+            <span className="rounded-xs bg-paper-warm/95 px-1.5 py-0.5 font-mono text-[9px] font-medium text-ink-muted border border-rule-soft shadow-xs">
+              {isOpen ? (isPlaying ? "● 正在输液" : "○ 已暂停") : "3.5mm 耳机线"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EpheiaPage() {
   useLayoutEffect(() => {
     nowPlaying.setEpheiaMode(true);
@@ -90,6 +220,55 @@ export default function EpheiaPage() {
   const [modalFocus, setModalFocus] = useState<
     "all" | "epheia_sy" | "epheia_world"
   >("all");
+
+  // 自由落体 Remix 彩蛋状态
+  const [isFreefallOpen, setIsFreefallOpen] = useState(false);
+  const [freefallPlaying, setFreefallPlaying] = useState(false);
+
+  const freefallAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 点击耳机线插头交互：进入暗房
+  const handleToggleFreefall = () => {
+    if (isFreefallOpen) return; // 暗房打开时不响应（由暗房自身管理退出）
+    setIsFreefallOpen(true);
+
+    const audio = freefallAudioRef.current;
+    if (!audio) return;
+
+    // 暂停主站播放器
+    if (nowPlaying.isPlaying) {
+      nowPlaying.togglePlay();
+    }
+    // 从头开始播放
+    audio.currentTime = 0;
+    void audio.play().catch(() => {});
+  };
+
+  // 暗房退出回调
+  const handleCloseFreefall = () => {
+    if (freefallAudioRef.current) {
+      freefallAudioRef.current.pause();
+    }
+    setFreefallPlaying(false);
+    setIsFreefallOpen(false);
+  };
+
+  // 音频事件监听
+  useEffect(() => {
+    const audio = freefallAudioRef.current;
+    if (!audio) return;
+    const onPlaying = () => setFreefallPlaying(true);
+    const onEnded = () => setFreefallPlaying(false);
+    audio.addEventListener("playing", onPlaying);
+    audio.addEventListener("pause", onEnded);
+    audio.addEventListener("ended", onEnded);
+    return () => {
+      audio.removeEventListener("playing", onPlaying);
+      audio.removeEventListener("pause", onEnded);
+      audio.removeEventListener("ended", onEnded);
+      audio.pause();
+    };
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -284,9 +463,24 @@ export default function EpheiaPage() {
                 </div>
               </a>
             </div>
+
+            {/* 挂件 4：垂落的耳机线与 3.5mm 镀金音频插头（隐秘彩蛋入口） */}
+            <div
+              className="flex w-[70px] sm:w-[100px] md:w-[120px] lg:w-[130px] justify-center"
+              style={{
+                transform: "rotate(1.5deg)",
+                transformOrigin: "top center",
+              }}
+            >
+              <HeadphoneCordHang
+                isPlaying={freefallPlaying}
+                isOpen={isFreefallOpen}
+                onClick={handleToggleFreefall}
+              />
+            </div>
           </div>
 
-          {/* 2. 全宽 SVG 绳索：图层 z-20，永远横贯在卡片之上，绝不会被卡片遮挡！ */}
+          {/* 2. 全宽 SVG 绳索：图层 z-20，自然下垂弧线 (全屏纯麻绳贯穿) */}
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-12 w-full">
             <svg
               className="h-12 w-full overflow-visible"
@@ -294,7 +488,7 @@ export default function EpheiaPage() {
               preserveAspectRatio="none"
               fill="none"
             >
-              {/* 绳索微阴影 */}
+              {/* 麻绳微阴影 (0 ~ 1000) */}
               <path
                 d="M 0 21 Q 500 31 1000 21"
                 stroke="rgba(0, 0, 0, 0.15)"
@@ -319,7 +513,7 @@ export default function EpheiaPage() {
             </svg>
           </div>
 
-          {/* 3. 木夹子：图层 z-30，最外层，正正好好夹在绳索与相框交界处 */}
+          {/* 3. 木夹子：图层 z-30，最外层，4个夹子整齐夹在麻绳上 */}
           <div className="pointer-events-none absolute inset-x-0 top-[30px] z-30 flex justify-center gap-3 sm:gap-6 md:gap-8 lg:gap-10">
             {/* 夹子 1（动漫） */}
             <div
@@ -359,9 +553,39 @@ export default function EpheiaPage() {
                 <Clothespin />
               </div>
             </div>
+
+            {/* 夹子 4（耳机线挂件） */}
+            <div
+              className="flex w-[70px] sm:w-[100px] md:w-[120px] lg:w-[130px] justify-center"
+              style={{
+                transform: "rotate(1.5deg)",
+                transformOrigin: "top center",
+              }}
+            >
+              <div className="-mt-[16px]">
+                <Clothespin />
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* 自由落体 Remix 音频实体 */}
+      <audio
+        ref={freefallAudioRef}
+        src="/audio/freefall/song.mp3"
+        preload="metadata"
+      />
+
+      {/* ========================================================================= */}
+      {/* 暗房：点击耳机线后进入的全屏沉浸式歌词体验                                  */}
+      {/* ========================================================================= */}
+      {isFreefallOpen && (
+        <FreefallDarkroom
+          audioRef={freefallAudioRef}
+          onClose={handleCloseFreefall}
+        />
+      )}
 
       {/* ========================================================================= */}
       {/* ========================================================================= */}

@@ -18,7 +18,7 @@ export const comments = {
   enabled: true,
   twikoo: {
     js: viteEnv.VITE_TWIKOO_JS || "https://cdn.jsdelivr.net/npm/twikoo@1.6.42/dist/twikoo.all.min.js",
-    envId: viteEnv.VITE_TWIKOO_ENV_ID || "https://twikoo.ddnsy.fun/",
+    envId: viteEnv.VITE_TWIKOO_ENV_ID || "https://twikoo.20110815.xyz/",
     lang: viteEnv.VITE_TWIKOO_LANG || "zh-CN",
     region: viteEnv.VITE_TWIKOO_REGION || "",
   },

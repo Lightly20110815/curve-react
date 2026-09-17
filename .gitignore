@@ -11,3 +11,7 @@ dist-ssr
 src/content/generated/
 public/rss.xml
 public/Musics/manifest.json
+
+# 临时文件
+downloads/
+scan_lyrics.swift
