@@ -9,6 +9,11 @@ export interface Post {
   categories: string[];
   tags: string[];
   cover?: string;
+  /** 特殊版式，例如 "memorial"（纪念页），未设置时使用标准文章版式 */
+  layout?: string;
+  /** memorial 版式页尾的名字与年份 */
+  memorialName?: string;
+  memorialYears?: string;
   articleGPT: boolean;
   html: string;
   readingMinutes: number;

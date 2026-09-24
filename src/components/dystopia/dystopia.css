@@ -1,0 +1,302 @@
+/* ===========================================================================
+   反乌托邦 Pt.2 // 沉浸式电影级动画 PV 暗房
+   视觉风格：赛博工业巨构 / 霓虹光晕 / 矢量动态排版 / 3.5mm 音频生命线
+   =========================================================================== */
+
+.dp-theater {
+  --phosphor: #96ffc8;
+  --amber: #ffb04a;
+  --alert: #ef4444;
+  --ink: #d7ffe9;
+  --dim: #2c4a3c;
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  overflow: hidden;
+  background: #04070a;
+  color: var(--phosphor);
+  font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
+  outline: none;
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  -webkit-font-smoothing: antialiased;
+}
+.dp-theater[data-entered="true"] { opacity: 1; }
+.dp-theater[data-exiting="true"] { opacity: 0; }
+
+.dp-theater__screen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  background: #04070a;
+}
+
+/* 极其微妙的电影胶片感颗粒与柔和 LED 滤镜（绝不遮挡或马赛克化高分辨率矢量文字） */
+.dp-theater__led {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(0, 0, 0, 0) 65%, rgba(0, 0, 0, 0.4) 100%);
+  background-size: 4px 4px;
+  background-position: center;
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+}
+
+/* 横向微弱扫描线 + 缓慢滚动的胶片刷新带 */
+.dp-theater__scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 0 1px, rgba(0, 0, 0, 0) 1px 3px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.03), rgba(0, 0, 0, 0) 18%, rgba(0, 0, 0, 0) 82%, rgba(245, 158, 11, 0.03));
+  mix-blend-mode: screen;
+}
+.dp-theater__scanlines::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20%;
+  top: -22%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0));
+  animation: dp-refresh 8s linear infinite;
+}
+@keyframes dp-refresh {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(600%); }
+}
+
+.dp-theater__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 160px 30px rgba(0, 0, 0, 0.85);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* 极其微弱的电流轻微闪烁 */
+.dp-theater__flicker {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(56, 189, 248, 0.015);
+  animation: dp-flicker 5.5s steps(1) infinite;
+}
+@keyframes dp-flicker {
+  0%, 96%, 100% { opacity: 0.2; }
+  97% { opacity: 0.7; }
+  98% { opacity: 0.1; }
+  99% { opacity: 0.4; }
+}
+
+/* 顶部 / 底部 HUD ---------------------------------------------------------------- */
+.dp-theater__hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 24px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--phosphor);
+  text-shadow: 0 0 8px rgba(150, 255, 200, 0.55);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 10;
+}
+.dp-theater__hud--top { top: 0; justify-content: space-between; }
+.dp-theater__hud--bottom { bottom: 0; flex-direction: column; align-items: stretch; gap: 10px; }
+.dp-theater[data-controls="false"] .dp-theater__hud { opacity: 0; }
+
+.dp-theater__brand,
+.dp-theater__readout,
+.dp-theater__tc { display: flex; align-items: center; gap: 12px; }
+.dp-theater__muted { color: rgba(150, 255, 200, 0.5); }
+
+.dp-theater__rec {
+  width: 9px;
+  height: 9px;
+  background: var(--dim);
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgba(150, 255, 200, 0.25);
+}
+.dp-theater__rec[data-live="true"] {
+  background: var(--alert);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.9);
+  animation: dp-blink 1.1s steps(1) infinite;
+}
+@keyframes dp-blink { 50% { opacity: 0.35; } }
+
+.dp-theater__title { font-weight: 600; color: #ffffff; }
+.dp-theater__badge {
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(255, 176, 74, 0.6);
+  box-shadow: inset 0 0 8px rgba(255, 176, 74, 0.15);
+  border-radius: 2px;
+}
+.dp-theater__spec { color: rgba(150, 255, 200, 0.6); font-size: 9px; }
+
+.dp-theater__tc {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #ffffff;
+}
+.dp-theater__tc-sep { opacity: 0.4; }
+.dp-theater__tc-tot { color: rgba(150, 255, 200, 0.6); }
+
+/* 分段块状进度轨 */
+.dp-theater__rail {
+  position: relative;
+  height: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.dp-theater__rail-seg {
+  flex: 1 1 0;
+  height: 5px;
+  background: rgba(150, 255, 200, 0.15);
+  transition: background 0.1s linear;
+  border-radius: 1px;
+}
+.dp-theater__rail-seg[data-on="true"] {
+  background: var(--phosphor);
+  box-shadow: 0 0 8px rgba(150, 255, 200, 0.8);
+}
+.dp-theater__rail-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--amber);
+  box-shadow: 0 0 8px rgba(255, 176, 74, 0.9);
+}
+.dp-theater__rail-head {
+  position: absolute;
+  top: -2px;
+  width: 3px;
+  height: 18px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 1);
+  border-radius: 1px;
+}
+
+.dp-theater__hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: rgba(150, 255, 200, 0.65);
+}
+.dp-theater__hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  margin-right: 4px;
+  background: rgba(150, 255, 200, 0.1);
+  border: 1px solid rgba(150, 255, 200, 0.35);
+  border-radius: 2px;
+  color: #ffffff;
+  font-family: inherit;
+}
+
+/* 暂停/播放大门遮罩 ------------------------------------------------------------- */
+.dp-theater__gate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(4, 7, 10, 0.6);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  z-index: 20;
+  transition: background 0.3s ease;
+}
+.dp-theater__gate:hover {
+  background: rgba(4, 7, 10, 0.5);
+}
+.dp-theater__play {
+  width: 72px;
+  height: 72px;
+  border: 2px solid var(--phosphor);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(150, 255, 200, 0.5), inset 0 0 16px rgba(150, 255, 200, 0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.dp-theater__gate:hover .dp-theater__play {
+  transform: scale(1.1);
+  box-shadow: 0 0 32px rgba(150, 255, 200, 0.8), inset 0 0 20px rgba(150, 255, 200, 0.35);
+}
+.dp-theater__play::after {
+  content: "";
+  display: block;
+  margin-left: 5px;
+  border-left: 20px solid var(--phosphor);
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  filter: drop-shadow(0 0 8px rgba(150, 255, 200, 0.8));
+}
+.dp-theater__gate[data-ended="true"] .dp-theater__play::after {
+  margin-left: 0;
+  border: none;
+  width: 18px;
+  height: 18px;
+  background: var(--amber);
+  box-shadow: 0 0 12px rgba(255, 176, 74, 0.9);
+}
+.dp-theater__gate-label {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #ffffff;
+  text-shadow: 0 0 16px rgba(150, 255, 200, 0.8);
+}
+.dp-theater__gate-sub {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 临时操作提示浮层 ------------------------------------------------------------- */
+.dp-theater__transient {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 24px;
+  background: rgba(4, 7, 10, 0.85);
+  border: 1px solid var(--phosphor);
+  box-shadow: 0 0 24px rgba(150, 255, 200, 0.4);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 30;
+  animation: dp-pop 0.2s ease-out;
+}
+@keyframes dp-pop {
+  0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}

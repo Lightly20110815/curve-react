@@ -8,6 +8,7 @@ import { ArticleAiSummary } from "@/components/ArticleAiSummary";
 import { useArticleAi } from "@/components/ArticleAiProvider";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { ReadingProgress } from "@/components/ReadingProgress";
+import MemorialPostPage from "@/pages/MemorialPostPage";
 import { TwikooComments } from "@/components/TwikooComments";
 import { useZenMode } from "@/components/ZenModeProvider";
 import { buttonVariants } from "@/components/ui/button";
@@ -89,6 +90,11 @@ export default function PostPage() {
         </div>
       </div>
     );
+  }
+
+  // 特殊版式：纪念页（所有 hooks 都在上面，这里提前返回是安全的）
+  if (post.layout === "memorial") {
+    return <MemorialPostPage post={post} />;
   }
 
   const navPool = asOf ? filterByAsOf(posts, asOf) : posts;

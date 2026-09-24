@@ -40,6 +40,9 @@ interface RawFrontmatter {
   categories?: string[] | string;
   tags?: string[] | string;
   cover?: string;
+  layout?: string;
+  memorialName?: string;
+  memorialYears?: string;
   articleGPT?: boolean;
   draft?: boolean;
   [key: string]: unknown;
@@ -180,6 +183,9 @@ export interface PostRecord {
   categories: string[];
   tags: string[];
   cover?: string;
+  layout?: string;
+  memorialName?: string;
+  memorialYears?: string;
   articleGPT: boolean;
   html: string;
   readingMinutes: number;
@@ -263,6 +269,9 @@ async function processPost(filename: string): Promise<PostRecord | null> {
     categories: toArray(data.categories),
     tags: toArray(data.tags),
     cover: typeof data.cover === "string" ? data.cover : undefined,
+    layout: typeof data.layout === "string" ? data.layout : undefined,
+    memorialName: data.memorialName != null ? String(data.memorialName) : undefined,
+    memorialYears: data.memorialYears != null ? String(data.memorialYears) : undefined,
     articleGPT: typeof data.articleGPT === "boolean" ? data.articleGPT : true,
     html,
     wordCount: stats.wordCount,

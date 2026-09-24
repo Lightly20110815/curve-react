@@ -1,0 +1,162 @@
+/*
+ * /epheia — 她的墨水。
+ *
+ * 页面本身还是 Sy 的报纸（paper / ink / stamp，随时间主题变化）；
+ * 只有 Epheia 说话的地方用她自己站点「わたくしのつぶやき」的颜色和样式。
+ * --eph-* 不跟随 data-time-theme：纸会随时间变，她的颜色不变。
+ *
+ * #d88c9a / #f4c2c2 在浅色纸上对比度只有约 2.1:1，只用于线条、边框和填充，不用于文字。
+ */
+.eph-page {
+  --eph-font: system-ui, -apple-system, "PingFang SC", "Hiragino Sans", "Noto Sans SC", "Noto Sans JP", sans-serif;
+  --eph-ink: #5c4b51;
+  --eph-rose: #8c4356;
+  --eph-muted: #67565c;
+  --eph-petal: #d88c9a;
+  --eph-track: #f4c2c2;
+  --eph-line: rgb(216 140 154 / 0.4);
+  --eph-sheet: linear-gradient(135deg, #fdfbfb, #f1f3f4);
+  --eph-sheet-line: rgb(216 140 154 / 0.3);
+  --eph-card: rgb(255 255 255 / 0.65);
+  --eph-card-line: rgb(255 255 255 / 0.5);
+  --eph-pill: rgb(244 194 194 / 0.35);
+  --eph-sel: rgb(244 194 194 / 0.6);
+}
+
+.dark .eph-page {
+  --eph-ink: #ecd6dc;
+  --eph-rose: #e3a3b1;
+  --eph-muted: #bba7ae;
+  --eph-track: rgb(216 140 154 / 0.45);
+  --eph-line: rgb(216 140 154 / 0.35);
+  --eph-sheet: linear-gradient(135deg, #221b1f, #1d1a1c);
+  --eph-sheet-line: rgb(216 140 154 / 0.22);
+  --eph-card: rgb(255 255 255 / 0.04);
+  --eph-card-line: rgb(216 140 154 / 0.18);
+  --eph-pill: rgb(216 140 154 / 0.12);
+  --eph-sel: rgb(216 140 154 / 0.35);
+}
+
+/* 她站点标题的样子：细、字距拉开、玫瑰色 */
+.eph-title {
+  font-family: var(--eph-font);
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  margin-right: -0.25em;
+  color: var(--eph-rose);
+}
+
+.eph-voice {
+  font-family: var(--eph-font);
+  color: var(--eph-ink);
+}
+/* 日文按短语断行，不把「ですわ」拆开 */
+.eph-page [lang="ja"] {
+  word-break: auto-phrase;
+}
+.eph-voice::selection,
+.eph-voice ::selection {
+  background: var(--eph-sel);
+}
+
+.eph-small {
+  font-family: var(--eph-font);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--eph-muted);
+}
+
+.eph-sheet {
+  background: var(--eph-sheet);
+  border: 1px solid var(--eph-sheet-line);
+  border-radius: 8px;
+}
+
+.eph-card {
+  background: var(--eph-card);
+  border: 1px solid var(--eph-card-line);
+  border-radius: 8px;
+}
+
+.eph-tagtext {
+  font: 13px var(--eph-font);
+  color: var(--eph-rose);
+  margin-right: 0.4rem;
+}
+
+.eph-pill {
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 1px 10px;
+  font: 12px var(--eph-font);
+  color: var(--eph-rose);
+  background: var(--eph-pill);
+  border: 1px solid var(--eph-line);
+}
+
+.eph-num {
+  font: 500 13px var(--eph-font);
+  color: var(--eph-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.eph-link {
+  font-family: var(--eph-font);
+  color: var(--eph-rose);
+  border-bottom: 1px dashed var(--eph-line);
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+.eph-link:hover {
+  border-bottom-color: var(--eph-rose);
+}
+
+/* 她站点的时间线：一根细竖线 + 空心菱形 */
+.eph-track {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.eph-track::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: -1.5rem;
+  width: 1px;
+  background: var(--eph-track);
+}
+li:last-child > .eph-track::before {
+  bottom: 0;
+}
+.eph-diamond {
+  position: relative;
+  display: block;
+  margin-top: 0.35rem;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--eph-petal);
+  background: var(--eph-sheet);
+  transform: rotate(45deg);
+}
+
+.eph-focus:focus-visible {
+  outline: 2px solid var(--eph-rose);
+  outline-offset: 4px;
+}
+
+/* 从回复引用跳回原句时的短暂标记 */
+.eph-page .eph-fragment-text {
+  transition: background-color 600ms ease;
+}
+.eph-page .is-recalled {
+  background: hsl(var(--stamp-soft) / 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eph-page *,
+  .eph-page *::before,
+  .eph-page *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
