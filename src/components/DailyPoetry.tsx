@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { streamDeepSeekTask } from "@/lib/deepseek";
+import { callDeepSeekTask } from "@/lib/deepseek";
 import { useTheme } from "@/hooks/useTheme";
 const ORIGINAL_POETRY_API_URL = "https://v1.jinrishici.com/all.json";
 
@@ -198,7 +198,7 @@ export function DailyPoetry() {
     saveHistory(fallback);
   }
 
-  async function generate(attempt = 0, retryNote?: string) {
+  async function generate(attempt = 0) {
     abortRef.current?.abort();
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
@@ -209,17 +209,15 @@ export function DailyPoetry() {
     const history = loadHistory();
 
     try {
-      await streamDeepSeekTask(
+      const poetryContent = await callDeepSeekTask(
         {
           task: "daily-poetry",
           timeTheme,
-          retryNote: retryNote ? retryNote.slice(0, 100) : undefined,
-        },
-        (delta) => {
-          applyDraft(draftRef.current + delta);
         },
         { signal },
       );
+
+      await typewriteDraft(poetryContent, signal);
 
       const parsed = parseDraft(draftRef.current);
       const normalized = normalizeQuote(parsed.content);
@@ -227,17 +225,7 @@ export function DailyPoetry() {
       const isDuplicate = !normalized || historySet.has(normalized);
 
       if (isDuplicate && attempt < MAX_RETRIES) {
-        await generate(
-          attempt + 1,
-          [
-            "上一条与历史重复或格式不合规，请务必换成另一句真实存在于诗词、散文、古文或著名文章中的句子，并保持三行格式。",
-            timeTheme === "deep-night"
-              ? "这次请明显偏向安抚、静谧、适合夜里读的句子，不要热闹，不要惊烈。"
-              : "",
-          ]
-            .filter(Boolean)
-            .join(" "),
-        );
+        await generate(attempt + 1);
         return;
       }
 

@@ -91,7 +91,6 @@ export function ArticleAiReader({ article }: { article: ArticleAiDocument }) {
             role: turn.role,
             content: turn.content.slice(0, 300),
           })),
-          content: article.source.slice(0, 8000),
         },
         (delta) => {
           setMessages((prev) =>

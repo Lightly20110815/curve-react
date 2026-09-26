@@ -96,8 +96,7 @@ export function ArticleAiProvider({ children }: { children: ReactNode }) {
             action,
             selectedText: selectedText.slice(0, 500),
             surroundingText: surroundingText ? surroundingText.slice(0, 500) : undefined,
-            slug: activeArticle?.slug,
-            content: activeArticle?.source ? activeArticle.source.slice(0, 8000) : undefined,
+            slug: activeArticle.slug,
           },
           (delta) => {
             setSelectionPopover((prev) => {

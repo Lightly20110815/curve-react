@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import type { Post } from "@/content/posts";
 import { callDeepSeekTask } from "@/lib/deepseek";
 const CACHE_VERSION = "v1";
-const MAX_SOURCE_CHARS = 3200;
 
 type SummaryState = "loading" | "ready" | "error";
 
@@ -28,7 +27,6 @@ export function ArticleAiSummary({ post }: Props) {
     () => `article-ai-summary:${CACHE_VERSION}:${post.slug}:${post.date}:${contentSignature}`,
     [contentSignature, post.date, post.slug],
   );
-  const articleSource = useMemo(() => buildArticleSource(post.html), [post.html]);
 
   useEffect(() => {
     const cached = readCache(cacheKey);
@@ -68,7 +66,6 @@ export function ArticleAiSummary({ post }: Props) {
           {
             task: "summary",
             slug: post.slug,
-            content: articleSource,
           },
           { signal: controller.signal },
         ),
@@ -194,13 +191,6 @@ export function ArticleAiSummary({ post }: Props) {
       </div>
     </section>
   );
-}
-
-function buildArticleSource(html: string): string {
-  const text = new DOMParser().parseFromString(html, "text/html").body.textContent ?? "";
-  const normalized = text.replace(/\s+/g, " ").trim();
-  if (normalized.length <= MAX_SOURCE_CHARS) return normalized;
-  return `${normalized.slice(0, MAX_SOURCE_CHARS)}…`;
 }
 
 function normalizeSummary(value: string): string {
