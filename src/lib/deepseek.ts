@@ -9,13 +9,26 @@ export interface DeepSeekMessage {
   content: string;
 }
 
-export interface DeepSeekRequestOptions {
-  messages: DeepSeekMessage[];
-  model?: string;
-  stream?: boolean;
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
+export type DeepSeekTaskPayload =
+  | { task: "tagline" }
+  | { task: "masthead-title" }
+  | { task: "daily-poetry"; timeTheme?: string; retryNote?: string }
+  | { task: "summary"; slug?: string; content?: string }
+  | {
+      task: "article-reader";
+      slug?: string;
+      question: string;
+      history?: Array<{ role: "user" | "assistant"; content: string }>;
+      content?: string;
+    }
+  | {
+      task: "article-selection";
+      action: "explain" | "translate";
+      selectedText: string;
+      surroundingText?: string;
+      slug?: string;
+      content?: string;
+    };
 
 interface DeepSeekCompletionResponse {
   choices?: Array<{
@@ -23,6 +36,7 @@ interface DeepSeekCompletionResponse {
       content?: string;
     };
   }>;
+  content?: string;
 }
 
 interface DeepSeekStreamChunk {
@@ -33,14 +47,14 @@ interface DeepSeekStreamChunk {
   }>;
 }
 
-export async function getDeepSeekText({
-  signal,
-  ...payload
-}: DeepSeekRequestOptions): Promise<string> {
+export async function callDeepSeekTask(
+  payload: DeepSeekTaskPayload,
+  opts: { signal?: AbortSignal } = {},
+): Promise<string> {
   const response = await fetch(deepSeekApiUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    signal,
+    signal: opts.signal,
     body: JSON.stringify({ ...payload, stream: false }),
   });
 
@@ -49,7 +63,7 @@ export async function getDeepSeekText({
   }
 
   const data = (await response.json()) as DeepSeekCompletionResponse;
-  const content = data.choices?.[0]?.message?.content?.trim();
+  const content = data.content?.trim() || data.choices?.[0]?.message?.content?.trim();
 
   if (!content) {
     throw new Error("DeepSeek returned empty content");
@@ -58,14 +72,15 @@ export async function getDeepSeekText({
   return content;
 }
 
-export async function streamDeepSeekText(
-  { signal, ...payload }: DeepSeekRequestOptions,
+export async function streamDeepSeekTask(
+  payload: DeepSeekTaskPayload,
   onDelta: (delta: string) => void,
+  opts: { signal?: AbortSignal } = {},
 ): Promise<void> {
   const response = await fetch(deepSeekApiUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    signal,
+    signal: opts.signal,
     body: JSON.stringify({ ...payload, stream: true }),
   });
 

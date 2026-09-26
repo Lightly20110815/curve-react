@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { streamDeepSeekText, type DeepSeekMessage } from "@/lib/deepseek";
+import { streamDeepSeekTask } from "@/lib/deepseek";
 import { useTheme } from "@/hooks/useTheme";
-import { getTimeThemeInfo, type TimeTheme } from "@/lib/time-theme";
 const ORIGINAL_POETRY_API_URL = "https://v1.jinrishici.com/all.json";
 
 const HISTORY_KEY = "daily-poetry-history-v2";
@@ -95,52 +94,6 @@ function parseDraft(raw: string): QuoteData {
   }
 
   return { content, origin, author };
-}
-
-function buildMessages(
-  history: QuoteData[],
-  timeTheme: TimeTheme,
-  retryNote?: string,
-): DeepSeekMessage[] {
-  const recentList = history
-    .slice(0, 16)
-    .map((item, index) => `${index + 1}. ${item.content}`)
-    .join("\n");
-  const timeThemeInfo = getTimeThemeInfo(timeTheme);
-
-  return [
-    {
-      role: "system",
-      content: `
-你是一个中文名篇摘句编辑。
-你的任务是：每次只引用一句已经真实存在于中文诗词、散文、古文、词赋或著名文章中的句子。
-
-要求：
-1. 只许引用真实原句，不要原创，不要改写，不要拼接。
-2. 允许两种气质：
-   - 一种是松弛、豁达、看淡得失、适合“躺平自洽”，类似「不以物喜，不以己悲」「行到水穷处，坐看云起时」。
-   - 另一种是旧日寻常、家常温柔、含蓄怀想，像「被酒莫惊春睡重，赌书消得泼茶香，当时只道是寻常」「我渐渐明白，世间最可厌恶的事莫如一张生气的脸」这种有日常余味或文章感的句子。
-3. 可以来自诗词，也可以来自散文、杂文、书信、序跋或著名文章，但必须是广为人知或确有出处的原句。
-4. 不要励志鸡血，不要直白情话，不要悲壮决绝，不要说教。
-5. 优先选择完整的一句；长度尽量在 8 到 36 个汉字之间。
-6. 不要与给定的历史句子重复，也不要输出语义几乎相同的句子。
-7. 严格只输出三行，不要任何解释：
-第一行：句子
-第二行：出处：作品名或文章名
-第三行：作者：作者名
-8. 当前是${timeThemeInfo.label}时段，${timeThemeInfo.poetryInstruction}
-      `.trim(),
-    },
-    {
-      role: "user",
-      content: `
-请给我一句新的中文名句，可以来自诗词、散文、古文或著名文章。
-务必避开以下历史句子，不要重复：
-${recentList || "（暂无历史）"}
-${retryNote ? `\n补充要求：${retryNote}` : ""}
-      `.trim(),
-    },
-  ];
 }
 
 export function DailyPoetry() {
@@ -256,18 +209,16 @@ export function DailyPoetry() {
     const history = loadHistory();
 
     try {
-      await streamDeepSeekText(
+      await streamDeepSeekTask(
         {
-          model: "deepseek-v4-flash",
-          signal,
-          thinking: { type: "disabled" },
-          temperature: 1.05,
-          max_tokens: 120,
-          messages: buildMessages(history, timeTheme, retryNote),
+          task: "daily-poetry",
+          timeTheme,
+          retryNote: retryNote ? retryNote.slice(0, 100) : undefined,
         },
         (delta) => {
           applyDraft(draftRef.current + delta);
         },
+        { signal },
       );
 
       const parsed = parseDraft(draftRef.current);

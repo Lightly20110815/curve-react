@@ -14,13 +14,12 @@ import { Languages, RefreshCw, Sparkles, X } from "lucide-react";
 import { Kicker } from "@/components/Editorial";
 import { Button } from "@/components/ui/button";
 import {
-  buildSelectionMessages,
   getSelectionActionLabel,
   toArticleAiErrorMessage,
   type ArticleAiAction,
   type ArticleAiDocument,
 } from "@/lib/article-ai";
-import { streamDeepSeekText } from "@/lib/deepseek";
+import { streamDeepSeekTask } from "@/lib/deepseek";
 import { cn } from "@/lib/utils";
 
 interface SelectionAnchorRect {
@@ -91,18 +90,14 @@ export function ArticleAiProvider({ children }: { children: ReactNode }) {
       setSelectionPopover(nextState);
 
       try {
-        await streamDeepSeekText(
+        await streamDeepSeekTask(
           {
-            model: "deepseek-chat",
-            temperature: action === "translate" ? 0.2 : 0.45,
-            max_tokens: action === "translate" ? 220 : 320,
-            signal: controller.signal,
-            messages: buildSelectionMessages({
-              article: activeArticle,
-              action,
-              selectedText,
-              surroundingText,
-            }),
+            task: "article-selection",
+            action,
+            selectedText: selectedText.slice(0, 500),
+            surroundingText: surroundingText ? surroundingText.slice(0, 500) : undefined,
+            slug: activeArticle?.slug,
+            content: activeArticle?.source ? activeArticle.source.slice(0, 8000) : undefined,
           },
           (delta) => {
             setSelectionPopover((prev) => {

@@ -3,12 +3,11 @@ import { MessageSquareText, RefreshCw, SendHorizonal, Square, Trash2 } from "luc
 import { Kicker } from "@/components/Editorial";
 import { Button } from "@/components/ui/button";
 import {
-  buildArticleReaderMessages,
   toArticleAiErrorMessage,
   type ArticleAiDocument,
   type ArticleAiTurn,
 } from "@/lib/article-ai";
-import { streamDeepSeekText } from "@/lib/deepseek";
+import { streamDeepSeekTask } from "@/lib/deepseek";
 import { cn } from "@/lib/utils";
 
 interface ChatMessage extends ArticleAiTurn {
@@ -67,10 +66,6 @@ export function ArticleAiReader({ article }: { article: ArticleAiDocument }) {
 
     const userId = createMessageId("user");
     const assistantId = createMessageId("assistant");
-    const nextConversation: ArticleAiTurn[] = [
-      ...conversation,
-      { role: "user", content: normalizedQuestion },
-    ];
 
     setMessages((prev) => [
       ...prev,
@@ -87,13 +82,16 @@ export function ArticleAiReader({ article }: { article: ArticleAiDocument }) {
     abortRef.current = controller;
 
     try {
-      await streamDeepSeekText(
+      await streamDeepSeekTask(
         {
-          model: "deepseek-chat",
-          temperature: 0.45,
-          max_tokens: 720,
-          signal: controller.signal,
-          messages: buildArticleReaderMessages(article, nextConversation),
+          task: "article-reader",
+          slug: article.slug,
+          question: normalizedQuestion.slice(0, 300),
+          history: conversation.slice(-6).map((turn) => ({
+            role: turn.role,
+            content: turn.content.slice(0, 300),
+          })),
+          content: article.source.slice(0, 8000),
         },
         (delta) => {
           setMessages((prev) =>

@@ -10,6 +10,7 @@
     "dev": "pnpm run content && pnpm run manifest && vite",
     "build": "pnpm run content && pnpm run manifest && vite build",
     "check": "pnpm run typecheck && pnpm run build",
+    "test:deepseek": "tsx scripts/test-deepseek.ts",
     "preview": "vite preview",
     "typecheck": "pnpm run content && pnpm run manifest && tsc --noEmit"
   },
