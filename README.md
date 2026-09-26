@@ -139,6 +139,7 @@ curve-react/
 
 ---
 
-## 📄 开源许可
+## 📄 致谢
 
-本项目代码遵循 MIT 许可证。设计与布局致敬 [vitepress-theme-curve](https://github.com/imsyy/vitepress-theme-curve)。
+设计与布局致敬 [vitepress-theme-curve](https://github.com/imsyy/vitepress-theme-curve)。
+

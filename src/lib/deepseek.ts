@@ -13,21 +13,19 @@ export type DeepSeekTaskPayload =
   | { task: "tagline" }
   | { task: "masthead-title" }
   | { task: "daily-poetry"; timeTheme?: string; retryNote?: string }
-  | { task: "summary"; slug?: string; content?: string }
+  | { task: "summary"; slug: string }
   | {
       task: "article-reader";
-      slug?: string;
+      slug: string;
       question: string;
       history?: Array<{ role: "user" | "assistant"; content: string }>;
-      content?: string;
     }
   | {
       task: "article-selection";
       action: "explain" | "translate";
       selectedText: string;
       surroundingText?: string;
-      slug?: string;
-      content?: string;
+      slug: string;
     };
 
 interface DeepSeekCompletionResponse {
@@ -51,12 +49,33 @@ export async function callDeepSeekTask(
   payload: DeepSeekTaskPayload,
   opts: { signal?: AbortSignal } = {},
 ): Promise<string> {
-  const response = await fetch(deepSeekApiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    signal: opts.signal,
-    body: JSON.stringify({ ...payload, stream: false }),
-  });
+  const isGetTask =
+    payload.task === "tagline" ||
+    payload.task === "masthead-title" ||
+    payload.task === "daily-poetry";
+
+  let response: Response;
+  if (isGetTask) {
+    const url = new URL(
+      deepSeekApiUrl,
+      typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+    );
+    url.searchParams.set("task", payload.task);
+    if ("timeTheme" in payload && payload.timeTheme) {
+      url.searchParams.set("timeTheme", payload.timeTheme);
+    }
+    response = await fetch(url.toString(), {
+      method: "GET",
+      signal: opts.signal,
+    });
+  } else {
+    response = await fetch(deepSeekApiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: opts.signal,
+      body: JSON.stringify({ ...payload, stream: false }),
+    });
+  }
 
   if (!response.ok) {
     throw new Error(await readDeepSeekError(response));

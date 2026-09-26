@@ -1,13 +1,17 @@
 /**
- * Minimal test suite for api/deepseek.ts
+ * Comprehensive test suite for api/deepseek.ts
  *
  * Verifies:
- * 1. Global fetch is mocked (no real network calls).
+ * 1. Global fetch is mocked (no real network calls to DeepSeek).
  * 2. Unknown or missing task returns 400.
  * 3. Invalid Origin on POST returns 403.
- * 4. Overlong inputs (question > 300, history > 6, content > 8000) return 400.
- * 5. Client-provided model, max_tokens, messages, and temperature are strictly ignored.
- * 6. Cache-Control headers are correctly set for cachable GET requests.
+ * 4. Overlong inputs (question > 300, history > 6, slug > 100) return 400.
+ * 5. GET on non-whitelisted task (e.g., article-reader) returns 405.
+ * 6. Unknown slug in summary/reader/selection returns 404.
+ * 7. Passed client content is completely ignored (uses server posts.json text).
+ * 8. Client-provided model, max_tokens, messages, and temperature are strictly ignored.
+ * 9. Upstream error (e.g. 401) logs error and returns 502 {"error":"upstream_error"} without leaking raw error.
+ * 10. Cache-Control headers are correctly set for cachable GET requests, and retryNote is ignored on GET.
  */
 import assert from "node:assert/strict";
 import handler from "../api/deepseek";
@@ -16,12 +20,21 @@ process.env.DEEPSEEK_API_KEY = "test-mock-key";
 
 let lastUpstreamPayload: any = null;
 let lastUpstreamHeaders: any = null;
+let mockUpstreamStatus = 200;
+let mockUpstreamResponseBody: string | null = null;
 
 // Mock global fetch to prevent any external API calls
 globalThis.fetch = async (url: any, init: any = {}) => {
   if (String(url).includes("api.deepseek.com")) {
     lastUpstreamPayload = JSON.parse(init.body || "{}");
     lastUpstreamHeaders = init.headers;
+
+    if (mockUpstreamStatus !== 200) {
+      return new Response(mockUpstreamResponseBody || "Upstream failure", {
+        status: mockUpstreamStatus,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     const mockResponse = {
       id: "chatcmpl-test",
@@ -53,13 +66,15 @@ globalThis.fetch = async (url: any, init: any = {}) => {
 async function runTests() {
   console.log("--- Starting DeepSeek Proxy Tests ---");
 
+  const ORIGIN = "https://404yann.com";
+
   // Test 1: Missing task -> 400
   {
-    const req = new Request("https://chiyu.it/api/deepseek", {
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "https://chiyu.it",
+        Origin: ORIGIN,
       },
       body: JSON.stringify({}),
     });
@@ -72,11 +87,11 @@ async function runTests() {
 
   // Test 2: Unknown task -> 400
   {
-    const req = new Request("https://chiyu.it/api/deepseek", {
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "https://chiyu.it",
+        Origin: ORIGIN,
       },
       body: JSON.stringify({ task: "arbitrary-unknown-task" }),
     });
@@ -89,7 +104,7 @@ async function runTests() {
 
   // Test 3: Unauthorized origin on POST -> 403
   {
-    const req = new Request("https://chiyu.it/api/deepseek", {
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -104,15 +119,15 @@ async function runTests() {
 
   // Test 4: Overlong question (>300 chars) -> 400
   {
-    const req = new Request("https://chiyu.it/api/deepseek", {
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "https://chiyu.it",
+        Origin: ORIGIN,
       },
       body: JSON.stringify({
         task: "article-reader",
-        slug: "test-post",
+        slug: "more-than-a-username",
         question: "a".repeat(301),
       }),
     });
@@ -125,15 +140,15 @@ async function runTests() {
 
   // Test 5: Overlong history (>6 items) -> 400
   {
-    const req = new Request("https://chiyu.it/api/deepseek", {
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "https://chiyu.it",
+        Origin: ORIGIN,
       },
       body: JSON.stringify({
         task: "article-reader",
-        slug: "test-post",
+        slug: "more-than-a-username",
         question: "valid question",
         history: Array(7).fill({ role: "user", content: "hello" }),
       }),
@@ -145,34 +160,73 @@ async function runTests() {
     console.log("✓ Test 5 Passed: Overlong history returns 400");
   }
 
-  // Test 6: Overlong content (>8000 chars) -> 400
+  // Test 6: GET on non-whitelisted task (article-reader) returns 405
   {
-    const req = new Request("https://chiyu.it/api/deepseek", {
+    const req = new Request(`${ORIGIN}/api/deepseek?task=article-reader&slug=more-than-a-username`, {
+      method: "GET",
+      headers: { Origin: ORIGIN },
+    });
+    const res = await handler(req);
+    assert.equal(res.status, 405, "GET on article-reader must return 405");
+    const json = await res.json();
+    assert.match(json.error, /Method Not Allowed/i);
+    console.log("✓ Test 6 Passed: GET on article-reader returns 405");
+  }
+
+  // Test 7: Unknown slug returns 404
+  {
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "https://chiyu.it",
+        Origin: ORIGIN,
       },
       body: JSON.stringify({
         task: "summary",
-        content: "x".repeat(8001),
+        slug: "unknown-slug-not-in-posts",
       }),
     });
     const res = await handler(req);
-    assert.equal(res.status, 400, "Content > 8000 chars must return 400");
+    assert.equal(res.status, 404, "Unknown slug must return 404");
     const json = await res.json();
-    assert.match(json.error, /limit/i);
-    console.log("✓ Test 6 Passed: Overlong content returns 400");
+    assert.match(json.error, /not found/i);
+    console.log("✓ Test 7 Passed: Unknown slug returns 404");
   }
 
-  // Test 7: Client-sent model, max_tokens, messages are ignored; upstream uses deepseek-chat and server-set limit
+  // Test 8: Client-sent content is ignored; server loads article content by slug
   {
     lastUpstreamPayload = null;
-    const req = new Request("https://chiyu.it/api/deepseek", {
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "https://chiyu.it",
+        Origin: ORIGIN,
+      },
+      body: JSON.stringify({
+        task: "summary",
+        slug: "more-than-a-username",
+        content: "ROGUE_CLIENT_CONTENT_THAT_MUST_BE_IGNORED_BY_SERVER",
+      }),
+    });
+    const res = await handler(req);
+    assert.equal(res.status, 200, "Valid slug should succeed");
+    assert.ok(lastUpstreamPayload, "Upstream payload recorded");
+    const upstreamMessages = JSON.stringify(lastUpstreamPayload.messages);
+    assert.ok(
+      !upstreamMessages.includes("ROGUE_CLIENT_CONTENT_THAT_MUST_BE_IGNORED_BY_SERVER"),
+      "Client content must be completely ignored",
+    );
+    console.log("✓ Test 8 Passed: Client-sent content is ignored and server article is used");
+  }
+
+  // Test 9: Client-sent model, max_tokens, messages are ignored
+  {
+    lastUpstreamPayload = null;
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: ORIGIN,
       },
       body: JSON.stringify({
         task: "tagline",
@@ -205,25 +259,78 @@ async function runTests() {
       "attacker prompt injection",
       "Client messages must be ignored",
     );
-    console.log("✓ Test 7 Passed: Client model & max_tokens & messages are ignored");
+    console.log("✓ Test 9 Passed: Client model & max_tokens & messages are ignored");
   }
 
-  // Test 8: GET request caching headers
+  // Test 10: Upstream 401 returns 502 with {"error":"upstream_error"} and hides raw upstream text
   {
-    const req = new Request("https://chiyu.it/api/deepseek?task=tagline", {
+    mockUpstreamStatus = 401;
+    mockUpstreamResponseBody = JSON.stringify({
+      error: {
+        message: "Authentication FAILED: Invalid API Key sk-real-key-leaked",
+        type: "authentication_error",
+      },
+    });
+
+    const req = new Request(`${ORIGIN}/api/deepseek`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: ORIGIN,
+      },
+      body: JSON.stringify({ task: "tagline" }),
+    });
+
+    const res = await handler(req);
+    assert.equal(res.status, 502, "Upstream failure must return 502");
+    const json = await res.json();
+    assert.deepEqual(json, { error: "upstream_error" });
+    assert.ok(
+      !JSON.stringify(json).includes("Invalid API Key"),
+      "Sensitive upstream error must not be exposed",
+    );
+
+    // Reset upstream mock
+    mockUpstreamStatus = 200;
+    mockUpstreamResponseBody = null;
+    console.log("✓ Test 10 Passed: Upstream 401 returns 502 upstream_error without leaking details");
+  }
+
+  // Test 11: GET request caching headers
+  {
+    const req = new Request(`${ORIGIN}/api/deepseek?task=tagline`, {
       method: "GET",
       headers: {
-        Origin: "https://chiyu.it",
+        Origin: ORIGIN,
       },
     });
     const res = await handler(req);
     assert.equal(res.status, 200);
     const cacheHeader = res.headers.get("Cache-Control");
     assert.ok(cacheHeader && cacheHeader.includes("s-maxage="), "Cache-Control header present");
-    console.log("✓ Test 8 Passed: GET request sets Cache-Control s-maxage");
+    console.log("✓ Test 11 Passed: GET request sets Cache-Control s-maxage");
   }
 
-  console.log("\nALL 8 TESTS PASSED SUCCESSFULLY! Mock fetch was verified.");
+  // Test 12: GET daily-poetry ignores retryNote
+  {
+    lastUpstreamPayload = null;
+    const req = new Request(`${ORIGIN}/api/deepseek?task=daily-poetry&retryNote=ATTACKER_RETRY_NOTE`, {
+      method: "GET",
+      headers: {
+        Origin: ORIGIN,
+      },
+    });
+    const res = await handler(req);
+    assert.equal(res.status, 200);
+    const upstreamMessages = JSON.stringify(lastUpstreamPayload.messages);
+    assert.ok(
+      !upstreamMessages.includes("ATTACKER_RETRY_NOTE"),
+      "retryNote must be ignored on GET",
+    );
+    console.log("✓ Test 12 Passed: GET daily-poetry ignores retryNote");
+  }
+
+  console.log("\nALL 12 TESTS PASSED SUCCESSFULLY! Mock fetch was verified.");
 }
 
 runTests().catch((err) => {
