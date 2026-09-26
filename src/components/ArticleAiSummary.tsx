@@ -3,7 +3,7 @@ import { RefreshCw } from "lucide-react";
 import { Kicker } from "@/components/Editorial";
 import { Button } from "@/components/ui/button";
 import type { Post } from "@/content/posts";
-import { getDeepSeekText, type DeepSeekMessage } from "@/lib/deepseek";
+import { callDeepSeekTask } from "@/lib/deepseek";
 const CACHE_VERSION = "v1";
 const MAX_SOURCE_CHARS = 3200;
 
@@ -64,13 +64,14 @@ export function ArticleAiSummary({ post }: Props) {
 
     try {
       const nextSummary = normalizeSummary(
-        await getDeepSeekText({
-          model: "deepseek-chat",
-          signal: controller.signal,
-          temperature: 0.65,
-          max_tokens: 180,
-          messages: buildMessages(post, articleSource),
-        }),
+        await callDeepSeekTask(
+          {
+            task: "summary",
+            slug: post.slug,
+            content: articleSource,
+          },
+          { signal: controller.signal },
+        ),
       );
 
       if (!nextSummary) {
@@ -193,40 +194,6 @@ export function ArticleAiSummary({ post }: Props) {
       </div>
     </section>
   );
-}
-
-function buildMessages(
-  post: Pick<Post, "title" | "description" | "categories" | "tags">,
-  articleSource: string,
-): DeepSeekMessage[] {
-  return [
-    {
-      role: "system",
-      content: [
-        "你是这份中文个人刊物的编辑助理。",
-        "你的任务是阅读文章，并写一段简洁、克制、可信的中文摘要，放在正文前作为导读。",
-        "要求：",
-        "1. 只总结文中已经明确出现的内容，不要补充作者没写过的背景、观点或结论。",
-        "2. 保持作者原有气质，语气温和、克制，不要营销，不要故作夸张。",
-        "3. 输出 2 到 3 句，总长度控制在 80 到 140 个汉字之间。",
-        "4. 不用项目符号，不加标题，不加引号，不要出现“本文”“这篇文章主要讲了”这类套话。",
-        "5. 如果文章偏技术，就点明问题、做法和结果；如果偏随笔，就点明情绪、场景和核心意象。",
-        "6. 只输出摘要正文。",
-      ].join("\n"),
-    },
-    {
-      role: "user",
-      content: [
-        `标题：${post.title}`,
-        `简介：${post.description || "无"}`,
-        `栏目：${post.categories.join("、") || "未分类"}`,
-        `标签：${post.tags.join("、") || "无"}`,
-        "",
-        "正文节选：",
-        articleSource,
-      ].join("\n"),
-    },
-  ];
 }
 
 function buildArticleSource(html: string): string {

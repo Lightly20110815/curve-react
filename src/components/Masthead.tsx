@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getDeepSeekText, trimGeneratedText } from "@/lib/deepseek";
+import { callDeepSeekTask, trimGeneratedText } from "@/lib/deepseek";
 import { MastheadWeather } from "@/components/MastheadWeather";
 import { cn } from "@/lib/utils";
 import { formatMastheadDate, formatIssueSeason } from "@/lib/han-date";
@@ -34,16 +34,7 @@ function DeepSeekTagline() {
 
     async function fetchTagline() {
       try {
-        const content = await getDeepSeekText({
-          messages: [
-            {
-              role: "system",
-              content: "你是一个文艺网站的副标题生成器。请写一句简短、优美、有文艺气息的句子，适合作为博客的副标题。字数控制在15字以内。不需要标点符号结尾。不要包含任何解释。",
-            },
-          ],
-          temperature: 0.8,
-          max_tokens: 30,
-        });
+        const content = await callDeepSeekTask({ task: "tagline" });
 
         if (content && !cancelled) {
           setFullText(trimGeneratedText(content));
@@ -85,16 +76,7 @@ function DynamicMastheadTitle() {
 
     async function fetchTitle() {
       try {
-        const content = await getDeepSeekText({
-          messages: [
-            {
-              role: "system",
-              content: "You are generating a masthead title for a literary/coding blog. Generate a short, poetic English phrase (exactly 3 to 5 words). Do not use Chinese. Do not use punctuation at the end. Do not explain.",
-            },
-          ],
-          temperature: 0.9,
-          max_tokens: 15,
-        });
+        const content = await callDeepSeekTask({ task: "masthead-title" });
 
         if (content && !cancelled) {
           setTargetText(trimGeneratedText(content));
