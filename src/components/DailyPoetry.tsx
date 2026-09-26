@@ -5,7 +5,7 @@ const ORIGINAL_POETRY_API_URL = "https://v1.jinrishici.com/all.json";
 
 const HISTORY_KEY = "daily-poetry-history-v2";
 const MAX_HISTORY = 24;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 2;
 
 interface QuoteData {
   content: string;
@@ -213,6 +213,7 @@ export function DailyPoetry() {
         {
           task: "daily-poetry",
           timeTheme,
+          ...(attempt > 0 ? { v: attempt } : {}),
         },
         { signal },
       );

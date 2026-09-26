@@ -11,13 +11,13 @@ const ALLOWED_GET_TASKS = ["tagline", "masthead-title", "daily-poetry"];
 const UPSTREAM_MODEL = "deepseek-chat";
 const UPSTREAM_API_URL = "https://api.deepseek.com/chat/completions";
 
+const ALLOWED_TIME_THEMES = ["day", "dawn", "dusk", "deep-night"];
+
 const TIME_THEMES: Record<string, string> = {
-  morning: "清晨时段，多推荐苏醒、朝气、万物初生的句子",
-  noon: "正午时段，多推荐闲适、小憩、晴朗明媚的句子",
-  afternoon: "午后时段，多推荐静心、品茗、从容自如的句子",
-  evening: "黄昏时段，多推荐归家、落日、倦鸟归林的句子",
-  night: "夜晚时段，多推荐宁静、沉淀、抚慰人心的句子",
-  deepnight: "深夜时段，多推荐孤独自守、星河入梦、万籁俱寂的句子",
+  day: "白昼时段，保持松弛豁达，或旧日寻常、家常温柔的气质",
+  dawn: "清晨时段，优先选择带晨雾、初醒、微光、风露感的句子，语气要轻，不要太喧闹",
+  dusk: "黄昏时段，优先选择带余晖、归途、收束、灯火初上的句子，要温暖克制，不要过分悲切",
+  "deep-night": "深夜时段，优先选择安抚、静谧、适合深夜阅读的句子，可以有月色、灯下、松弛、自我安放的感觉，避免惊烈、喧闹、悲壮决绝",
 };
 
 function isOriginAllowed(origin: string | null): boolean {
@@ -428,8 +428,9 @@ export default async function handler(req: Request) {
 
   if (req.method === "GET") {
     const url = new URL(req.url);
+
     task = url.searchParams.get("task") || "";
-    if (!ALLOWED_GET_TASKS.includes(task)) {
+    if (task && !ALLOWED_GET_TASKS.includes(task)) {
       return jsonResponse(
         { error: `Method Not Allowed: task '${task}' cannot be accessed via GET` },
         405,
@@ -437,9 +438,49 @@ export default async function handler(req: Request) {
         allowOrigin,
       );
     }
+
+    // Only allow task, timeTheme, and v query params on GET
+    const ALLOWED_GET_PARAMS = ["task", "timeTheme", "v"];
+    for (const key of url.searchParams.keys()) {
+      if (!ALLOWED_GET_PARAMS.includes(key)) {
+        return jsonResponse(
+          { error: `Invalid query parameter: '${key}' is not allowed on GET` },
+          400,
+          {},
+          allowOrigin,
+        );
+      }
+    }
+
+    if (!task) {
+      return jsonResponse({ error: "Missing required parameter: task" }, 400, {}, allowOrigin);
+    }
+
+    if (url.searchParams.has("timeTheme")) {
+      const timeTheme = url.searchParams.get("timeTheme") || "";
+      if (!ALLOWED_TIME_THEMES.includes(timeTheme)) {
+        return jsonResponse(
+          { error: `Invalid timeTheme: must be one of ${ALLOWED_TIME_THEMES.join(", ")}` },
+          400,
+          {},
+          allowOrigin,
+        );
+      }
+    }
+
+    if (url.searchParams.has("v")) {
+      const v = url.searchParams.get("v") || "";
+      if (!["0", "1", "2"].includes(v)) {
+        return jsonResponse(
+          { error: "Invalid v: must be one of 0, 1, 2" },
+          400,
+          {},
+          allowOrigin,
+        );
+      }
+    }
+
     params = Object.fromEntries(url.searchParams.entries());
-    // Ignore retryNote on GET
-    delete params.retryNote;
     stream = false;
   } else if (req.method === "POST") {
     let body: Record<string, unknown> = {};

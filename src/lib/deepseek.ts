@@ -12,7 +12,7 @@ export interface DeepSeekMessage {
 export type DeepSeekTaskPayload =
   | { task: "tagline" }
   | { task: "masthead-title" }
-  | { task: "daily-poetry"; timeTheme?: string; retryNote?: string }
+  | { task: "daily-poetry"; timeTheme?: string; retryNote?: string; v?: number }
   | { task: "summary"; slug: string }
   | {
       task: "article-reader";
@@ -63,6 +63,9 @@ export async function callDeepSeekTask(
     url.searchParams.set("task", payload.task);
     if ("timeTheme" in payload && payload.timeTheme) {
       url.searchParams.set("timeTheme", payload.timeTheme);
+    }
+    if ("v" in payload && payload.v !== undefined) {
+      url.searchParams.set("v", String(payload.v));
     }
     response = await fetch(url.toString(), {
       method: "GET",

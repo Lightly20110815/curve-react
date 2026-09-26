@@ -311,26 +311,116 @@ async function runTests() {
     console.log("✓ Test 11 Passed: GET request sets Cache-Control s-maxage");
   }
 
-  // Test 12: GET daily-poetry ignores retryNote
+  // Test 12: GET with unknown query parameter returns 400
   {
-    lastUpstreamPayload = null;
     const req = new Request(`${ORIGIN}/api/deepseek?task=daily-poetry&retryNote=ATTACKER_RETRY_NOTE`, {
       method: "GET",
-      headers: {
-        Origin: ORIGIN,
-      },
+      headers: { Origin: ORIGIN },
     });
     const res = await handler(req);
-    assert.equal(res.status, 200);
-    const upstreamMessages = JSON.stringify(lastUpstreamPayload.messages);
-    assert.ok(
-      !upstreamMessages.includes("ATTACKER_RETRY_NOTE"),
-      "retryNote must be ignored on GET",
-    );
-    console.log("✓ Test 12 Passed: GET daily-poetry ignores retryNote");
+    assert.equal(res.status, 400, "Unknown GET parameter retryNote must return 400");
+    const json = await res.json();
+    assert.match(json.error, /invalid query parameter/i);
+
+    const req2 = new Request(`${ORIGIN}/api/deepseek?task=tagline&randomParam=123`, {
+      method: "GET",
+      headers: { Origin: ORIGIN },
+    });
+    const res2 = await handler(req2);
+    assert.equal(res2.status, 400, "Unknown GET parameter randomParam must return 400");
+    console.log("✓ Test 12 Passed: Unknown GET query parameters return 400");
   }
 
-  console.log("\nALL 12 TESTS PASSED SUCCESSFULLY! Mock fetch was verified.");
+  // Test 13: GET with invalid v (v=3, v=abc) returns 400; valid v (0, 1, 2) returns 200
+  {
+    const req3 = new Request(`${ORIGIN}/api/deepseek?task=daily-poetry&v=3`, {
+      method: "GET",
+      headers: { Origin: ORIGIN },
+    });
+    const res3 = await handler(req3);
+    assert.equal(res3.status, 400, "v=3 must return 400");
+    const json3 = await res3.json();
+    assert.match(json3.error, /invalid v/i);
+
+    const reqAbc = new Request(`${ORIGIN}/api/deepseek?task=daily-poetry&v=abc`, {
+      method: "GET",
+      headers: { Origin: ORIGIN },
+    });
+    const resAbc = await handler(reqAbc);
+    assert.equal(resAbc.status, 400, "v=abc must return 400");
+
+    for (const validV of ["0", "1", "2"]) {
+      const reqValid = new Request(`${ORIGIN}/api/deepseek?task=daily-poetry&v=${validV}`, {
+        method: "GET",
+        headers: { Origin: ORIGIN },
+      });
+      const resValid = await handler(reqValid);
+      assert.equal(resValid.status, 200, `v=${validV} must return 200`);
+    }
+    console.log("✓ Test 13 Passed: v=3 returns 400, and valid v (0, 1, 2) returns 200");
+  }
+
+  // Test 14: All four time themes (day, dawn, dusk, deep-night) use their respective style descriptions
+  {
+    const themes = ["day", "dawn", "dusk", "deep-night"] as const;
+    const EXPECTED_SUBSTRINGS: Record<string, string> = {
+      day: "白昼时段",
+      dawn: "清晨时段",
+      dusk: "黄昏时段",
+      "deep-night": "深夜时段",
+    };
+
+    for (const theme of themes) {
+      lastUpstreamPayload = null;
+      const req = new Request(`${ORIGIN}/api/deepseek?task=daily-poetry&timeTheme=${theme}`, {
+        method: "GET",
+        headers: { Origin: ORIGIN },
+      });
+      const res = await handler(req);
+      assert.equal(res.status, 200, `timeTheme=${theme} must return 200`);
+      assert.ok(lastUpstreamPayload, "Upstream payload must exist");
+      const systemMessage =
+        lastUpstreamPayload.messages.find((m: any) => m.role === "system")?.content || "";
+      assert.ok(
+        systemMessage.includes(EXPECTED_SUBSTRINGS[theme]),
+        `System prompt for theme '${theme}' must include '${EXPECTED_SUBSTRINGS[theme]}'`,
+      );
+    }
+    console.log("✓ Test 14 Passed: All 4 time themes (day, dawn, dusk, deep-night) use respective style descriptions");
+  }
+
+  // Test 15: Invalid timeTheme on GET returns 400; unknown timeTheme on POST falls back to default description
+  {
+    const reqInvalidGet = new Request(`${ORIGIN}/api/deepseek?task=daily-poetry&timeTheme=noon`, {
+      method: "GET",
+      headers: { Origin: ORIGIN },
+    });
+    const resInvalidGet = await handler(reqInvalidGet);
+    assert.equal(resInvalidGet.status, 400, "Unknown timeTheme on GET must return 400");
+    const jsonInvalid = await resInvalidGet.json();
+    assert.match(jsonInvalid.error, /invalid timeTheme/i);
+
+    lastUpstreamPayload = null;
+    const reqPostFallback = new Request(`${ORIGIN}/api/deepseek`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: ORIGIN,
+      },
+      body: JSON.stringify({ task: "daily-poetry", timeTheme: "unknown-legacy-theme" }),
+    });
+    const resPostFallback = await handler(reqPostFallback);
+    assert.equal(resPostFallback.status, 200, "Unknown timeTheme on POST must return 200");
+    const systemMessage =
+      lastUpstreamPayload.messages.find((m: any) => m.role === "system")?.content || "";
+    assert.ok(
+      systemMessage.includes("适度选择优美、有余味的中文名句"),
+      "Must fallback to default description",
+    );
+    console.log("✓ Test 15 Passed: Invalid timeTheme on GET returns 400; unknown on POST falls back to default");
+  }
+
+  console.log("\nALL 15 TESTS PASSED SUCCESSFULLY! Mock fetch was verified.");
 }
 
 runTests().catch((err) => {
