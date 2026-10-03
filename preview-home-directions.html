@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>首页改版 · 四个概念对比（第二版）</title>
+<!--
+  第二版：四个**架构级不同**的概念，不是换皮。
+  切换：顶部按钮，或键盘 1 / 2 / 3 / 4 / ← / →。
+
+  ① 杂志封面 —— 首屏即封面：墨蓝全屏刊面 + 竖排期号 + 封面要目；内页是目录/卷首语
+  ② 档案索引 —— 实体档案室：打孔索引卡 + 归档章 + 抽屉分类 + 金属拉手
+  ③ 瑞士大字 —— 国际主义网格：120px 黑体标题 + 电蓝 + 错位栏
+  ④ 竖排卷轴 —— 横向展卷：竖排从右往左读，界行、墨印、卷首卷尾
+
+  去 AI 味原则继续生效：无打字机/光标、无随机报头、无 stats 三件套、
+  无 01/02 装饰序号、箭头收敛、无奶油底+铁锈红+暖衬线组合。
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════ 预览工具条（非设计稿） ═══════════ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #16181a; }
+body { font-family: Inter, "PingFang SC", -apple-system, sans-serif; }
+#bar {
+  position: fixed; inset: 0 0 auto 0; z-index: 9999;
+  background: #16181a; color: #e8eaec; border-bottom: 1px solid #000;
+  display: flex; align-items: center; gap: 4px; padding: 0 14px; height: 52px; font-size: 13px;
+}
+#bar .brand { font-weight: 700; margin-right: 10px; white-space: nowrap; opacity: .92; }
+#bar button {
+  appearance: none; border: 1px solid #3a3e42; background: transparent; color: #c8ccd0;
+  font: 500 12.5px/1 Inter, "PingFang SC", sans-serif;
+  padding: 7px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+}
+#bar button:hover { border-color: #8a9096; color: #fff; }
+#bar button.on { background: #e8eaec; color: #16181a; border-color: #e8eaec; font-weight: 700; }
+#bar .desc { margin-left: auto; color: #8a9096; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#bar .navbtn { font-size: 15px; padding: 7px 10px; }
+#spacer { height: 52px; }
+.demo { display: none; min-height: calc(100vh - 52px); }
+.demo.on { display: block; }
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+@media (max-width: 900px) { #bar .desc, #bar .brand { display: none; } }
+
+/* ═══════════════════════════ ① 杂志封面 ═══════════════════════════ */
+.m1 { --ink:#10243a; --ink2:#1d3a5c; --paper:#fbfbf9; --txt:#22292f; --mut:#6d7680; --line:#dfe3e7; --acc:#2e6f8e;
+  background: var(--paper); color: var(--txt);
+  font: 16px/1.8 Georgia, "Songti SC", "Source Han Serif SC", SimSun, serif; }
+.m1 .mono { font-family: ui-monospace, "JetBrains Mono", Menlo, monospace; }
+/* —— 封面 —— */
+.m1 .cover {
+  position: relative; min-height: calc(100vh - 52px);
+  background:
+    radial-gradient(1200px 700px at 78% -10%, #1a3b5e 0%, transparent 60%),
+    linear-gradient(160deg, #132b47 0%, var(--ink) 55%, #0b1b2e 100%);
+  color: #eef2f6;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.m1 .cover-top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 26px 40px 0;
+}
+.m1 .cover-top .name { font: 800 22px/1 Inter, "PingFang SC", sans-serif; letter-spacing: .04em; }
+.m1 .cover-top .name span { color: #9fc3d8; }
+.m1 .cover-top .no { font: 400 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .18em; color: #8fa9bd; text-transform: uppercase; }
+/* 竖排期号 —— 封面右侧边栏 */
+.m1 .cover-rail {
+  position: absolute; right: 34px; top: 50%; transform: translateY(-50%);
+  writing-mode: vertical-rl; letter-spacing: .35em;
+  font: 500 13px/1 "Songti SC", SimSun, serif; color: #7d99af;
+  border-left: 1px solid rgba(255,255,255,.14); padding-left: 16px;
+}
+.m1 .cover-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 40px; max-width: 900px; }
+.m1 .cover-kick { font: 600 12px/1 Inter, "PingFang SC", sans-serif; letter-spacing: .3em; color: #9fc3d8; }
+.m1 .cover-title {
+  margin-top: 22px;
+  font: 900 clamp(52px, 8.2vw, 104px)/1.16 "Songti SC", "Source Han Serif SC", SimSun, serif;
+  color: #fbfbf7; letter-spacing: .02em; text-wrap: balance;
+}
+.m1 .cover-title a:hover { color: #9fc3d8; }
+.m1 .cover-lede { margin-top: 26px; max-width: 26em; font-size: 17px; line-height: 1.95; color: rgba(238,242,246,.68); }
+.m1 .cover-meta { margin-top: 22px; font: 400 11.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .1em; color: #6f8aa0; }
+/* 封面底部要目 */
+.m1 .cover-lines { border-top: 1px solid rgba(255,255,255,.16); padding: 20px 40px 26px;
+  display: grid; gap: 18px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .m1 .cover-lines { grid-template-columns: repeat(3, 1fr); } }
+.m1 .cover-lines a { display: block; border-top: 2px solid rgba(255,255,255,.28); padding-top: 12px; }
+.m1 .cover-lines a:hover { border-top-color: #9fc3d8; }
+.m1 .cover-lines .pg { font: 600 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .14em; color: #9fc3d8; }
+.m1 .cover-lines .tt { display: block; margin-top: 8px; font: 700 19px/1.4 "Songti SC", SimSun, serif; color: #f4f6f8; }
+.m1 .cover-lines .ds { display: block; margin-top: 6px; font-size: 13px; line-height: 1.7; color: rgba(238,242,246,.55); }
+/* —— 内页 —— */
+.m1 .inner { padding: 76px 0 10px; }
+.m1 .toc-head { display: flex; align-items: baseline; gap: 18px; }
+.m1 .toc-head h2 { font: 900 34px/1 "Songti SC", SimSun, serif; color: var(--ink); }
+.m1 .toc-head .en { font: 600 11px/1 Inter, sans-serif; letter-spacing: .3em; color: var(--mut); text-transform: uppercase; }
+.m1 .toc { margin-top: 30px; columns: 2; column-gap: 56px; }
+@media (max-width: 760px) { .m1 .toc { columns: 1; } }
+.m1 .toc a { display: flex; align-items: baseline; padding: 11px 0; break-inside: avoid; }
+.m1 .toc .n { font: 400 11px/1 ui-monospace, Menlo, monospace; color: var(--acc); width: 44px; flex: none; }
+.m1 .toc .t { font-size: 17px; color: var(--txt); }
+.m1 .toc a:hover .t { color: var(--acc); }
+.m1 .toc .dots { flex: 1; border-bottom: 1px dotted #b9c1c8; margin: 0 10px; transform: translateY(-4px); }
+.m1 .toc .p { font: 400 11px/1 ui-monospace, Menlo, monospace; color: var(--mut); }
+/* 卷首语 */
+.m1 .preface { margin: 84px auto 0; max-width: 620px; text-align: center; }
+.m1 .preface .lbl { font: 600 11px/1 Inter, sans-serif; letter-spacing: .34em; color: var(--mut); }
+.m1 .preface blockquote { margin-top: 20px; font-size: 21px; line-height: 2.05; color: var(--ink); }
+.m1 .preface .who { margin-top: 16px; font-size: 13px; color: var(--mut); }
+/* 本期文章 */
+.m1 .issue { margin-top: 84px; }
+.m1 .issue-head { border-top: 3px solid var(--ink); border-bottom: 1px solid var(--line); padding: 12px 0;
+  display: flex; justify-content: space-between; align-items: baseline; }
+.m1 .issue-head h2 { font: 900 22px/1 "Songti SC", SimSun, serif; color: var(--ink); }
+.m1 .issue-head a { font: 500 12px/1 Inter, "PingFang SC", sans-serif; color: var(--mut); }
+.m1 .issue-head a:hover { color: var(--acc); }
+.m1 .issue .row { display: grid; grid-template-columns: 96px 1fr auto; gap: 22px; align-items: baseline;
+  padding: 18px 0; border-bottom: 1px solid var(--line); }
+.m1 .issue .d { font: 400 11.5px/1 ui-monospace, Menlo, monospace; color: var(--mut); }
+.m1 .issue .t { font: 700 21px/1.5 "Songti SC", SimSun, serif; color: var(--ink); }
+.m1 .issue .row:hover .t { color: var(--acc); }
+.m1 .issue .c { font: 500 12px/1 Inter, "PingFang SC", sans-serif; color: var(--mut); }
+/* 索引 */
+.m1 .tags { margin-top: 84px; border-top: 1px solid var(--line); padding-top: 28px;
+  font-size: 14.5px; line-height: 2.4; color: var(--mut); }
+.m1 .tags b { font: 700 15px/1 "Songti SC", SimSun, serif; color: var(--ink); margin-right: 16px; }
+.m1 .tags a { color: var(--txt); }
+.m1 .tags a:hover { color: var(--acc); border-bottom: 1px solid var(--acc); }
+.m1 .tags i { color: #c3c9cf; margin: 0 9px; font-style: normal; }
+/* 刊尾 */
+.m1 .colophon { margin-top: 84px; background: var(--ink); color: rgba(238,242,246,.75); }
+.m1 .colophon .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 28px; padding-top: 26px; padding-bottom: 30px; }
+.m1 .colophon .big { font: 900 18px/1 "Songti SC", SimSun, serif; color: #f4f6f8; }
+.m1 .colophon p { font-size: 13px; line-height: 2; }
+.m1 .colophon a:hover { color: #9fc3d8; }
+.m1 .colophon .mono-l { font: 400 11px/2 ui-monospace, Menlo, monospace; letter-spacing: .08em; color: #6f8aa0; }
+
+/* ═══════════════════════════ ② 档案索引 ═══════════════════════════ */
+.m2 { --wall:#454c43; --wall2:#3a413a; --wall3:#313730; --card:#efeee8; --ink:#20251f; --mut:#6f7568;
+  --steel:#54708c; --label:#f7f6f0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 46px, rgba(0,0,0,.05) 46px 47px),
+    var(--wall);
+  color: var(--ink);
+  font: 16px/1.75 Georgia, "Songti SC", "Source Han Serif SC", SimSun, serif; }
+.m2 .mono { font-family: ui-monospace, "JetBrains Mono", Menlo, monospace; }
+/* 门牌 */
+.m2 .plate {
+  background: linear-gradient(180deg, #2e332d, #242824);
+  border-bottom: 1px solid #1c201b;
+  box-shadow: 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.3);
+  color: #d8dcd2; padding: 30px 0 26px;
+}
+.m2 .plate .wrap { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.m2 .plate h1 { font: 900 clamp(28px, 4vw, 40px)/1.1 "Songti SC", SimSun, serif; letter-spacing: .14em; color: #eceee6; }
+.m2 .plate .en { font: 400 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .3em; color: #8b948a; text-transform: uppercase; margin-top: 10px; }
+.m2 .plate .open { font: 500 12px/1 Inter, "PingFang SC", sans-serif; color: #a8b3a2;
+  border: 1px solid #55604f; padding: 7px 13px; display: inline-flex; align-items: center; gap: 8px; }
+.m2 .plate .open::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #8fb573; box-shadow: 0 0 8px #8fb573; }
+/* 主卡 —— 头条 */
+.m2 .lead-zone { padding: 46px 0 8px; }
+.m2 .card {
+  position: relative; background: var(--card);
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 0 22px 44px rgba(0,0,0,.34), 0 3px 8px rgba(0,0,0,.25);
+  padding: 34px 38px 30px;
+}
+.m2 .card-lead { max-width: 880px; margin: 0 auto; transform: rotate(-.7deg); transition: transform .25s ease; }
+.m2 .card-lead:hover { transform: rotate(0deg); }
+.m2 .holes { position: absolute; top: 14px; left: 0; right: 0; display: flex; justify-content: center; gap: 120px; }
+.m2 .holes i { width: 20px; height: 20px; border-radius: 50%; background: var(--wall);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.6); }
+.m2 .stamp {
+  position: absolute; top: 52px; right: 34px;
+  border: 2.5px solid var(--steel); color: var(--steel);
+  outline: 1px solid var(--steel); outline-offset: 3px;
+  font: 700 12px/1 Inter, "PingFang SC", sans-serif; letter-spacing: .24em; text-indent: .24em;
+  padding: 8px 12px; transform: rotate(-8deg); opacity: .8; border-radius: 2px;
+}
+.m2 .callno { font: 400 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .16em; color: var(--mut); margin-top: 26px; }
+.m2 .card-lead h2 { margin-top: 14px; font: 900 clamp(30px, 4.6vw, 46px)/1.25 "Songti SC", SimSun, serif; color: var(--ink); max-width: 16em; }
+.m2 .card-lead h2 a:hover { color: var(--steel); }
+.m2 .card-lead .lede { margin-top: 16px; max-width: 32em; font-size: 17.5px; line-height: 1.9; color: #3c423a; }
+.m2 .card-lead .meta { margin-top: 18px; padding-top: 14px; border-top: 1px dashed #b9b6a8;
+  display: flex; flex-wrap: wrap; gap: 8px 26px; font: 400 12px/1 ui-monospace, Menlo, monospace; color: var(--mut); letter-spacing: .06em; }
+.m2 .card-lead .meta b { color: var(--ink); font-weight: 600; }
+/* 索引卡排 */
+.m2 .zone-label { display: flex; align-items: baseline; gap: 14px; margin: 52px 0 22px; }
+.m2 .zone-label h2 { font: 900 24px/1 "Songti SC", SimSun, serif; color: #eceee6; letter-spacing: .1em; }
+.m2 .zone-label .en { font: 400 10.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .22em; color: #98a192; text-transform: uppercase; }
+.m2 .cards3 { display: grid; gap: 26px; }
+@media (min-width: 820px) { .m2 .cards3 { grid-template-columns: repeat(3, 1fr); } }
+.m2 .cards3 .card { padding: 0; transform: rotate(var(--rot, 0deg)); transition: transform .25s ease, box-shadow .25s ease; }
+.m2 .cards3 .card:hover { transform: rotate(0deg) translateY(-6px); box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 0 30px 50px rgba(0,0,0,.4), 0 5px 10px rgba(0,0,0,.28); }
+.m2 .cards3 .tab { display: inline-block; background: var(--steel); color: #f2f5f8;
+  font: 600 11px/1 Inter, "PingFang SC", sans-serif; letter-spacing: .14em;
+  padding: 6px 12px; margin: 18px 0 0 22px; border-radius: 2px; }
+.m2 .cards3 .card:nth-child(1) { --rot: -1.1deg; } .m2 .cards3 .card:nth-child(1) .tab { background: #6d5f49; }
+.m2 .cards3 .card:nth-child(2) { --rot: .8deg; }
+.m2 .cards3 .card:nth-child(3) { --rot: -.5deg; } .m2 .cards3 .card:nth-child(3) .tab { background: #4f6653; }
+.m2 .cards3 h3 { padding: 14px 22px 0; font: 900 22px/1.4 "Songti SC", SimSun, serif; }
+.m2 .cards3 h3 a:hover { color: var(--steel); }
+.m2 .cards3 .snip { padding: 10px 22px 0; font-size: 14.5px; line-height: 1.8; color: #4a5048; min-height: 4.4em; }
+.m2 .cards3 .cmeta { margin: 16px 22px 0; padding: 12px 0 16px; border-top: 1px dashed #b9b6a8;
+  font: 400 11px/1 ui-monospace, Menlo, monospace; color: var(--mut); letter-spacing: .08em; }
+/* 抽屉分类 */
+.m2 .drawers { display: grid; gap: 18px; grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 900px) { .m2 .drawers { grid-template-columns: repeat(4, 1fr); } }
+.m2 .drawer {
+  background: linear-gradient(180deg, #4d554a, #424a40);
+  border: 1px solid #333a32; border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 4px 10px rgba(0,0,0,.28);
+  padding: 16px 14px 14px; transition: transform .2s ease;
+}
+.m2 .drawer:hover { transform: translateY(-3px); }
+.m2 .drawer .lbl {
+  background: var(--label); border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #c6c3b4, 0 1px 2px rgba(0,0,0,.3);
+  padding: 10px 12px; display: flex; align-items: baseline; justify-content: space-between;
+}
+.m2 .drawer .lbl .n { font: 900 17px/1 "Songti SC", SimSun, serif; color: var(--ink); }
+.m2 .drawer .lbl .c { font: 400 10.5px/1 ui-monospace, Menlo, monospace; color: var(--mut); }
+.m2 .drawer .pull { width: 58px; height: 9px; margin: 13px auto 2px; border-radius: 5px;
+  background: linear-gradient(180deg, #a7afa5, #6c7569);
+  box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.35); }
+/* 便签 tags */
+.m2 .notes-row { display: flex; flex-wrap: wrap; gap: 14px; }
+.m2 .notes-row a {
+  background: #e6e2d2; color: #3c423a;
+  font: 500 13px/1 Inter, "PingFang SC", sans-serif;
+  padding: 9px 14px; border-radius: 2px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.28), inset 0 -8px 12px rgba(0,0,0,.05);
+  transform: rotate(var(--r, 0deg)); transition: transform .2s ease;
+}
+.m2 .notes-row a:nth-child(3n+1) { --r: -1.4deg; background: #e2ddc8; }
+.m2 .notes-row a:nth-child(3n+2) { --r: 1.1deg; }
+.m2 .notes-row a:nth-child(4n) { --r: -.8deg; background: #dfe3d5; }
+.m2 .notes-row a:hover { transform: rotate(0) translateY(-3px); }
+/* 馆长留言 */
+.m2 .keeper { max-width: 640px; margin: 6px auto 0; }
+.m2 .keeper .card { transform: rotate(.6deg); padding: 28px 32px; }
+.m2 .keeper blockquote { font-size: 19px; line-height: 1.9; color: var(--ink); }
+.m2 .keeper .who { margin-top: 14px; font-size: 13px; color: var(--mut); }
+/* 室规 footer */
+.m2 .rules { margin-top: 60px; background: var(--wall3); border-top: 1px solid #2a2f29; color: #98a192; }
+.m2 .rules .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 26px;
+  padding-top: 20px; padding-bottom: 26px; font: 400 11.5px/1.9 ui-monospace, Menlo, monospace; letter-spacing: .06em; }
+.m2 .rules a:hover { color: #d8dcd2; }
+
+/* ═══════════════════════════ ③ 瑞士大字 ═══════════════════════════ */
+.m3 { --ink:#0b0b0b; --mut:#767676; --line:#dcdcdc; --acc:#1f3bff; --bg:#ffffff;
+  background: var(--bg); color: var(--ink);
+  font: 16px/1.7 Inter, "PingFang SC", "Hiragino Sans GB", -apple-system, sans-serif; }
+.m3 .mono { font-family: ui-monospace, "JetBrains Mono", Menlo, monospace; }
+.m3 .topbar { border-bottom: 1px solid var(--ink); }
+.m3 .topbar .wrap { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; padding-bottom: 16px; }
+.m3 .brand { font-size: 17px; font-weight: 800; letter-spacing: .02em; }
+.m3 .brand sup { color: var(--acc); font-size: 10px; }
+.m3 .topnav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.m3 .topnav a { font-size: 13px; font-weight: 500; color: var(--ink); position: relative; }
+.m3 .topnav a:hover { color: var(--acc); }
+.m3 .topnav a.cur { font-weight: 700; }
+.m3 .topnav a.cur::before { content: ""; position: absolute; left: -11px; top: 50%; width: 6px; height: 6px; background: var(--acc); transform: translateY(-50%); }
+/* 巨型头条 */
+.m3 .hero { padding: 56px 0 0; display: grid; gap: 36px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .m3 .hero { grid-template-columns: 8fr 4fr; gap: 48px; } }
+.m3 .hero .k { display: inline-block; background: var(--acc); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .2em; padding: 6px 12px; }
+.m3 .hero h1 { margin-top: 26px; font-size: clamp(54px, 8.6vw, 118px); font-weight: 800; line-height: 1.06; letter-spacing: -.035em; text-wrap: balance; }
+.m3 .hero h1 a:hover { color: var(--acc); }
+.m3 .hero .lede { margin-top: 30px; max-width: 26em; font-size: 18px; line-height: 1.85; color: #3a3a3a; }
+.m3 .hero-side { display: flex; flex-direction: column; gap: 0; border-top: 2px solid var(--ink); align-self: start; }
+.m3 .hero-side .cell { border-bottom: 1px solid var(--line); padding: 14px 0; display: flex; justify-content: space-between; align-items: baseline; }
+.m3 .hero-side .cell .k2 { font-size: 11px; font-weight: 600; letter-spacing: .18em; color: var(--mut); text-transform: uppercase; }
+.m3 .hero-side .cell .v { font-size: 14px; font-weight: 600; }
+.m3 .hero-side .bignum { border-bottom: 2px solid var(--ink); padding: 18px 0 22px; }
+.m3 .hero-side .bignum .n { font-size: 84px; font-weight: 800; line-height: 1; letter-spacing: -.04em; color: var(--acc); }
+.m3 .hero-side .bignum .cap { margin-top: 6px; font-size: 12px; color: var(--mut); }
+.m3 .bluebar { height: 14px; background: var(--acc); margin: 52px 0 0; }
+/* 错位三栏 */
+.m3 .grid3 { display: grid; gap: 32px; padding: 56px 0 8px; grid-template-columns: 1fr; }
+@media (min-width: 900px) {
+  .m3 .grid3 { grid-template-columns: repeat(3, 1fr); }
+  .m3 .grid3 article:nth-child(2) { margin-top: 44px; }
+  .m3 .grid3 article:nth-child(3) { margin-top: 88px; }
+}
+.m3 .sec-title { display: flex; align-items: center; gap: 14px; padding-top: 52px; }
+.m3 .sec-title h2 { font-size: 15px; font-weight: 800; letter-spacing: .24em; text-transform: uppercase; }
+.m3 .sec-title .sq { width: 12px; height: 12px; background: var(--acc); }
+.m3 .sec-title .ln { flex: 1; height: 1px; background: var(--ink); }
+.m3 .sec-title a { font-size: 12px; font-weight: 600; color: var(--mut); }
+.m3 .sec-title a:hover { color: var(--acc); }
+.m3 .grid3 article { border-top: 2px solid var(--ink); padding-top: 18px; }
+.m3 .grid3 .c { font-size: 11px; font-weight: 700; letter-spacing: .2em; color: var(--acc); text-transform: uppercase; }
+.m3 .grid3 h3 { margin-top: 12px; font-size: 26px; font-weight: 800; line-height: 1.3; letter-spacing: -.02em; }
+.m3 .grid3 h3 a:hover { color: var(--acc); }
+.m3 .grid3 .snip { margin-top: 12px; font-size: 14.5px; line-height: 1.8; color: #4a4a4a; }
+.m3 .grid3 .m { margin-top: 14px; font: 400 11px/1 ui-monospace, Menlo, monospace; color: var(--mut); }
+/* 规格表式列表 */
+.m3 .spec { margin-top: 24px; border-top: 2px solid var(--ink); }
+.m3 .spec a { display: grid; grid-template-columns: 90px 1fr 110px; gap: 18px; align-items: baseline;
+  padding: 15px 0; border-bottom: 1px solid var(--line); }
+.m3 .spec .d { font: 400 11.5px/1 ui-monospace, Menlo, monospace; color: var(--mut); }
+.m3 .spec .t { font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+.m3 .spec a:hover .t { color: var(--acc); }
+.m3 .spec .c { font-size: 11px; font-weight: 600; letter-spacing: .14em; color: var(--mut); text-transform: uppercase; text-align: right; }
+/* 索引网格 */
+.m3 .taggrid { margin-top: 24px; display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--ink); border-left: 1px solid var(--ink); }
+@media (min-width: 760px) { .m3 .taggrid { grid-template-columns: repeat(4, 1fr); } }
+.m3 .taggrid a { border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 16px 14px;
+  font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; }
+.m3 .taggrid a:hover { background: var(--acc); color: #fff; }
+.m3 .taggrid a:hover .x { color: rgba(255,255,255,.7); }
+.m3 .taggrid .x { font: 400 10.5px/1 ui-monospace, Menlo, monospace; color: var(--mut); }
+/* 引文 */
+.m3 .quote { margin: 72px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start; }
+.m3 .quote .qm { font-size: 120px; font-weight: 800; line-height: .7; color: var(--acc); }
+.m3 .quote blockquote { font-size: clamp(20px, 2.6vw, 28px); font-weight: 700; line-height: 1.6; letter-spacing: -.01em; max-width: 22em; }
+.m3 .quote .who { margin-top: 14px; font-size: 13px; color: var(--mut); }
+/* 黑色刊尾 */
+.m3 .foot { margin-top: 80px; background: var(--ink); color: #f2f2f2; }
+.m3 .foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 30px; padding-top: 24px; padding-bottom: 28px; align-items: baseline; }
+.m3 .foot .b { font-size: 17px; font-weight: 800; }
+.m3 .foot p, .m3 .foot a { font-size: 12px; color: #bdbdbd; }
+.m3 .foot a:hover { color: var(--acc); }
+.m3 .foot a { margin-left: 18px; }
+
+/* ═══════════════════════════ ④ 竖排卷轴 ═══════════════════════════ */
+.m4 { --silk:#eef3f0; --ink:#1c1f1c; --mut:#6d7a72; --jie:#c3d0c7; --sei:#3f6e6b;
+  background: var(--silk); color: var(--ink);
+  font: 16px/2 Georgia, "Songti SC", "Source Han Serif SC", SimSun, serif;
+  height: calc(100vh - 52px); overflow: hidden; }
+.m4 .roll {
+  height: 100%; width: 100%; display: flex; direction: rtl;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+}
+.m4 .roll::-webkit-scrollbar { display: none; }
+.m4 .panel { direction: rtl; height: 100%; flex: none; padding: 56px 52px; border-left: 1px solid var(--jie);
+  display: flex; gap: 44px; align-items: flex-start; position: relative; }
+.m4 .v { writing-mode: vertical-rl; text-orientation: mixed; }
+/* 卷首 */
+.m4 .p-head { border-left: 4px solid var(--ink); padding-right: 10vw; }
+.m4 .p-head .big { font-size: clamp(64px, 11vh, 104px); font-weight: 900; letter-spacing: .18em; line-height: 1; }
+.m4 .p-head .sub { font-size: 15px; letter-spacing: .5em; color: var(--mut); margin-right: 30px; }
+.m4 .seal {
+  writing-mode: vertical-rl; background: var(--ink); color: var(--silk);
+  font-size: 17px; font-weight: 700; letter-spacing: .3em; padding: 12px 9px;
+  align-self: flex-start; margin-right: 8px;
+}
+.m4 .p-head .date { font-size: 12.5px; letter-spacing: .3em; color: var(--mut); margin-right: 26px; }
+.m4 .hint {
+  position: absolute; bottom: 34px; right: 52px; writing-mode: horizontal-tb;
+  font: 400 11.5px/1 ui-monospace, Menlo, monospace; color: var(--mut); letter-spacing: .12em;
+  animation: m4nudge 2.6s ease-in-out infinite;
+}
+@keyframes m4nudge { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-10px); } }
+/* 头条 */
+.m4 .p-lead .kick { font-size: 13px; letter-spacing: .4em; color: var(--sei); border-right: 2px solid var(--sei); padding-right: 12px; }
+.m4 .p-lead h2 { font-size: clamp(40px, 7.4vh, 58px); font-weight: 900; letter-spacing: .14em; line-height: 1.25; margin-right: 26px; }
+.m4 .p-lead h2 a:hover { color: var(--sei); }
+.m4 .p-lead .lede { height: 46vh; font-size: 15.5px; line-height: 2.5; letter-spacing: .1em; color: #39423c;
+  border-right: 1px solid var(--jie); padding-right: 26px; margin-right: 12px; }
+.m4 .p-lead .meta { font: 400 11px/1.9 ui-monospace, Menlo, monospace; letter-spacing: .18em; color: var(--mut); }
+/* 句读 */
+.m4 .p-poem { align-items: center; }
+.m4 .p-poem blockquote { font-size: clamp(26px, 4.6vh, 36px); letter-spacing: .3em; line-height: 2; font-weight: 700; }
+.m4 .p-poem cite { font-size: 13px; letter-spacing: .3em; color: var(--mut); font-style: normal; margin-right: 24px; }
+/* 要闻 */
+.m4 .p-stories .zh { font-size: 15px; letter-spacing: .5em; color: var(--mut); border-right: 1px solid var(--jie); padding-right: 14px; }
+.m4 .story { display: flex; gap: 26px; }
+.m4 .story h3 { font-size: 30px; font-weight: 900; letter-spacing: .12em; }
+.m4 .story h3 a:hover { color: var(--sei); }
+.m4 .story .s { height: 38vh; font-size: 14px; line-height: 2.4; letter-spacing: .08em; color: #4a544d; }
+.m4 .story .m { font: 400 10.5px/1.8 ui-monospace, Menlo, monospace; letter-spacing: .14em; color: var(--mut); }
+/* 栏目 */
+.m4 .p-cats .cat { display: flex; gap: 22px; }
+.m4 .p-cats .n { font-size: 24px; font-weight: 900; letter-spacing: .18em; }
+.m4 .p-cats a:hover .n { color: var(--sei); }
+.m4 .p-cats .c { font: 400 11px/1.8 ui-monospace, Menlo, monospace; color: var(--mut); letter-spacing: .12em; }
+/* 卷尾 */
+.m4 .p-end { padding-left: 16vw; }
+.m4 .p-end blockquote { font-size: 19px; line-height: 2.6; letter-spacing: .14em; height: 56vh; }
+.m4 .p-end .who { font-size: 12.5px; letter-spacing: .3em; color: var(--mut); margin-right: 22px; }
+.m4 .p-end .fin { writing-mode: vertical-rl; border: 1.5px solid var(--ink); color: var(--ink);
+  font-size: 14px; font-weight: 700; letter-spacing: .34em; padding: 12px 7px; align-self: flex-end; margin-bottom: 60px; }
+.m4 .p-end .footv { font: 400 10.5px/2 ui-monospace, Menlo, monospace; letter-spacing: .14em; color: var(--mut); align-self: flex-end; margin-bottom: 56px; }
+@media (max-width: 860px) {
+  /* 窄屏退回纵向阅读 */
+  .m4 { height: auto; overflow: visible; }
+  .m4 .roll { display: block; width: auto; height: auto; direction: ltr; overflow: visible; }
+  .m4 .panel { display: block; height: auto; padding: 40px 24px; border-left: 0; border-bottom: 1px solid var(--jie); }
+  .m4 .v { writing-mode: horizontal-tb; }
+  .m4 .p-head .big { font-size: 52px; }
+  .m4 .p-head { border-left: 0; border-bottom: 4px solid var(--ink); padding-right: 0; }
+  .m4 .p-head > * , .m4 .panel > * { margin: 0 0 14px; }
+  .m4 .p-lead .lede, .m4 .story .s, .m4 .p-end blockquote { height: auto; border-right: 0; padding-right: 0; }
+  .m4 .story { margin-bottom: 20px; }
+  .m4 .hint { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <span class="brand">首页改版 v2</span>
+  <button data-i="0" class="on">① 杂志封面</button>
+  <button data-i="1">② 档案索引</button>
+  <button data-i="2">③ 瑞士大字</button>
+  <button data-i="3">④ 竖排卷轴</button>
+  <button class="navbtn" id="prev" aria-label="上一个">‹</button>
+  <button class="navbtn" id="next" aria-label="下一个">›</button>
+  <span class="desc" id="desc"></span>
+</div>
+<div id="spacer"></div>
+
+<!-- ════════════ ① 杂志封面 ════════════ -->
+<div class="demo m1 on">
+  <section class="cover">
+    <div class="cover-top">
+      <span class="name">曲線時報 <span>THE CURVE TIMES</span></span>
+      <span class="no">Vol. I · No. 001 · Sep 2026</span>
+    </div>
+    <span class="cover-rail">二〇二六年 · 九月号 · 总第零零一期</span>
+    <div class="cover-mid">
+      <p class="cover-kick">封面故事 · COVER STORY</p>
+      <h1 class="cover-title"><a href="#">她不只是一个用户名</a></h1>
+      <p class="cover-lede">关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。</p>
+      <p class="cover-meta">文 / SY · 约 12 分钟 · 4300 字</p>
+    </div>
+    <div class="cover-lines">
+      <a href="#"><span class="pg">P.02 · 纪念</span><span class="tt">晚安喵</span><span class="ds">我还有很多事情没来得及问。</span></a>
+      <a href="#"><span class="pg">P.03 · 随笔</span><span class="tt">没有下一版</span><span class="ds">她没能见到 GPT 6，我也再没等到一个已读。</span></a>
+      <a href="#"><span class="pg">P.04 · 随笔</span><span class="tt">过期的存档点</span><span class="ds">想回去的那一天，印在过期可乐的瓶身上。</span></a>
+    </div>
+  </section>
+
+  <main class="inner wrap">
+    <div class="toc-head"><h2>目录</h2><span class="en">Contents</span></div>
+    <div class="toc">
+      <a href="#"><span class="n">01</span><span class="t">她不只是一个用户名</span><span class="dots"></span><span class="p">P.01</span></a>
+      <a href="#"><span class="n">02</span><span class="t">晚安喵</span><span class="dots"></span><span class="p">P.02</span></a>
+      <a href="#"><span class="n">03</span><span class="t">没有下一版</span><span class="dots"></span><span class="p">P.03</span></a>
+      <a href="#"><span class="n">04</span><span class="t">过期的存档点</span><span class="dots"></span><span class="p">P.04</span></a>
+      <a href="#"><span class="n">05</span><span class="t">六月没有主线任务</span><span class="dots"></span><span class="p">P.05</span></a>
+      <a href="#"><span class="n">06</span><span class="t">依恋的形状</span><span class="dots"></span><span class="p">P.06</span></a>
+      <a href="#"><span class="n">07</span><span class="t">维权报告：德智成长中心</span><span class="dots"></span><span class="p">P.07</span></a>
+      <a href="#"><span class="n">08</span><span class="t">DeepSeek 侧边栏问候</span><span class="dots"></span><span class="p">P.08</span></a>
+    </div>
+
+    <div class="preface">
+      <p class="lbl">卷 首 语</p>
+      <blockquote>“我总希望能给别人带来欢乐，但最终带来的几乎只是烦恼。”</blockquote>
+      <p class="who">—— 编者 Sy，偶尔把这里当草稿纸</p>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head"><h2>本期文章</h2><a href="#">过刊存档 · 二十四期 →</a></div>
+      <a class="row" href="#"><span class="d">09-24</span><span class="t">她不只是一个用户名</span><span class="c">随笔</span></a>
+      <a class="row" href="#"><span class="d">09-24</span><span class="t">晚安喵</span><span class="c">纪念</span></a>
+      <a class="row" href="#"><span class="d">09-21</span><span class="t">没有下一版</span><span class="c">随笔</span></a>
+      <a class="row" href="#"><span class="d">09-19</span><span class="t">过期的存档点</span><span class="c">随笔</span></a>
+      <a class="row" href="#"><span class="d">06-18</span><span class="t">六月没有主线任务</span><span class="c">随笔</span></a>
+    </div>
+
+    <p class="tags"><b>索引</b>
+      <a href="#">依恋</a><i>·</i><a href="#">心理</a><i>·</i><a href="#">自我剖析</a><i>·</i><a href="#">Epheia</a><i>·</i><a href="#">纪念</a><i>·</i><a href="#">AI</a><i>·</i><a href="#">建站</a><i>·</i><a href="#">Curve</a><i>·</i><a href="#">DeepSeek</a><i>·</i><a href="#">前端</a><i>·</i><a href="#">报告</a><i>·</i><a href="#">夏天</a>
+    </p>
+  </main>
+
+  <footer class="colophon"><div class="wrap">
+    <div>
+      <p class="big">曲線時報</p>
+      <p>一份个人早报。不定期出刊，一切以「想写」为准。<br />想说点什么，<a href="#">写信给编者</a>。</p>
+    </div>
+    <p class="mono-l">© 2026 THE CURVE TIMES · ALL WRONGS RESERVED<br />RSS · GITHUB · EMAIL</p>
+  </div></footer>
+</div>
+
+<!-- ════════════ ② 档案索引 ════════════ -->
+<div class="demo m2">
+  <header class="plate"><div class="wrap">
+    <div>
+      <h1>曲線檔案室</h1>
+      <p class="en">The Curve Archives · Est. 2025</p>
+    </div>
+    <span class="open">开放阅览中</span>
+  </div></header>
+
+  <main class="wrap">
+    <div class="lead-zone">
+      <article class="card card-lead">
+        <div class="holes"><i></i><i></i></div>
+        <span class="stamp">已归档</span>
+        <p class="callno">索书号 QD-2026-0924-A · 架位：随笔</p>
+        <h2><a href="#">她不只是一个用户名</a></h2>
+        <p class="lede">关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。</p>
+        <div class="meta">
+          <span>归档日期 <b>2026-09-24</b></span>
+          <span>篇幅 <b>4300 字 · 约 12 分钟</b></span>
+          <span>经手 <b>Sy</b></span>
+        </div>
+      </article>
+    </div>
+
+    <div class="zone-label"><h2>新进档案</h2><span class="en">Recent Accessions</span></div>
+    <div class="cards3">
+      <article class="card">
+        <span class="tab">纪念</span>
+        <h3><a href="#">晚安喵</a></h3>
+        <p class="snip">后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。</p>
+        <p class="cmeta">QD-2026-0924-B · 09-24 入库</p>
+      </article>
+      <article class="card">
+        <span class="tab">随笔</span>
+        <h3><a href="#">没有下一版</a></h3>
+        <p class="snip">她没能见到 GPT 6，我也再没等到一个已读。</p>
+        <p class="cmeta">QD-2026-0921-A · 09-21 入库</p>
+      </article>
+      <article class="card">
+        <span class="tab">随笔</span>
+        <h3><a href="#">过期的存档点</a></h3>
+        <p class="snip">想回去的那一天，印在一瓶过期可乐的瓶身上。</p>
+        <p class="cmeta">QD-2026-0919-A · 09-19 入库</p>
+      </article>
+    </div>
+
+    <div class="zone-label"><h2>分类抽屉</h2><span class="en">Drawers</span></div>
+    <div class="drawers">
+      <a class="drawer" href="#"><span class="lbl"><span class="n">随笔</span><span class="c">14 卷</span></span><span class="pull"></span></a>
+      <a class="drawer" href="#"><span class="lbl"><span class="n">纪念</span><span class="c">3 卷</span></span><span class="pull"></span></a>
+      <a class="drawer" href="#"><span class="lbl"><span class="n">开发教程</span><span class="c">4 卷</span></span><span class="pull"></span></a>
+      <a class="drawer" href="#"><span class="lbl"><span class="n">权益维护</span><span class="c">2 卷</span></span><span class="pull"></span></a>
+      <a class="drawer" href="#"><span class="lbl"><span class="n">工具箱</span><span class="c">1 卷</span></span><span class="pull"></span></a>
+      <a class="drawer" href="#"><span class="lbl"><span class="n">光影</span><span class="c">不定期</span></span><span class="pull"></span></a>
+      <a class="drawer" href="#"><span class="lbl"><span class="n">随笔小记</span><span class="c">6 卷</span></span><span class="pull"></span></a>
+      <a class="drawer" href="#"><span class="lbl"><span class="n">站务</span><span class="c">2 卷</span></span><span class="pull"></span></a>
+    </div>
+
+    <div class="zone-label"><h2>检索便签</h2><span class="en">Index Slips</span></div>
+    <div class="notes-row">
+      <a href="#">依恋</a><a href="#">心理</a><a href="#">自我剖析</a><a href="#">Epheia</a><a href="#">纪念</a><a href="#">AI</a><a href="#">建站</a><a href="#">Curve</a><a href="#">DeepSeek</a><a href="#">前端</a><a href="#">报告</a><a href="#">夏天</a><a href="#">存档</a><a href="#">你好世界</a>
+    </div>
+
+    <div class="zone-label"><h2>馆长留言</h2><span class="en">From the Keeper</span></div>
+    <div class="keeper">
+      <div class="card">
+        <blockquote>“我总希望能给别人带来欢乐，但最终带来的几乎只是烦恼。”</blockquote>
+        <p class="who">—— 馆长 Sy · 想调阅更多，<a href="#" style="border-bottom:1px solid #54708c; color:#54708c;">登记阅览册（完整存档）</a> 或在留言簿（随笔评论）写字。</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="rules"><div class="wrap">
+    <span>© 2026 曲線檔案室 · 本室资料仅供阅览</span>
+    <span><a href="#">RSS</a> · <a href="#">GITHUB</a> · <a href="#">EMAIL</a></span>
+    <span>开馆时间：想写的时候</span>
+  </div></footer>
+</div>
+
+<!-- ════════════ ③ 瑞士大字 ════════════ -->
+<div class="demo m3">
+  <header class="topbar"><div class="wrap">
+    <a class="brand" href="#">曲線時報<sup>®</sup></a>
+    <nav class="topnav">
+      <a href="#" class="cur">头版</a><a href="#">存档</a><a href="#">版块</a><a href="#">索引</a>
+      <a href="#">随笔</a><a href="#">光影</a><a href="#">倒计时</a><a href="#">友链</a><a href="#">编者</a>
+    </nav>
+  </div></header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <span class="k">头版 · 随笔</span>
+        <h1><a href="#">她不只是一个用户名</a></h1>
+        <p class="lede">关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。</p>
+      </div>
+      <aside class="hero-side">
+        <div class="bignum"><span class="n">24</span><p class="cap">馆藏文章 · 持续增加</p></div>
+        <div class="cell"><span class="k2">日期</span><span class="v">2026-09-24</span></div>
+        <div class="cell"><span class="k2">篇幅</span><span class="v">4300 字 / 12 分钟</span></div>
+        <div class="cell"><span class="k2">作者</span><span class="v">Sy</span></div>
+        <div class="cell"><span class="k2">刊号</span><span class="v">Vol. I · No. 001</span></div>
+      </aside>
+    </section>
+    <div class="bluebar"></div>
+
+    <div class="sec-title"><span class="sq"></span><h2>头版要闻</h2><span class="ln"></span></div>
+    <div class="grid3">
+      <article>
+        <span class="c">纪念</span>
+        <h3><a href="#">晚安喵</a></h3>
+        <p class="snip">后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。</p>
+        <p class="m">2026-09-24</p>
+      </article>
+      <article>
+        <span class="c">随笔</span>
+        <h3><a href="#">没有下一版</a></h3>
+        <p class="snip">她没能见到 GPT 6，我也再没等到一个已读。</p>
+        <p class="m">2026-09-21</p>
+      </article>
+      <article>
+        <span class="c">随笔</span>
+        <h3><a href="#">过期的存档点</a></h3>
+        <p class="snip">想回去的那一天，印在一瓶过期可乐的瓶身上。</p>
+        <p class="m">2026-09-19</p>
+      </article>
+    </div>
+
+    <div class="sec-title"><span class="sq"></span><h2>更多文章</h2><span class="ln"></span><a href="#">完整存档 →</a></div>
+    <div class="spec">
+      <a href="#"><span class="d">2026-06-18</span><span class="t">六月没有主线任务</span><span class="c">随笔</span></a>
+      <a href="#"><span class="d">2026-04-25</span><span class="t">依恋的形状</span><span class="c">随笔</span></a>
+      <a href="#"><span class="d">2026-03-22</span><span class="t">关于「德智青少年成长中心」的维权报告</span><span class="c">权益维护</span></a>
+      <a href="#"><span class="d">2025-10-20</span><span class="t">给你的 Curve 主题添加 DeepSeek 侧边栏问候</span><span class="c">开发教程</span></a>
+    </div>
+
+    <div class="sec-title"><span class="sq"></span><h2>版块与索引</h2><span class="ln"></span><a href="#">全部标签</a></div>
+    <div class="taggrid">
+      <a href="#"><span>随笔</span><span class="x">14</span></a>
+      <a href="#"><span>纪念</span><span class="x">03</span></a>
+      <a href="#"><span>开发教程</span><span class="x">04</span></a>
+      <a href="#"><span>权益维护</span><span class="x">02</span></a>
+      <a href="#"><span>工具箱</span><span class="x">01</span></a>
+      <a href="#"><span>光影</span><span class="x">—</span></a>
+      <a href="#"><span>随笔小记</span><span class="x">06</span></a>
+      <a href="#"><span>站务</span><span class="x">02</span></a>
+    </div>
+
+    <div class="quote">
+      <span class="qm">“</span>
+      <div>
+        <blockquote>我总希望能给别人带来欢乐，但最终带来的几乎只是烦恼。</blockquote>
+        <p class="who">Sy · 编者 —— 想说点什么，写信，或在随笔下留言。</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot"><div class="wrap">
+    <span class="b">曲線時報</span>
+    <p>© 2026 · All wrongs reserved · Printed in 赛博空间</p>
+    <p><a href="#">RSS</a><a href="#">GitHub</a><a href="#">Email</a></p>
+  </div></footer>
+</div>
+
+<!-- ════════════ ④ 竖排卷轴 ════════════ -->
+<div class="demo m4">
+  <div class="roll" id="roll">
+    <section class="panel p-head">
+      <h1 class="v big">曲線時報</h1>
+      <span class="seal">曲線之印</span>
+      <p class="v sub">一份个人早报</p>
+      <p class="v date">岁次丙午 · 九月</p>
+      <span class="hint">← 滚动以展卷</span>
+    </section>
+
+    <section class="panel p-lead">
+      <p class="v kick">头版 · 随笔</p>
+      <h2 class="v"><a href="#">她不只是一个用户名</a></h2>
+      <p class="v lede">关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。</p>
+      <p class="v meta">文 / SY<br />二〇二六年九月二十四日<br />约十二分钟</p>
+    </section>
+
+    <section class="panel p-poem">
+      <blockquote class="v">行到水穷处，坐看云起时</blockquote>
+      <cite class="v">王维 · 终南别业</cite>
+    </section>
+
+    <section class="panel p-stories">
+      <p class="v zh">要闻</p>
+      <div class="story">
+        <h3 class="v"><a href="#">晚安喵</a></h3>
+        <p class="v s">后来我才发现，关于 Epheia，我还有很多事情没来得及问。</p>
+        <p class="v m">九月二十四日<br />纪念</p>
+      </div>
+      <div class="story">
+        <h3 class="v"><a href="#">没有下一版</a></h3>
+        <p class="v s">她没能见到 GPT 6，我也再没等到一个已读。</p>
+        <p class="v m">九月二十一日<br />随笔</p>
+      </div>
+      <div class="story">
+        <h3 class="v"><a href="#">过期的存档点</a></h3>
+        <p class="v s">想回去的那一天，印在一瓶过期可乐的瓶身上。</p>
+        <p class="v m">九月十九日<br />随笔</p>
+      </div>
+    </section>
+
+    <section class="panel p-cats">
+      <p class="v zh">栏目</p>
+      <div class="cat"><span class="v n"><a href="#">随笔</a></span><span class="v c">十四篇</span></div>
+      <div class="cat"><span class="v n"><a href="#">纪念</a></span><span class="v c">三篇</span></div>
+      <div class="cat"><span class="v n"><a href="#">开发教程</a></span><span class="v c">四篇</span></div>
+      <div class="cat"><span class="v n"><a href="#">权益维护</a></span><span class="v c">二篇</span></div>
+      <div class="cat"><span class="v n"><a href="#">工具箱</a></span><span class="v c">一篇</span></div>
+      <div class="cat"><span class="v n"><a href="#">光影</a></span><span class="v c">不定期</span></div>
+    </section>
+
+    <section class="panel p-end">
+      <blockquote class="v">我总希望能给别人带来欢乐，但最终带来的几乎只是烦恼。</blockquote>
+      <p class="v who">编者识 · 来信请寄 Sy</p>
+      <span class="fin">卷终</span>
+      <p class="v footv">© 2026 THE CURVE TIMES<br />RSS · GITHUB · EMAIL</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  var demos = Array.prototype.slice.call(document.querySelectorAll('.demo'));
+  var btns = Array.prototype.slice.call(document.querySelectorAll('#bar button[data-i]'));
+  var desc = document.getElementById('desc');
+  var texts = [
+    '首屏即封面：墨蓝刊面 + 竖排期号 + 封面要目；内页是目录与卷首语',
+    '实体档案室：打孔索引卡 + 归档章 + 抽屉分类 + 金属拉手',
+    '国际主义网格：120px 黑体 + 电蓝 + 错位栏 + 规格表',
+    '横向展卷：竖排从右往左读，滚轮展卷，界行与墨印'
+  ];
+  var cur = 0;
+  function show(i) {
+    cur = (i + demos.length) % demos.length;
+    demos.forEach(function (d, k) { d.classList.toggle('on', k === cur); });
+    btns.forEach(function (b, k) { b.classList.toggle('on', k === cur); });
+    desc.textContent = texts[cur];
+    window.scrollTo(0, 0);
+    document.body.style.overflow = cur === 3 ? 'hidden' : '';
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { show(+b.dataset.i); }); });
+  document.getElementById('prev').addEventListener('click', function () { show(cur - 1); });
+  document.getElementById('next').addEventListener('click', function () { show(cur + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key >= '1' && e.key <= '4') show(+e.key - 1);
+    if (e.key === 'ArrowLeft') show(cur - 1);
+    if (e.key === 'ArrowRight') show(cur + 1);
+  });
+  // 卷轴：纵向滚轮转横向展卷
+  var roll = document.getElementById('roll');
+  roll.addEventListener('wheel', function (e) {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      roll.scrollLeft -= e.deltaY;
+    }
+  }, { passive: false });
+  show(0);
+})();
+</script>
+</body>
+</html>

@@ -23,7 +23,7 @@
     --ink-strong: 28 16% 5%;
     --ink-body: 28 12% 17%;
     --ink-muted: 28 9% 31%;
-    --ink-faded: 28 7% 43%;
+    --ink-faded: 28 7% 38%;
 
     /* Rules */
     --rule: 28 14% 14%;
@@ -47,7 +47,7 @@
     --ink-strong: 40 18% 96%;
     --ink-body: 40 11% 85%;
     --ink-muted: 38 8% 66%;
-    --ink-faded: 38 6% 52%;
+    --ink-faded: 38 6% 54%;
 
     /* Rules — subtle grey lines */
     --rule: 0 0% 32%;
@@ -68,10 +68,10 @@
     --ink-strong: 28 18% 5%;
     --ink-body: 28 12% 18%;
     --ink-muted: 24 11% 34%;
-    --ink-faded: 24 9% 46%;
+    --ink-faded: 24 9% 39%;
     --rule: 24 16% 16%;
     --rule-soft: 24 11% 30%;
-    --stamp: 18 76% 44%;
+    --stamp: 18 76% 38%;
     --stamp-soft: 22 82% 93%;
   }
 
@@ -83,10 +83,10 @@
     --ink-strong: 25 18% 6%;
     --ink-body: 25 12% 18%;
     --ink-muted: 25 10% 33%;
-    --ink-faded: 25 8% 45%;
+    --ink-faded: 25 8% 36%;
     --rule: 25 15% 15%;
     --rule-soft: 25 11% 28%;
-    --stamp: 17 67% 40%;
+    --stamp: 17 67% 36%;
     --stamp-soft: 21 72% 90%;
   }
 
@@ -98,10 +98,10 @@
     --ink-strong: 214 24% 8%;
     --ink-body: 214 14% 20%;
     --ink-muted: 214 10% 35%;
-    --ink-faded: 214 8% 47%;
+    --ink-faded: 214 8% 37%;
     --rule: 214 16% 18%;
     --rule-soft: 214 10% 31%;
-    --stamp: 198 44% 38%;
+    --stamp: 198 44% 33%;
     --stamp-soft: 198 42% 91%;
   }
 
@@ -113,7 +113,7 @@
     --ink-strong: 42 20% 96%;
     --ink-body: 38 12% 85%;
     --ink-muted: 33 10% 66%;
-    --ink-faded: 32 9% 52%;
+    --ink-faded: 32 9% 55%;
     --rule: 29 12% 32%;
     --rule-soft: 29 11% 24%;
     --stamp: 28 72% 62%;
@@ -128,7 +128,7 @@
     --ink-strong: 40 20% 96%;
     --ink-body: 37 12% 85%;
     --ink-muted: 28 9% 65%;
-    --ink-faded: 28 8% 51%;
+    --ink-faded: 28 8% 54%;
     --rule: 22 12% 31%;
     --rule-soft: 22 12% 23%;
     --stamp: 18 74% 61%;
@@ -143,7 +143,7 @@
     --ink-strong: 48 22% 96%;
     --ink-body: 42 12% 85%;
     --ink-muted: 34 9% 65%;
-    --ink-faded: 34 8% 51%;
+    --ink-faded: 34 8% 52%;
     --rule: 210 16% 31%;
     --rule-soft: 210 18% 23%;
     --stamp: 195 50% 68%;
@@ -627,13 +627,15 @@
     color: hsl(38 18% 72%);
   }
 
+  /*
+   * The code toolbar is a dark surface in BOTH themes (#16110c / hsl(28 14% 14%)),
+   * so it needs the dark-surface accent regardless of the page theme. Using
+   * hsl(var(--stamp)) here gave 1.99:1 in light mode — the vintage red is tuned
+   * for newsprint, not for near-black.
+   */
   .code-block__lang {
     text-transform: lowercase;
     font-weight: 600;
-    color: hsl(var(--stamp));
-  }
-
-  .dark .code-block__lang {
     color: hsl(42 70% 70%);
   }
 
@@ -647,7 +649,7 @@
     align-items: center;
     gap: 0.35em;
     padding: 0.22em 0.65em;
-    border: 1px solid hsl(38 12% 36% / 0.55);
+    border: 1px solid hsl(38 14% 52%);
     background: transparent;
     color: hsl(38 14% 78%);
     font-family: inherit;
@@ -658,8 +660,8 @@
   }
 
   .code-block__action:hover {
-    border-color: hsl(var(--stamp));
-    color: hsl(var(--stamp));
+    border-color: hsl(42 70% 70%);
+    color: hsl(42 70% 70%);
   }
 
   .code-block__action[data-copied="true"] {
@@ -742,18 +744,9 @@
     background-color: hsl(var(--paper-soft));
   }
 
-  body.zen-mode .page-impression > *,
-  body.zen-mode .page-impression-header {
-    animation: none;
-    transform: none;
-    opacity: 1;
-    clip-path: none;
-    filter: none;
-  }
-  body.zen-mode .page-impression::after {
-    animation: none;
-    opacity: 0;
-  }
+  /* 注意：不要在这里关掉 .page-impression 的印刷机动画。
+   * zen: true 的文章进来就是禅模式，动画在挂载时就被下面这类清零的话，
+   * 印刷机质感会整个消失。中途手动开关禅模式不会重放动画（不重挂载）。 */
 
   body.zen-mode ::-webkit-scrollbar {
     display: none !important;
@@ -852,6 +845,12 @@
 @keyframes marquee-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* Route-chunk loading rule — settles in place, no bounce. */
+@keyframes route-rule {
+  0%, 100% { transform: scaleX(0.35); opacity: 0.45; }
+  50% { transform: scaleX(1); opacity: 0.9; }
 }
 
 @keyframes visualizer-bounce {

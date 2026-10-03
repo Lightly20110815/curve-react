@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { createFreefallRenderer } from "./freefall/renderer";
 import { acts } from "./freefall/score";
 import "./freefall/darkroom.css";
@@ -28,6 +29,10 @@ export default function FreefallDarkroom({
   const mountedRef = useRef(false);
   const exitingRef = useRef(false);
   const controlsFocusedRef = useRef(false);
+
+  // Focus in/out is handled by the mount effect below; this only adds the
+  // Tab cycle and takes the covered page out of the accessibility tree.
+  useFocusTrap(dialogRef, true, { manageFocus: false });
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const exitTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const transientTimerRef = useRef<ReturnType<typeof setTimeout>>();

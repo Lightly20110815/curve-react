@@ -300,3 +300,23 @@
   0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
   100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
+
+/*
+ * The JS render loop already freezes under reduced motion (see
+ * DystopiaDarkroom's matchMedia gate), but the CSS overlays kept sweeping,
+ * flickering and blinking on top of a still frame. Mirror freefall/darkroom.css.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .dp-theater__flicker,
+  .dp-theater__rec[data-live="true"],
+  .dp-theater__scanlines::after,
+  .dp-theater__pop {
+    animation: none;
+  }
+
+  .dp-theater,
+  .dp-theater__rail,
+  .dp-theater__hint {
+    transition: none;
+  }
+}

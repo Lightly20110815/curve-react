@@ -8,21 +8,12 @@ import { getPostBySlug } from "@/content/posts";
 import { EPHEIA, type Favorite } from "@/content/epheia";
 import FreefallDarkroom from "@/components/FreefallDarkroom";
 import DystopiaDarkroom from "@/components/DystopiaDarkroom";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { imageSrcSet } from "@/lib/responsive-image";
 import "./epheia.css";
 
 const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stamp";
-
-/** Enter / 空格 当作点击，给用 div 做的按钮用 */
-function onActivate(handler: () => void) {
-  return (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      event.stopPropagation();
-      handler();
-    }
-  };
-}
 
 /* ------------------------------------------------------------------ */
 /* 时间                                                                 */
@@ -275,7 +266,15 @@ function Polaroid({ item }: { item: Favorite }) {
       )}
     >
       <span className="block aspect-[3/4] w-full overflow-hidden rounded-xs border border-black/10 bg-paper-warm">
-        <img src={item.img} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <img
+          src={item.img}
+          srcSet={imageSrcSet(item.img)}
+          sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
       </span>
       <span className="mt-2.5 block px-1 text-center">
         <span className="block font-serif text-[12.5px] font-medium leading-snug text-ink-strong transition-colors group-hover:text-stamp lg:text-[13px]">
@@ -357,7 +356,15 @@ function Clothesline({
               <Hanger key={item.id} tilt={item.tilt * 0.6} className="min-w-0 flex-1">
                 <div aria-hidden="true" className={cn("w-full p-1.5 pb-1", polaroidFrame)}>
                   <div className="aspect-[3/4] w-full overflow-hidden rounded-xs border border-black/10 bg-paper-warm">
-                    <img src={item.img} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    <img
+          src={item.img}
+          srcSet={imageSrcSet(item.img)}
+          sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
                   </div>
                   <p className="mt-1 text-center font-mono text-[10px] text-ink-muted">{i + 1}</p>
                 </div>
@@ -625,11 +632,8 @@ function FootnoteCard({ hidden }: { hidden: boolean }) {
         if (pointerTypeRef.current !== "mouse") toggle();
       }}
       onMouseLeave={() => setPinned(false)}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") setPinned(false);
-        else onActivate(toggle)(event);
-      }}
       onBlur={() => setPinned(false)}
+      aria-labelledby="epheia-footnote-label"
       className={cn(
         "group fixed left-0 top-[40vh] z-30 w-[240px] cursor-pointer select-none rounded-xs border-2 border-rule/80 bg-paper p-5 sm:w-[268px] sm:p-6",
         "shadow-[8px_16px_36px_rgba(0,0,0,0.08),2px_4px_12px_rgba(0,0,0,0.04)] dark:shadow-[8px_16px_36px_rgba(0,0,0,0.35)]",
@@ -643,31 +647,41 @@ function FootnoteCard({ hidden }: { hidden: boolean }) {
             ? "-translate-x-full -rotate-12 opacity-0"
             : pinned
               ? shown
-              : "translate-x-[calc(-100%+28px)] rotate-6 opacity-95 hover:translate-x-4 hover:rotate-0 hover:border-stamp hover:opacity-100 hover:shadow-[0_24px_50px_rgba(0,0,0,0.18)] focus-visible:translate-x-4 focus-visible:rotate-0 focus-visible:border-stamp focus-visible:opacity-100 sm:translate-x-[calc(-100%+32px)] sm:hover:translate-x-6 sm:focus-visible:translate-x-6",
+              : "translate-x-[calc(-100%+28px)] rotate-6 opacity-95 hover:translate-x-4 hover:rotate-0 hover:border-stamp hover:opacity-100 hover:shadow-[0_24px_50px_rgba(0,0,0,0.18)] focus-within:translate-x-4 focus-within:rotate-0 focus-within:border-stamp focus-within:opacity-100 sm:translate-x-[calc(-100%+32px)] sm:hover:translate-x-6 sm:focus-within:translate-x-6",
       )}
       style={{ transformOrigin: "top left" }}
-      role="button"
-      tabIndex={hidden ? -1 : 0}
-      aria-expanded={pinned}
-      aria-label="注脚"
     >
-      {/* 缩在角落时露出的小标签 */}
-      <div
+      {/*
+        缩在角落时露出的小标签 — this is the disclosure control. It used to be
+        `role="button"` on the <aside> itself, which made every child presentational
+        and hid the three footnote paragraphs from assistive tech entirely.
+      */}
+      <button
+        type="button"
+        id="epheia-footnote-label"
+        onClick={(event) => {
+          event.stopPropagation();
+          // 鼠标交给悬停展开；键盘（detail 0）与触屏需要显式切换
+          if (event.detail === 0 || pointerTypeRef.current !== "mouse") toggle();
+        }}
+        aria-expanded={pinned}
+        aria-controls="epheia-footnote-body"
         className={cn(
-          "pointer-events-none absolute right-1.5 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1.5 text-stamp opacity-80 transition-opacity duration-300 group-hover:opacity-0 group-focus-visible:opacity-0",
-          pinned && "opacity-0",
+          "absolute right-1.5 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1.5 text-stamp transition-opacity duration-300 focus-visible:!opacity-100",
+          pinned ? "opacity-0" : "opacity-80 group-hover:opacity-0",
         )}
       >
         <Bookmark className="h-3.5 w-3.5" aria-hidden="true" />
         <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-ink-muted [writing-mode:vertical-lr]">
           注脚
         </span>
-      </div>
+      </button>
 
       {/* 滑出时的完整内容 */}
       <div
+        id="epheia-footnote-body"
         className={cn(
-          "opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100",
+          "opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100",
           pinned && "opacity-100",
         )}
       >
@@ -710,8 +724,7 @@ function ChronoCard({
 
   return (
     <aside
-      onClick={() => onOpen("all")}
-      onKeyDown={onActivate(() => onOpen("all", true))}
+      aria-labelledby="epheia-chrono-label"
       className={cn(
         "group fixed right-0 top-[40vh] z-30 w-[290px] cursor-pointer select-none rounded-xs border-2 border-rule bg-paper p-5 sm:w-[320px]",
         "shadow-[-8px_16px_36px_rgba(0,0,0,0.12),-2px_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[-8px_16px_36px_rgba(0,0,0,0.45)]",
@@ -722,26 +735,32 @@ function ChronoCard({
         hidden
           ? "pointer-events-none translate-x-full opacity-0"
           : cardMounted
-            ? "translate-x-[calc(100%-28px)] -rotate-6 opacity-95 hover:-translate-x-4 hover:rotate-0 hover:border-stamp hover:opacity-100 hover:shadow-[0_24px_50px_rgba(0,0,0,0.18)] focus-visible:-translate-x-4 focus-visible:rotate-0 focus-visible:border-stamp focus-visible:opacity-100 sm:translate-x-[calc(100%-32px)] sm:hover:-translate-x-6 sm:focus-visible:-translate-x-6"
+            ? "translate-x-[calc(100%-28px)] -rotate-6 opacity-95 hover:-translate-x-4 hover:rotate-0 hover:border-stamp hover:opacity-100 hover:shadow-[0_24px_50px_rgba(0,0,0,0.18)] focus-within:-translate-x-4 focus-within:rotate-0 focus-within:border-stamp focus-within:opacity-100 sm:translate-x-[calc(100%-32px)] sm:hover:-translate-x-6 sm:focus-within:-translate-x-6"
             : "translate-x-full rotate-12 opacity-0",
       )}
       style={{ transformOrigin: "top right" }}
-      title="点击展开两段光阴对望"
-      role="button"
-      tabIndex={hidden ? -1 : 0}
-      aria-label="Epheia 的两个日子，点击查看详情"
-      aria-haspopup="dialog"
     >
-      {/* 缩在角落时露出的小标签 */}
-      <div className="pointer-events-none absolute left-1.5 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1.5 text-stamp opacity-80 transition-opacity duration-300 group-hover:opacity-0 group-focus-visible:opacity-0">
+      {/*
+        缩在角落时露出的小标签 — the disclosure control. This used to be
+        `role="button"` on the <aside>, which flattened the two live counters
+        and the nested cards out of the accessibility tree.
+      */}
+      <button
+        type="button"
+        id="epheia-chrono-label"
+        onClick={() => onOpen("all", true)}
+        aria-haspopup="dialog"
+        aria-expanded={false}
+        className="absolute left-1.5 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1.5 text-stamp transition-opacity duration-300 focus-visible:!opacity-100 group-hover:opacity-0 opacity-80"
+      >
         <Compass className="h-3.5 w-3.5" aria-hidden="true" />
         <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-ink-muted [writing-mode:vertical-lr]">
           刻度
         </span>
-      </div>
+      </button>
 
       {/* 滑出时的完整内容 */}
-      <div className="opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+      <div className="opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
         <div className="flex items-center justify-between border-b border-dashed border-rule-soft/80 pb-3">
           <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
             <Compass className="h-3.5 w-3.5 text-stamp" aria-hidden="true" />
@@ -753,17 +772,15 @@ function ChronoCard({
           </span>
         </div>
 
-        <div
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpen("epheia_sy");
-          }}
-          className="group/item mt-4 rounded-xs p-2 transition-all hover:bg-paper-warm/80 hover:shadow-xs active:scale-[0.99]"
+        <button
+          type="button"
+          onClick={() => onOpen("epheia_sy")}
+          className="group/item mt-4 block w-full rounded-xs p-2 text-left transition-all hover:bg-paper-warm/80 hover:shadow-xs active:scale-[0.99]"
           title="点击查看「Epheia 离开 Sy」详情"
         >
           <div className="flex items-center justify-between">
             <p className="font-serif text-[13px] italic text-ink-muted group-hover/item:text-stamp">Epheia 离开 Sy 已</p>
-            <span className="font-mono text-[9px] uppercase text-ink-faded opacity-0 transition-opacity group-hover/item:opacity-100">
+            <span className="font-mono text-[9px] uppercase text-ink-faded opacity-0 transition-opacity group-hover/item:opacity-100 group-focus-visible/item:opacity-100">
               查看单项 →
             </span>
           </div>
@@ -774,23 +791,21 @@ function ChronoCard({
             </div>
             <span className="font-mono text-[10px] text-ink-faded">2026.07.24</span>
           </div>
-        </div>
+        </button>
 
         <div className="my-2.5 border-t border-dashed border-rule-soft/50" />
 
-        <div
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpen("epheia_world");
-          }}
-          className="group/item rounded-xs p-2 transition-all hover:bg-paper-warm/80 hover:shadow-xs active:scale-[0.99]"
+        <button
+          type="button"
+          onClick={() => onOpen("epheia_world")}
+          className="group/item block w-full rounded-xs p-2 text-left transition-all hover:bg-paper-warm/80 hover:shadow-xs active:scale-[0.99]"
           title="点击查看「Epheia 离开这个世界」秒表详情"
         >
           <div className="flex items-center justify-between">
             <p className="font-serif text-[13px] italic text-ink-muted group-hover/item:text-stamp">
               Epheia 离开这个世界已
             </p>
-            <span className="font-mono text-[9px] uppercase text-ink-faded opacity-0 transition-opacity group-hover/item:opacity-100">
+            <span className="font-mono text-[9px] uppercase text-ink-faded opacity-0 transition-opacity group-hover/item:opacity-100 group-focus-visible/item:opacity-100">
               查看单项 →
             </span>
           </div>
@@ -802,7 +817,7 @@ function ChronoCard({
             </span>
           </div>
           <p className="mt-1 font-mono text-[10px] text-ink-faded">累计 {world.totalSeconds.toLocaleString()} 秒</p>
-        </div>
+        </button>
 
         <div className="mt-3 flex items-center justify-between border-t border-rule-soft/40 pt-2.5 font-ui text-[11px] font-semibold text-stamp">
           <span>点击日期查看详情</span>
@@ -832,6 +847,10 @@ function ChronoModal({
   world: TimeBreakdown;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus in/out stays with the effect below; this adds the Tab cycle.
+  useFocusTrap(dialogRef, open, { manageFocus: false });
 
   // ESC 关闭、锁住背景滚动、焦点进出弹窗
   useEffect(() => {
@@ -874,6 +893,7 @@ function ChronoModal({
 
   return (
     <div
+      ref={dialogRef}
       className={cn(
         "fixed inset-0 z-[120] flex items-center justify-center overflow-hidden p-4 sm:p-6",
         open ? "pointer-events-auto" : "pointer-events-none delay-700",
@@ -882,6 +902,7 @@ function ChronoModal({
       aria-modal="true"
       aria-label="依菲雅时光详情弹窗"
       aria-hidden={!open}
+      tabIndex={-1}
     >
       <div
         className={cn(

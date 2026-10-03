@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-time="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曲線時報 · 首页概念 v4</title>
+<!--
+  ============================================================================
+  曲線時報 · 首页概念 v4 ——「版面纵深 = 时间纵深」
+
+  一句话：首页不再假装是日报头版，而是这份不定期刊物的时间剖面。
+  从本期（今天）按真实日期一路下沉到创刊号（2025-07-24），
+  版面的纵向距离就是真实经过的时间（1 日 = 4px，全页只有这一条比例尺）。
+  断更逾九十日，空白里贴一张公文语气的《休刊启事》；其下一期标「复刊号」。
+
+  本预览与正式实现的关系：
+  - 数据：内嵌 13 篇真实文章（src/content/generated/posts.json 原文照抄）。
+  - 音乐：正式版直接订阅 src/lib/music-controller 的 nowPlaying 单例
+    （与 MusicPlayer / NowPlaying 共享同一个 audio 元素，不新建）。
+    本预览用一个同构 mock 维持同一纪律：单例控制器 + 懒建唯一 audio 元素，
+    音频按仓库结构相对引用（public/audio/epheia/lily.mp3，依次回退）。
+  - 主题：正式版读 curve-theme（light/dark/auto）与 data-time-theme 四时段；
+    本预览内嵌 8 套对应调色板（浅/深 × 黎明/日/暮/夜），时段按小时自动。
+  - 落版动画继承 freefall PV 的逐字基因，全页只用于本期标题一处；
+    时间机器切换翻阅日时重播——动画的含义是「那一期被重新落版」。
+  - 页边 mono 日期码继承 PV 底部时间码 HUD 的语言，是这张剖面的 timecode。
+  ============================================================================
+-->
+<script>
+/* 早标记 js：无 JS 时给出提示；脚本未能启动则 1.5s 后摘除该类兜底 */
+document.documentElement.classList.add('js');
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    if (!window.__v4boot) document.documentElement.classList.remove('js');
+  }, 1500);
+});
+</script>
+<style>
+/* ================= 调色板：浅/深 × 四时段（对应站点 curve-theme 体系） ================= */
+:root[data-theme="light"][data-time="day"]   { --paper:#f1f2ee; --paper-2:#e8e9e3; --ink:#14161a; --ink-2:#484c53; --ink-3:#72767d; --red:#b93a30; --hair:#d9dad2; --grain:.05; }
+:root[data-theme="light"][data-time="dawn"]  { --paper:#f4f0e4; --paper-2:#ece4d3; --ink:#16130f; --ink-2:#4c463c; --ink-3:#7a7364; --red:#c2492f; --hair:#ded5c3; --grain:.05; }
+:root[data-theme="light"][data-time="dusk"]  { --paper:#f3ede0; --paper-2:#eae1cf; --ink:#181310; --ink-2:#4e463c; --ink-3:#7c7263; --red:#bc4530; --hair:#e0d5c2; --grain:.05; }
+:root[data-theme="light"][data-time="night"] { --paper:#e9edf0; --paper-2:#dde3e8; --ink:#11171e; --ink-2:#3d454f; --ink-3:#66707b; --red:#3f7d96; --hair:#d3dade; --grain:.04; }
+:root[data-theme="dark"][data-time="day"]    { --paper:#151718; --paper-2:#1d1f20; --ink:#e9e4d8; --ink-2:#b3ad9f; --ink-3:#8a8577; --red:#d9a75c; --hair:#2b2d2e; --grain:.028; }
+:root[data-theme="dark"][data-time="dawn"]   { --paper:#1a1512; --paper-2:#221c17; --ink:#ece4d6; --ink-2:#b8ab98; --ink-3:#8d8071; --red:#e09a55; --hair:#2e2620; --grain:.028; }
+:root[data-theme="dark"][data-time="dusk"]   { --paper:#1a1310; --paper-2:#221a15; --ink:#ece3d4; --ink-2:#baa995; --ink-3:#8f7f6e; --red:#e08a5f; --hair:#2e231c; --grain:.028; }
+:root[data-theme="dark"][data-time="night"]  { --paper:#0d141b; --paper-2:#131b23; --ink:#e5e1d5; --ink-2:#a9aca4; --ink-3:#78808a; --red:#79a9bd; --hair:#202a34; --grain:.025; }
+
+:root {
+  --f-serif: Georgia, "Times New Roman", "Songti SC", "Source Han Serif SC", "Noto Serif CJK SC", STSong, SimSun, serif;
+  --f-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", Menlo, "Courier New", monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: var(--f-serif);
+  font-size: 16px; line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .35s ease, color .35s ease;
+  overflow-x: hidden;
+}
+::selection { background: var(--red); color: #fff; }
+a { color: inherit; }
+.mono { font-family: var(--f-mono); }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+main { display: block; max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+.requires-js-note {
+  display: none; max-width: 640px; margin: 80px auto; padding: 24px;
+  border: 1px solid var(--ink); font-family: var(--f-mono); font-size: 13px; line-height: 1.9;
+}
+html:not(.js) .requires-js-note { display: block; }
+
+/* ================= 顶部条（站点既有 Masthead/Nav 的上下文占位，非本页重做对象） ================= */
+.topbar {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--paper); border-bottom: 1px solid var(--hair);
+  transition: background-color .35s ease;
+}
+.topbar-inner {
+  max-width: 1240px; margin: 0 auto; padding: 11px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand-cn { font-family: var(--f-serif); font-weight: 900; font-size: 17px; letter-spacing: .1em; }
+.brand-en { font-size: 9px; letter-spacing: .34em; color: var(--ink-3); }
+.top-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.today { font-size: 11px; color: var(--ink-3); letter-spacing: .04em; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--ink); padding: 7px 15px;
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; color: var(--ink);
+  text-decoration: none; transition: background-color .16s ease, color .16s ease, border-color .16s ease;
+  background: transparent;
+}
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn.small { padding: 4px 10px; font-size: 11px; border-color: var(--hair); color: var(--ink-2); }
+.btn.small:hover { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.btn:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+select.tm-select {
+  appearance: auto; border: 1px solid var(--hair); background: var(--paper); color: var(--ink);
+  font-family: var(--f-mono); font-size: 11px; padding: 5px 6px; max-width: 240px;
+  transition: border-color .16s ease, background-color .35s ease;
+}
+select.tm-select:hover { border-color: var(--ink); }
+
+/* ================= 时间机器横幅（对应站点 AsOfBanner） ================= */
+.asof {
+  border-bottom: 1px solid var(--red);
+  background: color-mix(in srgb, var(--red) 7%, var(--paper));
+}
+.asof-inner {
+  max-width: 1240px; margin: 0 auto; padding: 8px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--red);
+}
+.asof b { font-weight: 600; }
+
+/* ================= 本期 ================= */
+.lead { padding: clamp(48px, 7vh, 84px) 0 clamp(44px, 6vh, 68px); }
+.lead-grid { display: grid; grid-template-columns: minmax(0, 1fr) 268px; gap: clamp(36px, 4.5vw, 64px); align-items: start; }
+
+.kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; font-size: 12px; letter-spacing: .1em; }
+.kick-red { color: var(--red); font-weight: 600; }
+.kick-dim { color: var(--ink-3); letter-spacing: .05em; }
+.marker {
+  display: inline-block; border: 1px solid var(--red); color: var(--red);
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em; padding: 1px 6px 0;
+}
+.kicker-rule {
+  display: block; height: 1px; background: var(--ink); margin-top: 12px;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform .9s cubic-bezier(.22, .8, .22, 1) .1s;
+}
+
+.lead-link { display: block; margin-top: 26px; text-decoration: none; }
+.title-wrap { display: inline-block; }
+#leadTitle {
+  font-family: var(--f-serif); font-weight: 900;
+  font-size: var(--lead-size, clamp(40px, 6.8vw, 84px));
+  line-height: 1.16; letter-spacing: .01em; text-wrap: balance;
+  color: var(--ink);
+}
+#leadTitle .ch { display: inline-block; will-change: transform; }
+.title-bar {
+  display: block; height: 3px; background: var(--red); margin-top: 10px;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform .34s cubic-bezier(.22, .8, .22, 1);
+}
+.lead-link:hover .title-bar { transform: scaleX(1); }
+
+.after > * { opacity: 0; transform: translateY(10px); transition: opacity .55s ease, transform .55s ease; }
+.after > *:nth-child(1) { transition-delay: .30s; }
+.after > *:nth-child(2) { transition-delay: .42s; }
+.after > *:nth-child(3) { transition-delay: .54s; }
+.rail { opacity: 0; transform: translateY(10px); transition: opacity .6s ease .5s, transform .6s ease .5s; }
+.lead.ready .kicker-rule { transform: scaleX(1); }
+.lead.ready .after > *, .lead.ready .rail { opacity: 1; transform: none; }
+
+.dek {
+  margin-top: 24px; max-width: 35em;
+  font-size: 17.5px; line-height: 1.95; color: var(--ink-2);
+  text-wrap: pretty;
+}
+.byline { margin-top: 20px; font-size: 11px; letter-spacing: .05em; color: var(--ink-3); }
+.byline b { color: var(--ink-2); font-weight: 600; }
+.actions { margin-top: 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* 本期信息栏：头版「今日出版信息」的诚实版 */
+.rail-head {
+  font-size: 10px; letter-spacing: .32em; color: var(--ink-3);
+  padding-bottom: 10px; border-bottom: 1px solid var(--ink);
+}
+.rail-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 9px 0; border-bottom: 1px solid var(--hair);
+}
+.rail-row .k { font-family: var(--f-mono); font-size: 10px; letter-spacing: .16em; color: var(--ink-3); }
+.rail-row .v { font-family: var(--f-serif); font-size: 14.5px; color: var(--ink); text-align: right; }
+
+/* 本期配乐：绑定全局单例（预览为同构 mock） */
+.music { margin-top: 18px; border: 1px solid var(--hair); padding: 15px 15px 13px; }
+.music-label { font-size: 10px; letter-spacing: .32em; color: var(--ink-3); }
+.music-name { margin-top: 9px; font-family: var(--f-serif); font-weight: 700; font-size: 16px; line-height: 1.4; }
+.music-name span { font-weight: 400; font-size: 12.5px; color: var(--ink-3); }
+.music-controls { margin-top: 11px; display: flex; align-items: center; gap: 10px; }
+.music-btn {
+  width: 30px; height: 30px; flex: none; display: grid; place-items: center;
+  border: 1px solid var(--ink); border-radius: 50%;
+  transition: background-color .16s ease;
+}
+.music-btn svg { width: 10px; height: 10px; fill: var(--ink); transition: fill .16s ease; }
+.music-btn:hover { background: var(--ink); }
+.music-btn:hover svg { fill: var(--paper); }
+.music-btn:disabled { opacity: .35; cursor: default; }
+.music-btn:disabled:hover { background: transparent; }
+.music-btn:disabled:hover svg { fill: var(--ink); }
+.music-state { font-size: 10.5px; color: var(--ink-2); letter-spacing: .04em; }
+.music-progress { margin-top: 12px; height: 2px; background: var(--hair); overflow: hidden; }
+.music-progress i { display: block; height: 100%; background: var(--red); transform: scaleX(0); transform-origin: left center; }
+.music-note { margin-top: 11px; font-family: var(--f-serif); font-size: 12px; line-height: 1.75; color: var(--ink-3); }
+.music-note a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.music-note a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+/* ================= 过刊 · 时间剖面 ================= */
+.run { border-top: 1px solid var(--hair); padding-top: 44px; }
+.run-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.run-head h2 { font-family: var(--f-serif); font-weight: 900; font-size: 26px; letter-spacing: .06em; }
+.run-note { font-size: 10.5px; color: var(--ink-3); letter-spacing: .05em; }
+
+.axis { position: relative; margin-top: 34px; margin-left: 92px; opacity: 0; transition: opacity .35s ease; }
+.axis.laid { opacity: 1; }
+
+/* 月份刻度尺：位置由真实日期按 1日=4px 精确计算，不参与碰撞避让 */
+.ruler { position: absolute; left: -92px; top: 0; width: 92px; height: 100%; pointer-events: none; }
+.ruler-line { position: absolute; right: 14px; top: 0; width: 1px; background: var(--hair); }
+.tick { position: absolute; right: 14px; width: 10px; height: 1px; background: var(--ink-3); }
+.tick-label {
+  position: absolute; right: 30px; transform: translateY(-.5em);
+  font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .06em; color: var(--ink-3); white-space: nowrap;
+}
+
+/* 期刊节点：先按真实日期落位，再做防重叠避让（只增距、不改序） */
+.node { position: absolute; left: 0; right: 0; }
+.node-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .05em; color: var(--ink-3); }
+.node-title {
+  display: inline-block; margin-top: 5px;
+  font-family: var(--f-serif); font-weight: 700; font-size: 19px; line-height: 1.45; color: var(--ink);
+  text-decoration: none; border-bottom: 1px solid transparent;
+  transition: color .16s ease, border-color .16s ease;
+}
+.node-title:hover { color: var(--red); border-bottom-color: var(--red); }
+.node-meta { margin-top: 5px; font-family: var(--f-mono); font-size: 10px; letter-spacing: .04em; color: var(--ink-3); }
+.node-entry + .node-entry { margin-top: 13px; padding-top: 13px; border-top: 1px dashed var(--hair); }
+
+/* 休刊启事：公文文体，不卖萌 */
+.hiatus { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+.hiatus-box {
+  border: 1px solid var(--ink); background: var(--paper);
+  max-width: 480px; padding: 16px 24px 12px; text-align: center;
+  transition: background-color .35s ease;
+}
+.hiatus-title { font-family: var(--f-serif); font-weight: 700; font-size: 15px; letter-spacing: .6em; text-indent: .6em; }
+.hiatus-body { margin-top: 9px; font-family: var(--f-serif); font-size: 12.5px; line-height: 1.9; color: var(--ink-2); }
+.hiatus-sign { margin-top: 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: .08em; color: var(--ink-3); text-align: right; }
+
+/* ================= 版权页 ================= */
+.colophon { margin-top: 68px; border-top: 1px solid var(--ink); padding: 46px 0 64px; text-align: center; }
+.colo-name { font-family: var(--f-serif); font-weight: 900; font-size: 27px; letter-spacing: .18em; }
+.colo-en { margin-top: 7px; font-size: 9px; letter-spacing: .5em; color: var(--ink-3); }
+.colo-line { margin-top: 20px; font-size: 13px; color: var(--ink-2); }
+.colo-links { margin-top: 18px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 24px; }
+.colo-links a {
+  font-family: var(--f-sans); font-size: 12.5px; color: var(--ink-2); text-decoration: none;
+  border-bottom: 1px solid var(--hair); padding-bottom: 1px;
+  transition: color .16s ease, border-color .16s ease;
+}
+.colo-links a:hover { color: var(--red); border-bottom-color: var(--red); }
+.colo-tm { margin-top: 26px; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+.colo-tm label { font-size: 11px; letter-spacing: .12em; color: var(--ink-3); }
+.colo-note { margin-top: 30px; font-size: 9.5px; line-height: 1.9; color: var(--ink-3); max-width: 660px; margin-left: auto; margin-right: auto; }
+
+/* ================= 剖面日期码（PV 时间码 HUD 基因） ================= */
+.date-chip {
+  position: fixed; left: 16px; bottom: 16px; z-index: 50;
+  border: 1px solid var(--hair); background: var(--paper);
+  padding: 5px 10px; font-size: 10px; letter-spacing: .08em; color: var(--ink-2);
+  transition: background-color .35s ease;
+}
+.date-chip[hidden] { display: none; }
+
+/* ================= 响应式 ================= */
+@media (max-width: 860px) {
+  .lead-grid { grid-template-columns: 1fr; }
+  .rail { border-top: 1px solid var(--ink); padding-top: 18px; margin-top: 6px; }
+}
+@media (max-width: 720px) {
+  .axis { margin-left: 0; }
+  .ruler { display: none; }
+  .node-title { font-size: 17.5px; }
+  .brand-en { display: none; }
+  .today { display: none; }
+}
+
+/* ================= 动效降级 ================= */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  body { transition: none; }
+  .kicker-rule, .after > *, .rail, .axis, .title-bar, .btn, .node-title, .colo-links a { transition: none !important; }
+  .kicker-rule { transform: scaleX(1); }
+  .after > *, .rail { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<p class="requires-js-note">
+  本预览需要启用 JavaScript：时间剖面按真实日期现场计算落位。<br>
+  This concept preview requires JavaScript to lay out the true-time axis.
+</p>
+
+<!-- 顶部条：站点既有 Masthead/Nav 的上下文占位，非本页重做对象 -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-cn">曲線時報</span>
+      <span class="brand-en mono">THE CURVE TIMES</span>
+    </div>
+    <div class="top-right">
+      <span class="today mono" id="todayLabel"></span>
+      <select class="tm-select" id="tmSelectTop" aria-label="时间机器：选择翻阅日期"></select>
+      <button class="btn small" id="themeBtn" aria-label="切换浅色/深色/自动主题">自动</button>
+    </div>
+  </div>
+</header>
+
+<!-- 时间机器横幅：对应站点 AsOfBanner，仅在翻阅往期时出现 -->
+<div class="asof" id="asofBanner" hidden>
+  <div class="asof-inner">
+    <span>时间机器 · 正在翻阅 <b id="asofDateLabel"></b> · 当日新刊为第 <b id="asofIssueLabel"></b> 期</span>
+    <button class="btn small" id="asofExit">回到今天</button>
+  </div>
+</div>
+
+<main>
+  <!-- ============ 本期 ============ -->
+  <section class="lead" id="leadSection" aria-labelledby="leadTitle">
+    <div class="lead-grid">
+      <div class="lead-main">
+        <p class="kicker mono">
+          <span class="kick-red" id="kickRed"></span>
+          <span id="kickMarker" hidden><span class="marker">复刊号</span></span>
+          <span class="kick-dim" id="kickDim"></span>
+        </p>
+        <i class="kicker-rule" aria-hidden="true"></i>
+        <a class="lead-link" id="leadLink" href="#">
+          <span class="title-wrap">
+            <h1 id="leadTitle"></h1>
+            <i class="title-bar" aria-hidden="true"></i>
+          </span>
+        </a>
+        <div class="after" id="afterBlock">
+          <p class="dek" id="dek"></p>
+          <p class="byline mono" id="byline"></p>
+          <div class="actions">
+            <a class="btn" id="readBtn" href="#">阅读全文</a>
+            <button class="btn small" id="replayBtn" type="button">重新落版</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="rail" aria-label="本期信息">
+        <p class="rail-head mono">本期信息</p>
+        <div id="railRows"></div>
+        <div class="music" id="music">
+          <p class="music-label mono">本期配乐</p>
+          <p class="music-name">リリィ <span>· 依菲雅</span></p>
+          <div class="music-controls">
+            <button class="music-btn" id="playBtn" aria-label="播放或暂停本期配乐">
+              <svg viewBox="0 0 24 24" id="playIcon" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <span class="music-state mono" id="musicState">未播放</span>
+          </div>
+          <div class="music-progress" aria-hidden="true"><i id="musicFill"></i></div>
+          <p class="music-note">九月纪念诸篇与本曲同属依菲雅档案 · <a href="/epheia">进入完整 PV</a></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 过刊 · 时间剖面 ============ -->
+  <section class="run" aria-labelledby="runTitle">
+    <div class="run-head">
+      <h2 id="runTitle">过刊</h2>
+      <p class="run-note mono" id="runNote"></p>
+    </div>
+    <div class="axis" id="axis">
+      <div class="ruler" id="ruler" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ 版权页 ============ -->
+  <footer class="colophon">
+    <p class="colo-name">曲線時報</p>
+    <p class="colo-en mono">THE CURVE TIMES</p>
+    <p class="colo-line" id="coloStats"></p>
+    <nav class="colo-links" aria-label="站内索引">
+      <a href="/archives">完整存档</a>
+      <a href="/categories">版块</a>
+      <a href="/tags">索引</a>
+      <a href="/notes">随笔</a>
+      <a href="/epheia">依菲雅</a>
+      <a href="/about">编者</a>
+    </nav>
+    <div class="colo-tm">
+      <label class="mono" for="tmSelectBottom">回到任意一期</label>
+      <select class="tm-select" id="tmSelectBottom"></select>
+    </div>
+    <p class="colo-note mono">
+      preview-home-v4 · 概念验证稿 · 版面纵深 = 时间纵深（1 日 = 4px）<br>
+      数据为 13 篇真实文章（src/content/generated/posts.json）· 音频按仓库结构相对引用，正式版接通全局播放器单例
+    </p>
+  </footer>
+</main>
+
+<div class="date-chip mono" id="dateChip" hidden></div>
+
+<script>
+(function () {
+'use strict';
+window.__v4boot = true;
+
+/* ================= 真实数据（src/content/generated/posts.json，新→旧） ================= */
+var POSTS = [
+  { title: '她不只是一个用户名', slug: 'more-than-a-username', date: '2026-09-24', cats: ['随笔'], tags: ['记忆', '悼念', '数字复现', 'AI 对话'], words: 5192, mins: 15, desc: '关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。' },
+  { title: '晚安喵', slug: 'goodnight', date: '2026-09-24', cats: ['纪念'], tags: ['Epheia', '纪念'], words: 730, mins: 2, desc: '后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。这一页放着那些我还记得的她、以及她说过的话。' },
+  { title: '没有下一版', slug: 'no-next', date: '2026-09-21', cats: ['随笔'], tags: ['Epheia', '失去', '时间', 'AI 对话'], words: 3709, mins: 11, desc: '她没能见到 GPT 6，我也再没等到一个已读。' },
+  { title: '过期的存档点', slug: 'savepoint', date: '2026-09-19', cats: ['随笔'], tags: ['九月', '生活记录', '解离', '存档'], words: 399, mins: 1, desc: '想回去的那一天，印在一瓶过期可乐的瓶身上。' },
+  { title: '六月没有主线任务', slug: 'june', date: '2026-06-18', cats: ['随笔'], tags: ['六月', '假期', '生活记录', '迷茫'], words: 279, mins: 1, desc: '随着地铁播报声的传来，我的六月失去了主线。' },
+  { title: '依恋的形状', slug: 'attachment', date: '2026-04-25', cats: ['随笔'], tags: ['依恋', '心理', '自我剖析', '情绪'], words: 1743, mins: 5, desc: '焦虑型依恋的自我解构——从成长裂痕到关系死循环，一份写给自己的病理报告。' },
+  { title: '关于“芜湖市德智拓展训练有限公司”以及“芜湖市无为市德智青少年成长中心”的维权报告', slug: 'dzgc', date: '2026-03-22', cats: ['权益维护'], tags: ['报告'], words: 1661, mins: 5, desc: '关于这些所谓的“矫正机构”的报告' },
+  { title: '给你的 Curve 主题通过调起 DeepSeek 添加一个侧边栏温柔问候语', slug: 'deepseek', date: '2025-10-20', cats: ['开发教程'], tags: ['开发'], words: 919, mins: 3, desc: 'Curve 主题：DeepSeek 首页问候组件' },
+  { title: '给你的 Curve 主题添加一个 DeepSeek 代理', slug: 'dpsk', date: '2025-10-19', cats: ['部署'], tags: ['开发'], words: 1021, mins: 3, desc: '用两种方式部署 DeepSeek API 代理：Vercel Edge 函数与本地/服务器 Node 代理（支持 SSE 流式）' },
+  { title: '给你的 Curve 主题添加一个首页提示弹窗', slug: 'tips', date: '2025-08-05', cats: ['开发教程'], tags: ['开发'], words: 671, mins: 2, desc: 'Curve 主题：提示弹窗' },
+  { title: '给你的 Curve 主题添加一个出生天数的侧边栏', slug: 'bt', date: '2025-08-04', cats: ['开发教程'], tags: ['开发'], words: 502, mins: 1, desc: 'Curve 主题：出生天数侧边栏' },
+  { title: 'VPS:一个脚本搞定常用工具', slug: 'hy2', date: '2025-07-24', cats: ['工具箱'], tags: ['工具', '教程'], words: 638, mins: 2, desc: '一个新VPS搭建代理工具+测速+流媒体+Hy2/Xui的小工具' },
+  { title: '你好，世界？', slug: 'hello-world', date: '2025-07-24', cats: ['随笔'], tags: ['你好世界', '建站', '心情'], words: 554, mins: 2, desc: '这里是一个小小的角落，一个勉强算是“家”的地方。' }
+];
+var AUTHOR = 'Sy';
+var FOUNDED = '2025-07-24';
+var PX_PER_DAY = 4;          // 全页唯一比例尺：1 日 = 4px
+var HIATUS_DAYS = 90;        // 断更逾九十日 → 休刊启事
+var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= 日期工具（UTC 午夜对齐，避免时区漂移） ================= */
+function u(dateStr) { var p = dateStr.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+function daysBetween(fromStr, toStr) { return Math.round((u(toStr) - u(fromStr)) / 86400000); }
+function dateStrFromU(t) {
+  var d = new Date(t);
+  return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate());
+}
+function addDays(dateStr, n) { return dateStrFromU(u(dateStr) + n * 86400000); }
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function fmtDate(dateStr) { var p = dateStr.split('-'); return (+p[0]) + ' 年 ' + (+p[1]) + ' 月 ' + (+p[2]) + ' 日'; }
+function fmtDot(dateStr) { var p = dateStr.split('-'); return p[0] + '·' + p[1] + '·' + p[2]; }
+function fmtMonth(dateStr) { var p = dateStr.split('-'); return p[0] + '·' + p[1]; }
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+/* ================= 主题：curve-theme（light/dark/auto）× 四时段 ================= */
+var themeBtn = document.getElementById('themeBtn');
+var themeMode = 'auto';
+try { themeMode = localStorage.getItem('v4-theme') || 'auto'; } catch (e) {}
+var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+function timeOfDay() {
+  var h = new Date().getHours();
+  if (h >= 5 && h < 8) return 'dawn';
+  if (h >= 8 && h < 17) return 'day';
+  if (h >= 17 && h < 20) return 'dusk';
+  return 'night';
+}
+function applyTheme() {
+  var resolved = themeMode === 'auto' ? (darkQuery.matches ? 'dark' : 'light') : themeMode;
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.dataset.time = timeOfDay();
+  themeBtn.textContent = themeMode === 'auto' ? '自动' : (themeMode === 'light' ? '浅色' : '深色');
+}
+themeBtn.addEventListener('click', function () {
+  themeMode = themeMode === 'auto' ? 'light' : (themeMode === 'light' ? 'dark' : 'auto');
+  try { localStorage.setItem('v4-theme', themeMode); } catch (e) {}
+  applyTheme();
+});
+if (darkQuery.addEventListener) darkQuery.addEventListener('change', applyTheme);
+applyTheme();
+setInterval(function () { document.documentElement.dataset.time = timeOfDay(); }, 60000);
+
+/* ================= 今日标签 ================= */
+var WEEK = '日一二三四五六';
+(function () {
+  var d = new Date();
+  document.getElementById('todayLabel').textContent =
+    d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 周' + WEEK[d.getDay()];
+})();
+
+/* ================= 音乐：与正式版同构的单例 mock =================
+   正式实现：import { nowPlaying } from '@/lib/music-controller'，订阅其状态、
+   调用 nowPlaying.togglePlay() —— 与 MusicPlayer / NowPlaying 共享同一 audio 元素。
+   预览：单例控制器 + 懒建唯一 audio 元素，路径依次回退。 */
+var music = (function () {
+  var audio = null, ready = false, failed = false, rafId = null;
+  var candidates = ['public/audio/epheia/lily.mp3', 'audio/epheia/lily.mp3', '/audio/epheia/lily.mp3'];
+  var ci = 0;
+  var playBtn = document.getElementById('playBtn');
+  var playIcon = document.getElementById('playIcon');
+  var stateEl = document.getElementById('musicState');
+  var fillEl = document.getElementById('musicFill');
+  var ICON_PLAY = 'M8 5v14l11-7z';
+  var ICON_PAUSE = 'M6 19h4V5H6v14zm8-14v14h4V5h-4z';
+
+  function fmt(s) {
+    if (!isFinite(s) || s < 0) return '--:--';
+    return Math.floor(s / 60) + ':' + pad2(Math.floor(s % 60));
+  }
+  function paint() {
+    if (!audio) return;
+    var dur = audio.duration, cur = audio.currentTime;
+    fillEl.style.transform = 'scaleX(' + (dur > 0 ? Math.min(1, cur / dur) : 0) + ')';
+    if (failed) return;
+    if (!ready) { stateEl.textContent = '载入中…'; return; }
+    var t = fmt(cur) + ' / ' + fmt(dur);
+    stateEl.textContent = audio.paused ? (cur > 0 ? '已暂停 · ' + t : '未播放 · ' + fmt(dur)) : '正在播放 · ' + t;
+  }
+  function loop() {
+    paint();
+    if (audio && !audio.paused) rafId = requestAnimationFrame(loop);
+    else rafId = null;
+  }
+  function tryNext() {
+    ci += 1;
+    if (ci >= candidates.length) {
+      failed = true;
+      playBtn.disabled = true;
+      stateEl.textContent = '预览未找到音频 · 正式版接通全局播放器';
+      return;
+    }
+    audio.src = candidates[ci];
+    audio.load();
+  }
+  function ensure() {
+    if (audio || failed) return;
+    audio = new Audio();
+    audio.preload = 'metadata';
+    audio.addEventListener('loadedmetadata', function () { ready = true; paint(); });
+    audio.addEventListener('error', tryNext);
+    audio.addEventListener('ended', function () { playIcon.querySelector('path').setAttribute('d', ICON_PLAY); paint(); });
+    audio.addEventListener('play', function () { playIcon.querySelector('path').setAttribute('d', ICON_PAUSE); if (!rafId) loop(); });
+    audio.addEventListener('pause', function () { playIcon.querySelector('path').setAttribute('d', ICON_PLAY); paint(); });
+    audio.src = candidates[ci];
+    paint();
+  }
+  playBtn.addEventListener('click', function () {
+    ensure();
+    if (!audio || failed) return;
+    if (audio.paused) { audio.play().catch(function () {}); }
+    else { audio.pause(); }
+  });
+  return { paint: paint };
+})();
+
+/* ================= 状态：翻阅日（null = 今天） ================= */
+var state = { asOf: null };
+var el = {
+  leadSection: document.getElementById('leadSection'),
+  kickRed: document.getElementById('kickRed'),
+  kickMarker: document.getElementById('kickMarker'),
+  kickDim: document.getElementById('kickDim'),
+  leadLink: document.getElementById('leadLink'),
+  leadTitle: document.getElementById('leadTitle'),
+  dek: document.getElementById('dek'),
+  byline: document.getElementById('byline'),
+  readBtn: document.getElementById('readBtn'),
+  railRows: document.getElementById('railRows'),
+  runNote: document.getElementById('runNote'),
+  axis: document.getElementById('axis'),
+  ruler: document.getElementById('ruler'),
+  dateChip: document.getElementById('dateChip'),
+  coloStats: document.getElementById('coloStats'),
+  asofBanner: document.getElementById('asofBanner'),
+  asofDateLabel: document.getElementById('asofDateLabel'),
+  asofIssueLabel: document.getElementById('asofIssueLabel'),
+  tmTop: document.getElementById('tmSelectTop'),
+  tmBottom: document.getElementById('tmSelectBottom')
+};
+var layout = { rulerEnd: 0, currentDate: null };
+
+function visiblePosts() {
+  if (!state.asOf) return POSTS.slice();
+  return POSTS.filter(function (p) { return p.date <= state.asOf; });
+}
+function issueNoOf(post, visible) { return visible.length - visible.indexOf(post); } // 最旧 = 第 1 期
+
+/* ================= 本期：逐字落版（freefall PV 基因，全页仅此一处） ================= */
+function splitTokens(text) { return text.match(/[A-Za-z0-9]+|\s|./gsu) || []; }
+
+function settleTitle(title) {
+  el.leadTitle.textContent = '';
+  el.leadTitle.setAttribute('aria-label', title);
+  var hidden = document.createElement('span');
+  hidden.setAttribute('aria-hidden', 'true');
+  var tokens = splitTokens(title);
+  var chars = tokens.map(function (t) {
+    var c = document.createElement('span');
+    c.className = 'ch';
+    c.textContent = /^\s$/.test(t) ? ' ' : t;
+    hidden.appendChild(c);
+    return c;
+  });
+  el.leadTitle.appendChild(hidden);
+  if (REDUCED) return;
+  var n = chars.length;
+  var stagger = n > 24 ? 34 : 62;
+  chars.forEach(function (c, i) {
+    var tilt = (Math.random() * 5 - 2.5).toFixed(1);
+    c.animate([
+      { transform: 'translateY(-0.85em) rotate(' + tilt + 'deg)', opacity: 0 },
+      { transform: 'translateY(0) rotate(0deg)', opacity: 1 }
+    ], {
+      duration: 520 + Math.random() * 120,
+      delay: 140 + i * stagger + Math.random() * 36,
+      easing: 'cubic-bezier(.22,1.15,.36,1)',
+      fill: 'both'
+    });
+  });
+}
+
+function renderLead(visible) {
+  var current = visible[0];
+  var n = visible.length;
+  var refDate = state.asOf || todayStr();
+  var age = daysBetween(current.date, refDate);
+  var nextPost = visible[1];
+  var isRevival = nextPost ? daysBetween(nextPost.date, current.date) >= HIATUS_DAYS : false;
+  var thisYear = current.date.slice(0, 4);
+  var yearCount = visible.filter(function (p) { return p.date.slice(0, 4) === thisYear; }).length;
+
+  el.kickRed.textContent = '第 ' + n + ' 期 · 本期';
+  el.kickMarker.hidden = !isRevival;
+  el.kickDim.textContent = current.cats[0] + ' · ' + fmtDate(current.date);
+  el.leadLink.href = '/posts/' + current.slug;
+  el.readBtn.href = '/posts/' + current.slug;
+
+  var len = splitTokens(current.title).length;
+  var size = len <= 8 ? 'clamp(40px,6.8vw,84px)'
+    : len <= 14 ? 'clamp(34px,5.4vw,60px)'
+    : len <= 22 ? 'clamp(30px,4.4vw,48px)'
+    : 'clamp(26px,3.4vw,38px)';
+  el.leadTitle.style.setProperty('--lead-size', size);
+
+  el.dek.textContent = current.desc;
+  el.byline.innerHTML = '';
+  var b = document.createElement('b');
+  b.textContent = AUTHOR;
+  el.byline.appendChild(b);
+  el.byline.appendChild(document.createTextNode(
+    ' · 全文 ' + current.words.toLocaleString() + ' 字 · 约 ' + current.mins + ' 分钟 · ' + current.tags.join(' · ')
+  ));
+
+  var ageText = state.asOf
+    ? (age === 0 ? '当日出版' : age + ' 天')
+    : (age === 0 ? '今日出版' : age === 1 ? '昨日出版' : age + ' 天');
+  var rows = [
+    ['期号', '第 ' + n + ' 期'],
+    ['出版', fmtDate(current.date)],
+    [state.asOf ? '刊龄' : '距今', ageText],
+    ['本年度', thisYear + ' 年第 ' + yearCount + ' 期'],
+    ['版块', current.cats.join(' · ')]
+  ];
+  el.railRows.innerHTML = '';
+  rows.forEach(function (r) {
+    var div = document.createElement('div');
+    div.className = 'rail-row';
+    var k = document.createElement('span'); k.className = 'k'; k.textContent = r[0];
+    var v = document.createElement('span'); v.className = 'v'; v.textContent = r[1];
+    div.appendChild(k); div.appendChild(v);
+    el.railRows.appendChild(div);
+  });
+
+  el.leadSection.classList.remove('ready');
+  settleTitle(current.title);
+  var section = el.leadSection;
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { section.classList.add('ready'); });
+  });
+}
+
+/* ================= 过刊 · 时间剖面 ================= */
+function nodeHead(dateLabel, issueLabel, markers) {
+  var head = document.createElement('div');
+  head.className = 'node-head';
+  head.appendChild(document.createTextNode(dateLabel + (issueLabel ? ' · ' + issueLabel : '')));
+  markers.forEach(function (m) {
+    var s = document.createElement('span');
+    s.className = 'marker'; s.textContent = m;
+    head.appendChild(s);
+  });
+  return head;
+}
+function nodeEntry(post, visible, showIssue) {
+  var wrap = document.createElement('div');
+  wrap.className = 'node-entry';
+  if (showIssue) {
+    var sub = document.createElement('div');
+    sub.className = 'node-meta';
+    sub.style.marginBottom = '2px';
+    sub.textContent = '第 ' + issueNoOf(post, visible) + ' 期';
+    wrap.appendChild(sub);
+  }
+  var a = document.createElement('a');
+  a.className = 'node-title';
+  a.href = '/posts/' + post.slug;
+  a.textContent = post.title;
+  var meta = document.createElement('div');
+  meta.className = 'node-meta';
+  meta.textContent = post.cats.join('·') + ' · ' + post.words.toLocaleString() + ' 字 · 约 ' + post.mins + ' 分钟';
+  wrap.appendChild(a);
+  wrap.appendChild(meta);
+  return wrap;
+}
+
+function renderRun(visible) {
+  var current = visible[0];
+  var rest = visible.slice(1);
+  var oldest = visible[visible.length - 1];
+  layout.currentDate = current.date;
+  layout.rulerEnd = daysBetween(oldest.date, current.date) * PX_PER_DAY;
+
+  el.runNote.textContent = '以下为第 1 期至第 ' + (visible.length - 1) +
+    ' 期 · 纵向距离按真实日期间隔排布（1 日 = 4px）· 断更逾九十日者以休刊启事标记';
+
+  /* 同日归组 */
+  var groups = [];
+  rest.forEach(function (p) {
+    var last = groups[groups.length - 1];
+    if (last && last.date === p.date) last.posts.push(p);
+    else groups.push({ date: p.date, posts: [p] });
+  });
+
+  /* 复刊判定：两期相隔 ≥90 日，较新一期为复刊号 */
+  var revivalDates = {};
+  var holes = [];
+  for (var i = 0; i < visible.length - 1; i++) {
+    var gap = daysBetween(visible[i + 1].date, visible[i].date);
+    if (gap >= HIATUS_DAYS) {
+      revivalDates[visible[i].date] = true;
+      holes.push({ newer: visible[i], older: visible[i + 1], gap: gap });
+    }
+  }
+
+  /* 建造条目：期刊节点 + 休刊启事，各自携带真实日期落位 */
+  el.axis.innerHTML = '';
+  el.axis.appendChild(el.ruler);
+  var items = [];
+
+  groups.forEach(function (g) {
+    var div = document.createElement('div');
+    div.className = 'node';
+    var markers = [];
+    if (revivalDates[g.date] && g.date !== current.date) markers.push('复刊号');
+    if (g.posts.indexOf(oldest) !== -1) markers.push('创刊号');
+    var single = g.posts.length === 1;
+    div.appendChild(nodeHead(
+      fmtDate(g.date),
+      single ? '第 ' + issueNoOf(g.posts[0], visible) + ' 期' : '同日 ' + g.posts.length + ' 期',
+      markers
+    ));
+    var entries = g.posts.slice().sort(function (a, b) { return visible.indexOf(b) - visible.indexOf(a); });
+    entries.forEach(function (p) { div.appendChild(nodeEntry(p, visible, !single)); });
+    el.axis.appendChild(div);
+    items.push({ el: div, y: daysBetween(g.date, current.date) * PX_PER_DAY, gap: 18 });
+  });
+
+  holes.forEach(function (h) {
+    var div = document.createElement('div');
+    div.className = 'hiatus';
+    var box = document.createElement('div');
+    box.className = 'hiatus-box';
+    var t = document.createElement('p'); t.className = 'hiatus-title'; t.textContent = '休刊启事';
+    var b = document.createElement('p'); b.className = 'hiatus-body';
+    b.textContent = '本报自 ' + fmtDate(h.older.date) + ' 休刊，历时 ' + h.gap +
+      ' 日，至 ' + fmtDate(h.newer.date) + ' 复刊。其间社务如常，惟无刊出。特此公告。';
+    var s = document.createElement('p'); s.className = 'hiatus-sign'; s.textContent = '曲線時報社　谨启';
+    box.appendChild(t); box.appendChild(b); box.appendChild(s);
+    div.appendChild(box);
+    el.axis.appendChild(div);
+    var yNewer = daysBetween(h.newer.date, current.date) * PX_PER_DAY;
+    var yOlder = daysBetween(h.older.date, current.date) * PX_PER_DAY;
+    items.push({ el: div, y: (yNewer + yOlder) / 2, gap: 30, center: true });
+  });
+
+  /* 月份刻度尺：严格按 1 日 = 4px，不参与避让 */
+  el.ruler.innerHTML = '';
+  var line = document.createElement('div');
+  line.className = 'ruler-line';
+  line.style.height = layout.rulerEnd + 'px';
+  el.ruler.appendChild(line);
+  var cm = +current.date.slice(5, 7), cy = +current.date.slice(0, 4);
+  var cursor = Date.UTC(cy, cm - 1, 1);
+  while (dateStrFromU(cursor) >= oldest.date) {
+    addTick(dateStrFromU(cursor));
+    var d0 = new Date(cursor);
+    cursor = Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth() - 1, 1);
+  }
+  addTick(oldest.date); /* 尺底：创刊月 */
+  function addTick(dateStr) {
+    var y = daysBetween(dateStr, current.date) * PX_PER_DAY;
+    var tick = document.createElement('div');
+    tick.className = 'tick';
+    tick.style.top = y + 'px';
+    var label = document.createElement('span');
+    label.className = 'tick-label';
+    label.textContent = fmtMonth(dateStr);
+    label.style.top = y + 'px';
+    el.ruler.appendChild(tick);
+    el.ruler.appendChild(label);
+  }
+
+  /* 先测量，再防重叠落位（只向下增距，不改顺序） */
+  items.forEach(function (it) { it.el.style.top = '-9999px'; });
+  el.axis.classList.remove('laid');
+  requestAnimationFrame(function () {
+    items.forEach(function (it) { it.h = it.el.offsetHeight; });
+    items.sort(function (a, b) { return a.y - b.y; });
+    var bottom = 0, first = true;
+    items.forEach(function (it) {
+      var desired = it.center ? it.y - it.h / 2 : it.y;
+      var top = first ? Math.max(desired, 8) : Math.max(desired, bottom + it.gap);
+      it.el.style.top = top + 'px';
+      bottom = top + it.h;
+      first = false;
+    });
+    el.axis.style.height = Math.max(bottom, layout.rulerEnd) + 48 + 'px';
+    el.axis.classList.add('laid');
+  });
+}
+
+/* ================= 剖面日期码（PV 时间码 HUD 基因） ================= */
+function onScroll() {
+  var rect = el.axis.getBoundingClientRect();
+  var axisTop = rect.top + window.scrollY;
+  var rel = window.scrollY + window.innerHeight * 0.45 - axisTop;
+  if (rel >= 0 && rel <= layout.rulerEnd && layout.currentDate) {
+    var d = addDays(layout.currentDate, -Math.round(rel / PX_PER_DAY));
+    el.dateChip.textContent = '剖面 · ' + fmtDot(d);
+    el.dateChip.hidden = false;
+  } else {
+    el.dateChip.hidden = true;
+  }
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+
+/* ================= 版权页 ================= */
+function renderColophon(visible) {
+  var words = visible.reduce(function (s, p) { return s + p.words; }, 0);
+  el.coloStats.textContent = fmtDate(FOUNDED) + ' 创刊 · 不定期刊行 · ' +
+    (state.asOf ? '截至翻阅日' : '迄今') + '共 ' + visible.length + ' 期 · 累计 ' + words.toLocaleString() +  ' 字';
+}
+
+/* ================= 时间机器 ================= */
+function distinctDates() {
+  var seen = {}, out = [];
+  POSTS.forEach(function (p) { if (!seen[p.date]) { seen[p.date] = true; out.push(p.date); } });
+  return out;
+}
+function buildTmSelect(select) {
+  select.innerHTML = '';
+  var opt0 = document.createElement('option');
+  opt0.value = '';
+  opt0.textContent = '时间机器 · 回到今天（第 ' + POSTS.length + ' 期）';
+  select.appendChild(opt0);
+  distinctDates().forEach(function (d) {
+    var count = POSTS.filter(function (p) { return p.date <= d; }).length;
+    var opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = '翻阅 ' + fmtDate(d) + ' · 第 ' + count + ' 期';
+    select.appendChild(opt);
+  });
+}
+function syncTmSelects() {
+  el.tmTop.value = state.asOf || '';
+  el.tmBottom.value = state.asOf || '';
+}
+function setAsOf(v) {
+  state.asOf = v || null;
+  renderAll();
+}
+[el.tmTop, el.tmBottom].forEach(function (s) {
+  s.addEventListener('change', function () { setAsOf(s.value); });
+});
+document.getElementById('asofExit').addEventListener('click', function () { setAsOf(null); });
+document.getElementById('replayBtn').addEventListener('click', function () {
+  var current = visiblePosts()[0];
+  settleTitle(current.title);
+});
+
+/* ================= 总渲染 ================= */
+function renderAll() {
+  var visible = visiblePosts();
+  renderLead(visible);
+  renderRun(visible);
+  renderColophon(visible);
+  syncTmSelects();
+  if (state.asOf) {
+    el.asofBanner.hidden = false;
+    el.asofDateLabel.textContent = fmtDate(state.asOf);
+    el.asofIssueLabel.textContent = String(visible.length);
+  } else {
+    el.asofBanner.hidden = true;
+  }
+  onScroll();
+}
+
+/* URL 参数 ?as-of=YYYY-MM-DD，与正式版时间机器协议一致 */
+(function () {
+  var m = location.search.match(/as-of=(\d{4}-\d{2}-\d{2})/);
+  if (m && m[1] >= FOUNDED && m[1] <= todayStr()) state.asOf = m[1];
+})();
+
+buildTmSelect(el.tmTop);
+buildTmSelect(el.tmBottom);
+renderAll();
+
+/* 视口宽度变化时重排剖面 */
+var resizeTimer = null;
+window.addEventListener('resize', function () {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function () { renderRun(visiblePosts()); onScroll(); }, 160);
+});
+})();
+</script>
+</body>
+</html>

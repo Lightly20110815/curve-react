@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { ChevronRight, List, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, scrollBehavior } from "@/lib/utils";
 
 interface Heading {
   id: string;
@@ -116,7 +116,7 @@ export function ArticleToc({ containerRef, contentKey }: Props) {
   function handleJump(id: string) {
     const target = document.getElementById(id);
     if (!target) return;
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
     setOpen(false);
   }
 

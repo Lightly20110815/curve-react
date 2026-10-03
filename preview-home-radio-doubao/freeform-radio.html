@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="auto" data-time="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曲線自由電台 · CURVE FREE RADIO</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2312151a'/%3E%3Cpath d='M16 27V14' stroke='%23eef0ec' stroke-width='2'/%3E%3Ccircle cx='16' cy='11' r='2.6' fill='%23b5372c'/%3E%3Cpath d='M10.5 10.5a7.8 7.8 0 0 0 0 5M21.5 10.5a7.8 7.8 0 0 1 0 5M7 7a12.7 12.7 0 0 0 0 12M25 7a12.7 12.7 0 0 1 0 12' fill='none' stroke='%23eef0ec' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+/* ================================================================
+   曲線自由電台 CURVE FREE RADIO —— 概念预览 v.3
+   纪律：冷纸白 / 墨黑 / 指示灯红；高密度节目单；音乐为 slim 播出条
+   ================================================================ */
+:root{
+  --paper:#eef0ec; --panel:#e3e6e0; --panel-2:#d8dcd5;
+  --ink:#12151a; --ink-2:#424850; --ink-3:#5d636b;
+  --hair:#ccd1c8; --rule:#12151a;
+  --accent:#b5372c; --accent-soft:rgba(181,55,44,.10);
+  --f-sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --f-serif:Georgia,"Times New Roman","Songti SC","Source Han Serif SC","Noto Serif CJK SC",STSong,SimSun,serif;
+  --f-mono:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
+}
+:root[data-theme="light"][data-time="day"]{--paper:#eef0ec;--panel:#e3e6e0;--panel-2:#d8dcd5;--ink:#12151a;--ink-2:#424850;--ink-3:#5d636b;--hair:#ccd1c8;--rule:#12151a;--accent:#b5372c;--accent-soft:rgba(181,55,44,.10)}
+:root[data-theme="light"][data-time="dawn"]{--paper:#ede8ea;--panel:#e2dce0;--panel-2:#d6d0d5;--ink:#141218;--ink-2:#49444c;--ink-3:#78727c;--hair:#cfc8cd;--rule:#141218;--accent:#b8404e;--accent-soft:rgba(184,64,78,.10)}
+:root[data-theme="light"][data-time="dusk"]{--paper:#e9e8e6;--panel:#deddd9;--panel-2:#d2d1cc;--ink:#121413;--ink-2:#464a47;--ink-3:#747875;--hair:#cbcdc9;--rule:#121413;--accent:#ad3c2c;--accent-soft:rgba(173,60,44,.10)}
+:root[data-theme="light"][data-time="night"]{--paper:#e7ebef;--panel:#dce1e7;--panel-2:#cfd6de;--ink:#0f151c;--ink-2:#3c4650;--ink-3:#57616c;--hair:#c7cfd8;--rule:#0f151c;--accent:#2f6f8a;--accent-soft:rgba(47,111,138,.12)}
+:root[data-theme="dark"][data-time="day"]{--paper:#13161b;--panel:#1a1e24;--panel-2:#22272e;--ink:#e8e6df;--ink-2:#a7adb5;--ink-3:#8b929b;--hair:#272c33;--rule:#e8e6df;--accent:#d05a4e;--accent-soft:rgba(208,90,78,.15)}
+:root[data-theme="dark"][data-time="dawn"]{--paper:#171419;--panel:#1f1a21;--panel-2:#282129;--ink:#ece7e4;--ink-2:#b2a8ae;--ink-3:#938890;--hair:#2e262c;--rule:#ece7e4;--accent:#e08372;--accent-soft:rgba(224,131,114,.15)}
+:root[data-theme="dark"][data-time="dusk"]{--paper:#161318;--panel:#1e1a20;--panel-2:#272128;--ink:#eae4df;--ink-2:#afa5a8;--ink-3:#90878b;--hair:#2d252b;--rule:#eae4df;--accent:#d05a45;--accent-soft:rgba(208,90,69,.15)}
+:root[data-theme="dark"][data-time="night"]{--paper:#0b111a;--panel:#121a24;--panel-2:#18222e;--ink:#e6e9ec;--ink-2:#9da8b4;--ink-3:#82909e;--hair:#1f2935;--rule:#e6e9ec;--accent:#72aac8;--accent-soft:rgba(114,170,200,.16)}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-sans);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;transition:background-color .3s,color .3s}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E")}
+::selection{background:var(--accent);color:var(--paper)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.mono{font-family:var(--f-mono)} .serif{font-family:var(--f-serif)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
+
+/* ===== 顶部台标条 ===== */
+.topbar{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--paper) 92%,transparent);border-bottom:2px solid var(--rule)}
+.topbar-inner{max-width:1180px;margin:0 auto;padding:9px 28px;display:flex;align-items:center;gap:16px}
+.wordmark{display:flex;align-items:baseline;gap:10px;flex:none}
+.wordmark .cn{font-weight:800;font-size:16px;letter-spacing:.14em}
+.wordmark .en{font-family:var(--f-mono);font-size:9px;letter-spacing:.26em;color:var(--ink-3)}
+.top-tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dateline{font-family:var(--f-mono);font-size:10px;color:var(--ink-2);letter-spacing:.04em}
+.tm-select{appearance:auto;border:1px solid var(--hair);background:var(--paper);color:var(--ink);font-family:var(--f-mono);font-size:11px;padding:5px 6px;max-width:210px;border-radius:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--rule);padding:6px 13px;border-radius:2px;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;transition:background .16s,color .16s}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.ghost{border-color:var(--hair);color:var(--ink-2)}
+.btn.ghost:hover{border-color:var(--rule);background:var(--ink);color:var(--paper)}
+.btn:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ===== 紧凑台标带 ===== */
+.station-band{border-bottom:3px solid var(--rule);padding:20px 0 16px;position:relative}
+.sb-row{display:flex;align-items:center;gap:14px}
+.sb-row+.sb-row{margin-top:11px}
+.lamp{display:inline-flex;align-items:center;gap:9px;font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;color:var(--ink-2)}
+.lamp .dot{width:9px;height:9px;border-radius:50%;background:var(--ink-3);flex:none;transition:background .2s,box-shadow .2s}
+.lamp.onair .dot{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.sb-freq{margin-left:auto;font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;color:var(--ink-3)}
+.sb-title{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+.sb-title .cn{font-weight:800;font-size:clamp(20px,2.4vw,28px);letter-spacing:.1em;line-height:1.1}
+.sb-title .en{font-family:var(--f-mono);font-size:9px;letter-spacing:.3em;color:var(--ink-3)}
+.sb-note{font-size:12.5px;color:var(--ink-2)}
+.sb-note b{color:var(--ink);font-weight:700}
+.sb-call{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;border:1px solid var(--rule);padding:3px 10px;border-radius:2px}
+.sb-call b{font-weight:700}
+
+/* ===== slim 播出条 ===== */
+.onair-bar{background:var(--panel);border-bottom:1px solid var(--rule)}
+.onair-inner{max-width:1180px;margin:0 auto;padding:0 28px;display:flex;align-items:center;gap:13px;min-height:58px}
+.oa-cover{width:40px;height:40px;flex:none;border:1px solid var(--hair);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--panel-2)}
+.oa-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.oa-cover svg{width:16px;height:16px;stroke:var(--ink-3);fill:none;stroke-width:1.7}
+.oa-name{flex:0 1 190px;min-width:0}
+.oa-name .n{display:block;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.oa-name .a{display:block;font-family:var(--f-mono);font-size:9px;color:var(--ink-3);letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oa-ctl{display:flex;align-items:center;gap:5px;flex:none}
+.ctl{width:30px;height:30px;border:1px solid var(--hair);border-radius:2px;display:inline-flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+.ctl svg{width:12px;height:12px;fill:var(--ink);stroke:var(--ink)}
+.ctl:hover{border-color:var(--rule)}
+.ctl.play{width:36px;background:var(--ink);border-color:var(--ink)}
+.ctl.play svg{fill:var(--paper);stroke:var(--paper)}
+.oa-progress{flex:1;display:flex;align-items:center;gap:10px;min-width:110px}
+.rule-bar{flex:1;height:3px;background:var(--panel-2);position:relative;cursor:pointer;border-radius:1px}
+.rule-bar .fill{position:absolute;inset:0 auto 0 0;background:var(--accent);width:0%;border-radius:1px}
+.rule-bar .knob{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);left:0%}
+.oa-time{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);letter-spacing:.04em;flex:none}
+.oa-vu{display:flex;align-items:flex-end;gap:2px;height:16px;width:74px;flex:none}
+.oa-vu i{flex:1;background:var(--ink-3);height:3px;display:block;border-radius:1px}
+.oa-vu i.hot{background:var(--accent)}
+
+/* ===== 本期节目 ===== */
+.air{border-bottom:3px solid var(--rule)}
+.air-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.air-grid>.col{padding:28px 30px 30px 0}
+.air-grid>.col+.col{padding:28px 0 30px 30px;border-left:1px solid var(--hair)}
+.sec-label{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.sec-label .t{font-weight:700;font-size:14px;letter-spacing:.12em}
+.sec-label .x{flex:1;height:1px;background:var(--hair)}
+.sec-label .h{font-family:var(--f-mono);font-size:9px;letter-spacing:.16em;color:var(--ink-3)}
+.mono-kicker{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.mono-kicker .cat{font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;border:1px solid var(--rule);padding:3px 9px;border-radius:2px}
+.mono-kicker .cue{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);letter-spacing:.1em}
+.mono-title{font-size:clamp(25px,2.9vw,36px);font-weight:800;line-height:1.25;letter-spacing:.01em;margin-bottom:13px;text-wrap:balance}
+.mono-title .g{display:inline-block;white-space:pre}
+.dek{font-family:var(--f-serif);font-size:16px;line-height:1.9;color:var(--ink-2);margin-bottom:18px;max-width:40em}
+.mono-meta{display:flex;flex-wrap:wrap;gap:16px;font-family:var(--f-mono);font-size:11px;color:var(--ink-3);letter-spacing:.06em;margin-bottom:20px}
+.mono-meta b{color:var(--ink-2);font-weight:600}
+.mono-cta{display:flex;gap:10px;flex-wrap:wrap}
+.tuned-note{display:none;align-items:center;gap:12px;margin-bottom:16px;padding:9px 13px;border:1px solid var(--accent);background:var(--accent-soft);font-family:var(--f-mono);font-size:11px;color:var(--ink-2)}
+.tuned-note.show{display:flex}
+.tuned-note .btn{margin-left:auto;padding:4px 10px}
+
+/* 节目说明（头条自身节选，唯一内容） */
+.show-notes{margin-top:26px}
+.sn-text{font-family:var(--f-serif);font-size:14.5px;line-height:2;color:var(--ink-2);max-width:38em}
+.sn-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}
+.sn-tags span{font-family:var(--f-mono);font-size:10px;border:1px solid var(--hair);padding:2px 8px;border-radius:2px;color:var(--ink-2);letter-spacing:.06em}
+
+/* ===== 流程单 ===== */
+.log{list-style:none;border-top:1px solid var(--rule)}
+.log-entry{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:11px;padding:9px 8px;border-bottom:1px solid var(--hair);transition:background .15s}
+.log-entry .tc{font-family:var(--f-mono);font-size:10px;color:var(--ink-3)}
+.log-entry .ti{font-size:13.5px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-entry .ar{display:block;font-family:var(--f-mono);font-size:9px;color:var(--ink-3);letter-spacing:.05em;margin-top:1px}
+.log-entry.track{cursor:pointer}
+.log-entry.track:hover{background:var(--panel)}
+.log-entry.track:hover .ti,.log-entry.playing .ti{color:var(--accent)}
+.log-entry.talk{grid-template-columns:44px minmax(0,1fr)}
+.log-entry.talk .body{display:flex;align-items:baseline;gap:9px;min-width:0}
+.log-entry.talk .tag{font-family:var(--f-mono);font-size:9px;letter-spacing:.12em;color:var(--ink-3);border:1px solid var(--hair);padding:2px 6px;flex:none;border-radius:2px}
+.log-entry.talk .ti{font-family:var(--f-serif);font-size:13px}
+.log-entry.talk:hover{background:var(--panel);cursor:pointer}
+.log-entry.talk:hover .ti{color:var(--accent)}
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px;width:15px;flex:none}
+.eq i{width:2.4px;background:var(--ink-3);height:3px;display:block}
+.log-entry.playing .eq i{background:var(--accent);animation:eqB .9s ease-in-out infinite}
+.log-entry.playing .eq i:nth-child(2){animation-delay:.18s}
+.log-entry.playing .eq i:nth-child(3){animation-delay:.36s}
+.log-entry.playing .eq i:nth-child(4){animation-delay:.54s}
+@keyframes eqB{0%,100%{height:3px}50%{height:12px}}
+
+/* ===== 往期实录 ===== */
+.archive{border-bottom:3px solid var(--rule);padding:28px 0}
+.archive-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 34px}
+.arc-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;padding:11px 6px;border-bottom:1px solid var(--hair);position:relative;cursor:pointer;transition:background .15s}
+.arc-row::before{content:"";position:absolute;left:0;top:50%;width:3px;height:0;background:var(--accent);transform:translateY(-50%);transition:height .18s}
+.arc-row:hover{background:var(--panel)}
+.arc-row:hover::before{height:56%}
+.arc-row .d{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);padding-top:3px}
+.arc-row .ti{font-size:15px;font-weight:700;line-height:1.4}
+.arc-row .cat{font-family:var(--f-mono);font-size:9px;color:var(--ink-3);border:1px solid var(--hair);padding:1px 6px;margin-left:8px;border-radius:2px;vertical-align:.12em;letter-spacing:.1em}
+.arc-row .de{display:block;font-family:var(--f-serif);font-size:12.5px;color:var(--ink-2);margin-top:3px;line-height:1.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== 固定节目 / 关键词 ===== */
+.shows{border-bottom:3px solid var(--rule);padding:26px 0 4px}
+.shows-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 30px}
+.show-item{display:flex;align-items:baseline;gap:10px;padding:11px 6px;border-bottom:1px solid var(--hair);cursor:pointer;transition:background .15s,color .15s;border-radius:2px}
+.show-item:hover{background:var(--panel);color:var(--accent)}
+.show-item .n{font-size:14px;font-weight:700}
+.show-item .de{font-size:11px;color:var(--ink-3)}
+.show-item .c{margin-left:auto;font-family:var(--f-mono);font-size:10px;color:var(--ink-3)}
+.tags-block{padding:22px 0 2px}
+.tags-line{display:flex;flex-wrap:wrap;gap:7px 15px}
+.tags-line a{font-size:13px;color:var(--ink-2);transition:color .15s}
+.tags-line a:hover{color:var(--accent);text-underline-offset:4px}
+
+/* ===== 台脚 ===== */
+.colophon{padding:20px 0 38px}
+.col-grid{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:baseline}
+.col-grid .big{font-weight:800;letter-spacing:.14em;font-size:14px}
+.col-grid .sub{font-family:var(--f-mono);font-size:9px;color:var(--ink-3);letter-spacing:.12em}
+.col-grid .filler{flex:1}
+.col-note{margin-top:12px;font-family:var(--f-mono);font-size:9px;color:var(--ink-3);line-height:1.9;letter-spacing:.04em}
+
+/* ===== 落字（仅调谐时运行） ===== */
+html.js [data-split] .g{opacity:0}
+[data-split] .g{transition:transform .55s cubic-bezier(.22,1,.36,1),opacity .55s cubic-bezier(.22,1,.36,1),filter .55s ease}
+html.js [data-split].settled .g{opacity:1;transform:none;filter:none}
+.station-band.tuning [data-split] .g{transition-duration:.18s}
+.tune-sweep{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 2px,var(--ink) 2px 3px)}
+.station-band.tuning .tune-sweep{animation:sweepNoise .44s steps(3) both}
+@keyframes sweepNoise{0%{opacity:0}20%{opacity:.1}60%{opacity:.06}100%{opacity:0}}
+
+/* ===== 响应式 ===== */
+@media (max-width:920px){
+  .air-grid{grid-template-columns:minmax(0,1fr)}
+  .air-grid>.col{padding:24px 0}
+  .air-grid>.col+.col{padding:24px 0;border-left:none;border-top:1px solid var(--hair)}
+  .archive-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  .wrap{padding:0 18px}
+  .topbar-inner{padding:9px 18px;gap:10px}
+  .wordmark .en{display:none}
+  .dateline{display:none}
+  .tm-select{max-width:130px}
+  .onair-inner{flex-wrap:wrap;padding:10px 18px;gap:10px}
+  .oa-name{flex:1 1 auto}
+  .oa-vu{display:none}
+  .oa-progress{order:5;flex-basis:100%}
+  .sb-freq{display:none}
+  .shows-grid{grid-template-columns:minmax(0,1fr)}
+  .arc-row .de{white-space:normal}
+  .col-grid{flex-direction:column;gap:7px}
+  .col-grid .filler{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html.js [data-split] .g{opacity:1!important;transform:none!important}
+  *{transition:none!important}
+  .log-entry.playing .eq i,.station-band.tuning .tune-sweep{animation:none!important}
+}
+/* ===CSS2=== */
+</style>
+</head>
+<body>
+<!-- ===== 顶部台标条 ===== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="wordmark" href="#top"><span class="cn">曲線自由電台</span><span class="en">CURVE FREE RADIO</span></a>
+    <div class="top-tools">
+      <span class="dateline" id="dateline">PROGRAM PREVIEW</span>
+      <select class="tm-select" id="tuneSelect" aria-label="调谐往期录音">
+        <option value="live">当前频率 · 直播信号</option>
+        <option value="more-than-a-username">2026.09.24 · 她不只是一个用户名</option>
+        <option value="goodnight">2026.09.24 · 晚安喵</option>
+        <option value="no-next">2026.09.21 · 没有下一版</option>
+        <option value="savepoint">2026.09.19 · 过期的存档点</option>
+        <option value="june">2026.06.18 · 六月没有主线任务</option>
+        <option value="attachment">2026.04.25 · 依恋的形状</option>
+        <option value="dzgc">2026.03.22 · 关于“芜湖市德智拓展训练有限公司”等的维权报告</option>
+        <option value="deepseek">2025.10.20 · 给你的 Curve 主题添加一个侧边栏温柔问候语</option>
+        <option value="dpsk">2025.10.19 · 给你的 Curve 主题添加一个 DeepSeek 代理</option>
+        <option value="tips">2025.08.05 · 给你的 Curve 主题添加一个首页提示弹窗</option>
+        <option value="bt">2025.08.04 · 给你的 Curve 主题添加一个出生天数的侧边栏</option>
+        <option value="hy2">2025.07.24 · VPS:一个脚本搞定常用工具</option>
+        <option value="hello-world">2025.07.24 · 你好，世界？</option>
+      </select>
+      <button class="btn ghost" id="themeBtn" type="button">自动</button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 紧凑台标带 ===== -->
+<div class="station-band" id="top">
+  <div class="wrap">
+    <div class="tune-sweep"></div>
+    <div class="sb-row">
+      <span class="lamp" id="lamp"><span class="dot"></span><span id="lampText">STANDBY</span></span>
+      <span class="sb-freq">FM 98.7 · EST. 2025</span>
+    </div>
+    <div class="sb-row sb-title">
+      <span class="cn">曲線自由電台</span><span class="en">CURVE FREE RADIO</span>
+    </div>
+    <div class="sb-row">
+      <span class="sb-note">不定期发射 · 自 <b>2025.07.24</b> 起</span>
+      <span class="sb-call" id="sbCall">第 <b>13</b> 次发射 · 2026.09.24</span>
+      <span style="margin-left:auto"><button class="btn ghost" id="randomBtn" type="button">随机调谐</button></span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== slim 播出条 ===== -->
+<div class="onair-bar">
+  <div class="onair-inner">
+    <span class="oa-cover" id="oaCover"></span>
+    <span class="oa-name"><span class="n" id="oaName">未接入发射信号</span><span class="a" id="oaArtist">点击曲目开始播出</span></span>
+    <span class="oa-ctl">
+      <button class="ctl" id="prevBtn" type="button" aria-label="上一曲"><svg viewBox="0 0 24 24"><path d="M7 5v14M19 5L9 12l10 7z"/></svg></button>
+      <button class="ctl play" id="playBtn" type="button" aria-label="播放"><svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button>
+      <button class="ctl" id="nextBtn" type="button" aria-label="下一曲"><svg viewBox="0 0 24 24"><path d="M17 5v14M5 5l10 7-10 7z"/></svg></button>
+    </span>
+    <span class="oa-progress">
+      <span class="oa-time" id="curTime">00:00</span>
+      <span class="rule-bar" id="seekBar"><span class="fill" id="seekFill"></span><span class="knob" id="seekKnob"></span></span>
+      <span class="oa-time" id="durTime">--:--</span>
+    </span>
+    <span class="oa-vu" id="vuMeter"></span>
+  </div>
+</div>
+
+<!-- ===== 本期节目 ===== -->
+<section class="air">
+  <div class="wrap air-grid">
+    <div class="col">
+      <div class="sec-label"><span class="t">本期节目</span><span class="x"></span><span class="h" id="monoH">独白 · 15 分钟</span></div>
+      <div class="tuned-note" id="tunedNote"><span id="tunedNoteText"></span><button class="btn" id="backLiveBtn" type="button">回到直播</button></div>
+      <div class="mono-kicker"><span class="cat" id="monoCat">随笔</span><span class="cue" id="monoCue">CUE 2026.09.24</span></div>
+      <h2 class="mono-title" id="monoTitle" data-split>她不只是一个用户名</h2>
+      <p class="dek" id="monoDek">关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。</p>
+      <div class="mono-meta" id="monoMeta"><span>播出 <b>2026.09.24</b></span><span><b>5192</b> 字</span><span>时长 <b>15</b> 分钟</span></div>
+      <div class="mono-cta">
+        <button class="btn" id="readFullBtn" type="button">收听全文</button>
+        <a class="btn ghost" href="#archive">往期实录</a>
+      </div>
+
+      <div class="show-notes">
+        <div class="sec-label" style="margin-bottom:12px"><span class="t">节目说明</span><span class="x"></span></div>
+        <p class="sn-text" id="snText">一个人去世了，然后别人发讣告，然后所有人齐刷刷在评论区留下晚安和 RIP，然后就什么都没有了。人们发完慰问，转头开启了新的生活，只有最好的朋友和亲人会偶尔想起她。但我突然想到，当一个人已经不在了，她的记忆、她的故事、她没有说出口的话，是不是也永远消失了？AI 能学会她的说话方式，却补不回那些从未被记录的空白。</p>
+        <div class="sn-tags" id="snTags"><span>记忆</span><span>悼念</span><span>数字复现</span><span>AI 对话</span></div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="sec-label"><span class="t">本期曲目</span><span class="x"></span><span class="h">共 7 首</span></div>
+      <ul class="log" id="programLog">
+        <li class="log-entry track" data-track="0"><span class="tc">00:00</span><span class="body"><span class="ti">リリィ</span><span class="ar">リリィ（依菲雅）· 台曲</span></span><span class="eq"><i></i><i></i><i></i><i></i></span></li>
+        <li class="log-entry talk" data-tune="more-than-a-username"><span class="tc">TALK</span><span class="body"><span class="tag">开场独白</span><span class="ti">她不只是一个用户名</span></span></li>
+        <li class="log-entry track" data-track="1"><span class="tc">03:47</span><span class="body"><span class="ti">还愿</span><span class="ar">草东没有派对</span></span><span class="eq"><i></i><i></i><i></i><i></i></span></li>
+        <li class="log-entry talk" data-tune="goodnight"><span class="tc">TALK</span><span class="body"><span class="tag">听众来信</span><span class="ti">晚安喵</span></span></li>
+        <li class="log-entry track" data-track="2"><span class="tc">07:40</span><span class="body"><span class="ti">A Little Love</span><span class="ar">冯曦妤</span></span><span class="eq"><i></i><i></i><i></i><i></i></span></li>
+        <li class="log-entry track" data-track="3"><span class="tc">11:05</span><span class="body"><span class="ti">golden hour</span><span class="ar">JVKE</span></span><span class="eq"><i></i><i></i><i></i><i></i></span></li>
+        <li class="log-entry talk" data-tune="no-next"><span class="tc">TALK</span><span class="body"><span class="tag">插播</span><span class="ti">没有下一版</span></span></li>
+        <li class="log-entry track" data-track="4"><span class="tc">14:38</span><span class="body"><span class="ti">Ceremony</span><span class="ar">Day Wave</span></span><span class="eq"><i></i><i></i><i></i><i></i></span></li>
+        <li class="log-entry track" data-track="5"><span class="tc">18:02</span><span class="body"><span class="ti">evening</span><span class="ar">Corn Wave</span></span><span class="eq"><i></i><i></i><i></i><i></i></span></li>
+        <li class="log-entry track" data-track="6"><span class="tc">21:20</span><span class="body"><span class="ti">自由落体</span><span class="ar">リリィ · Freefall 台曲</span></span><span class="eq"><i></i><i></i><i></i><i></i></span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+<!-- ===== 往期实录 ===== -->
+<section class="archive wrap" id="archive">
+  <div class="sec-label"><span class="t">往期实录</span><span class="x"></span><span class="h">共 12 盘</span></div>
+  <div class="archive-grid" id="archiveList">
+    <div class="arc-row" data-tune="goodnight"><span class="d">2026.09.24</span><span><span class="ti">晚安喵</span><span class="cat">纪念</span><span class="de">后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。</span></span></div>
+    <div class="arc-row" data-tune="no-next"><span class="d">2026.09.21</span><span><span class="ti">没有下一版</span><span class="cat">随笔</span><span class="de">她没能见到 GPT 6，我也再没等到一个已读。</span></span></div>
+    <div class="arc-row" data-tune="savepoint"><span class="d">2026.09.19</span><span><span class="ti">过期的存档点</span><span class="cat">随笔</span><span class="de">想回去的那一天，印在一瓶过期可乐的瓶身上。</span></span></div>
+    <div class="arc-row" data-tune="june"><span class="d">2026.06.18</span><span><span class="ti">六月没有主线任务</span><span class="cat">随笔</span><span class="de">随着地铁播报声的传来，我的六月失去了主线。</span></span></div>
+    <div class="arc-row" data-tune="attachment"><span class="d">2026.04.25</span><span><span class="ti">依恋的形状</span><span class="cat">随笔</span><span class="de">焦虑型依恋的自我解构——从成长裂痕到关系死循环，一份写给自己的病理报告。</span></span></div>
+    <div class="arc-row" data-tune="dzgc"><span class="d">2026.03.22</span><span><span class="ti">关于“芜湖市德智拓展训练有限公司”以及“芜湖市无为市德智青少年成长中心”的维权报告</span><span class="cat">权益维护</span><span class="de">关于这些所谓的“矫正机构”的报告</span></span></div>
+    <div class="arc-row" data-tune="deepseek"><span class="d">2025.10.20</span><span><span class="ti">给你的 Curve 主题通过调起 DeepSeek 添加一个侧边栏温柔问候语</span><span class="cat">开发教程</span><span class="de">Curve 主题：DeepSeek 首页问候组件</span></span></div>
+    <div class="arc-row" data-tune="dpsk"><span class="d">2025.10.19</span><span><span class="ti">给你的 Curve 主题添加一个 DeepSeek 代理</span><span class="cat">部署</span><span class="de">用两种方式部署 DeepSeek API 代理：Vercel Edge 函数与本地/服务器 Node 代理（支持 SSE 流式）</span></span></div>
+    <div class="arc-row" data-tune="tips"><span class="d">2025.08.05</span><span><span class="ti">给你的 Curve 主题添加一个首页提示弹窗</span><span class="cat">开发教程</span><span class="de">Curve 主题：提示弹窗</span></span></div>
+    <div class="arc-row" data-tune="bt"><span class="d">2025.08.04</span><span><span class="ti">给你的 Curve 主题添加一个出生天数的侧边栏</span><span class="cat">开发教程</span><span class="de">Curve 主题：出生天数侧边栏</span></span></div>
+    <div class="arc-row" data-tune="hy2"><span class="d">2025.07.24</span><span><span class="ti">VPS:一个脚本搞定常用工具</span><span class="cat">工具箱</span><span class="de">一个新VPS搭建代理工具+测速+流媒体+Hy2/Xui的小工具</span></span></div>
+    <div class="arc-row" data-tune="hello-world"><span class="d">2025.07.24</span><span><span class="ti">你好，世界？</span><span class="cat">随笔</span><span class="de">这里是一个小小的角落，一个勉强算是“家”的地方。</span></span></div>
+  </div>
+</section>
+
+<!-- ===== 固定节目 ===== -->
+<section class="shows wrap">
+  <div class="sec-label"><span class="t">固定节目</span><span class="x"></span><span class="h">共 6 档</span></div>
+  <div class="shows-grid">
+    <div class="show-item" data-show="不定期独白"><span><span class="n">不定期独白</span><span class="de" style="display:block">随笔 · 自言自语的录音</span></span><span class="c">×6</span></div>
+    <div class="show-item" data-show="建站手记"><span><span class="n">建站手记</span><span class="de" style="display:block">开发教程 · 把自己做成功能</span></span><span class="c">×3</span></div>
+    <div class="show-item" data-show="纪念专场"><span><span class="n">纪念专场</span><span class="de" style="display:block">纪念 · 不该被遗忘的人</span></span><span class="c">×1</span></div>
+    <div class="show-item" data-show="听众维权"><span><span class="n">听众维权</span><span class="de" style="display:block">权益维护 · 一次机构纠纷</span></span><span class="c">×1</span></div>
+    <div class="show-item" data-show="机房来讯"><span><span class="n">机房来讯</span><span class="de" style="display:block">部署 · 数据在自己手里</span></span><span class="c">×1</span></div>
+    <div class="show-item" data-show="维修间"><span><span class="n">维修间</span><span class="de" style="display:block">工具箱 · 自用小工具</span></span><span class="c">×1</span></div>
+  </div>
+  <div class="tags-block">
+    <div class="sec-label" style="margin-bottom:13px"><span class="t">关键词</span><span class="x"></span><span class="h">共 26 个</span></div>
+    <div class="tags-line" id="tagsLine">
+      <a data-tag="Epheia">Epheia</a><a data-tag="纪念">纪念</a><a data-tag="悼念">悼念</a><a data-tag="失去">失去</a><a data-tag="记忆">记忆</a><a data-tag="AI 对话">AI 对话</a><a data-tag="数字复现">数字复现</a><a data-tag="时间">时间</a><a data-tag="解离">解离</a><a data-tag="存档">存档</a><a data-tag="生活记录">生活记录</a><a data-tag="九月">九月</a><a data-tag="六月">六月</a><a data-tag="假期">假期</a><a data-tag="迷茫">迷茫</a><a data-tag="依恋">依恋</a><a data-tag="心理">心理</a><a data-tag="自我剖析">自我剖析</a><a data-tag="情绪">情绪</a><a data-tag="报告">报告</a><a data-tag="开发">开发</a><a data-tag="工具">工具</a><a data-tag="教程">教程</a><a data-tag="你好世界">你好世界</a><a data-tag="建站">建站</a><a data-tag="心情">心情</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 台脚 ===== -->
+<footer class="colophon">
+  <div class="wrap">
+    <div class="col-grid">
+      <span class="big">曲線自由電台</span><span class="sub">CURVE FREE RADIO · FM 98.7</span>
+      <span class="filler"></span><span class="sub">不定期发射 · 不保证更新</span>
+    </div>
+    <p class="col-note">首页概念预览（单文件演示稿）：13 段录音为 posts.json 真实文章数据；曲目为仓库内真实音频，经单例控制器懒加载，全站只有一个 audio 元素。调谐往期、固定节目与关键词为演示交互；正式版接通 src/lib/music-controller 与 curve-theme（light/dark/auto × 四时段）。</p>
+  </div>
+</footer>
+<script>
+(function(){
+"use strict";
+var RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $=function(id){return document.getElementById(id);};
+
+/* ===== 真实数据（posts.json 13 篇 + 仓库真实音频；ex 为正文开头节选） ===== */
+var POSTS=[
+ {slug:'more-than-a-username',dateDot:'2026.09.24',cat:'随笔',tags:['记忆','悼念','数字复现','AI 对话'],title:'她不只是一个用户名',words:5192,min:15,
+  dek:'关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。',
+  ex:'一个人去世了，然后别人发讣告，然后所有人齐刷刷在评论区留下晚安和 RIP，然后就什么都没有了。人们发完慰问，转头开启了新的生活，只有最好的朋友和亲人会偶尔想起她。但我突然想到，当一个人已经不在了，她的记忆、她的故事、她没有说出口的话，是不是也永远消失了？AI 能学会她的说话方式，却补不回那些从未被记录的空白。'},
+ {slug:'goodnight',dateDot:'2026.09.24',cat:'纪念',tags:['Epheia','纪念'],title:'晚安喵',words:730,min:2,
+  dek:'后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。',
+  ex:'对我来说 Epheia 不只是一个陌生的用户名……她是一个拥有 17 年记忆，自己的学业、家庭、生活，活生生的人。这一页放着那些我还记得的她、以及她说过的话——后来我才发现，有些东西是在她离开以后才慢慢看懂的。'},
+ {slug:'no-next',dateDot:'2026.09.21',cat:'随笔',tags:['Epheia','失去','时间','AI 对话'],title:'没有下一版',words:3709,min:11,
+  dek:'她没能见到 GPT 6，我也再没等到一个已读。',
+  ex:'9 月 21 日，和 ChatGPT 的聊天记录。我的话一字未改；GPT 的回复有删节，删掉的地方用「……」标出。她没能见到 GPT 6，我也再没等到一个已读。'},
+ {slug:'savepoint',dateDot:'2026.09.19',cat:'随笔',tags:['九月','生活记录','解离','存档'],title:'过期的存档点',words:399,min:1,
+  dek:'想回去的那一天，印在一瓶过期可乐的瓶身上。',
+  ex:'万象城有好多人，我想来 Apple Store 看看 iPhone 18，本来想着工作日不会有多少人……可能是解离了（？）想回去的那一天印在瓶身上，可乐过期了，那个存档点也一样。'},
+ {slug:'june',dateDot:'2026.06.18',cat:'随笔',tags:['六月','假期','生活记录','迷茫'],title:'六月没有主线任务',words:279,min:1,
+  dek:'随着地铁播报声的传来，我的六月失去了主线。',
+  ex:'「合肥轨道交通提醒您……」随着地铁播报声的传来，我的六月，正式失去了主线。'},
+ {slug:'attachment',dateDot:'2026.04.25',cat:'随笔',tags:['依恋','心理','自我剖析','情绪'],title:'依恋的形状',words:1743,min:5,
+  dek:'焦虑型依恋的自我解构——从成长裂痕到关系死循环，一份写给自己的病理报告。',
+  ex:'焦虑着依恋别人真的会很痛苦诶……自己猜疑，又导致别人很有社交压力。但是为什么会这样呢？从成长裂痕到关系死循环，我想把它拆开来看清楚。'},
+ {slug:'dzgc',dateDot:'2026.03.22',cat:'权益维护',tags:['报告'],title:'关于“芜湖市德智拓展训练有限公司”以及“芜湖市无为市德智青少年成长中心”的维权报告',words:1661,min:5,
+  dek:'关于这些所谓的“矫正机构”的报告',
+  ex:'写这个没有什么意义，单纯是为了给当时的自己一个交代而已。关于这些所谓的“矫正机构”的报告，有用也罢，垃圾也罢，就放这放着吧。'},
+ {slug:'deepseek',dateDot:'2025.10.20',cat:'开发教程',tags:['开发'],title:'给你的 Curve 主题通过调起 DeepSeek 添加一个侧边栏温柔问候语',words:919,min:3,
+  dek:'Curve 主题：DeepSeek 首页问候组件',
+  ex:'通过调起 DeepSeek，在侧边栏小组件里生成一句温柔的问候语，每次打开首页都不一样。'},
+ {slug:'dpsk',dateDot:'2025.10.19',cat:'部署',tags:['开发'],title:'给你的 Curve 主题添加一个 DeepSeek 代理',words:1021,min:3,
+  dek:'用两种方式部署 DeepSeek API 代理：Vercel Edge 函数与本地/服务器 Node 代理（支持 SSE 流式）',
+  ex:'你会得到一个兼容 OpenAI 格式的 /api/deepseek 代理端点。两种部署方式：Vercel Edge 函数，或本地/服务器上的 Node 代理，后者同样支持 SSE 流式输出。'},
+ {slug:'tips',dateDot:'2025.08.05',cat:'开发教程',tags:['开发'],title:'给你的 Curve 主题添加一个首页提示弹窗',words:671,min:2,
+  dek:'Curve 主题：提示弹窗',
+  ex:'给网站首页加一个提示弹窗，用来展示一些重要信息。'},
+ {slug:'bt',dateDot:'2025.08.04',cat:'开发教程',tags:['开发'],title:'给你的 Curve 主题添加一个出生天数的侧边栏',words:502,min:1,
+  dek:'Curve 主题：出生天数侧边栏',
+  ex:'一个显示出生天数的侧边栏，用来提醒自己时间在流逝。数字每天自己跳动，看着它，就知道又过去了一天。'},
+ {slug:'hy2',dateDot:'2025.07.24',cat:'工具箱',tags:['工具','教程'],title:'VPS:一个脚本搞定常用工具',words:638,min:2,
+  dek:'一个新VPS搭建代理工具+测速+流媒体+Hy2/Xui的小工具',
+  ex:'每次拿到一台新 VPS，是不是总要重复那么几个操作：先跑个测速，再看看流媒体解锁情况，然后装个面板……一个脚本跑完代理工具、测速、流媒体、Hy2/Xui，新机器开箱即用。'},
+ {slug:'hello-world',dateDot:'2025.07.24',cat:'随笔',tags:['你好世界','建站','心情'],title:'你好，世界？',words:554,min:2,
+  dek:'这里是一个小小的角落，一个勉强算是“家”的地方。',
+  ex:'搭建一个网站，写下“你好，世界”，对很多人来说是一个起点。对我来说，更像是一个小声的提问。'}
+];
+var TRACKS=[
+ {name:'リリィ',artist:'リリィ（依菲雅）· 台曲',url:'../public/audio/epheia/lily.mp3',pic:'../public/audio/epheia/lily.jpg'},
+ {name:'还愿',artist:'草东没有派对',url:'../public/audio/epheia/huanyuan.mp3',pic:'../public/audio/epheia/huanyuan.jpg'},
+ {name:'A Little Love',artist:'冯曦妤',url:'../public/Musics/A%20Little%20Love.mp3',pic:null},
+ {name:'golden hour',artist:'JVKE',url:'../public/Musics/golden%20hour.mp3',pic:null},
+ {name:'Ceremony',artist:'Day Wave',url:'../public/Musics/Ceremony.mp3',pic:null},
+ {name:'evening',artist:'Corn Wave',url:'../public/Musics/evening.mp3',pic:null},
+ {name:'自由落体',artist:'リリィ · Freefall 台曲',url:'../public/audio/freefall/song.mp3',pic:'../public/audio/freefall/cover.jpg'}
+];
+var NOTE_SVG='<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2.4"/><circle cx="17" cy="16" r="2.4"/></svg>';
+var PLAY_SVG='<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>';
+var PAUSE_SVG='<svg viewBox="0 0 24 24"><path d="M8 5h3v14H8zM13 5h3v14h-3z"/></svg>';
+
+/* ===== 落字引擎（仅调谐时运行） ===== */
+function splitGlyphs(root){
+  var text=root.textContent;root.innerHTML='';
+  Array.prototype.forEach.call(text,function(ch){
+    var s=document.createElement('span');s.className='g';s.textContent=ch;root.appendChild(s);
+  });
+}
+function scatter(root){
+  Array.prototype.forEach.call(root.querySelectorAll('.g'),function(g){
+    g.style.transitionDelay='0ms';
+    g.style.transform='translate('+(Math.random()*22-11).toFixed(1)+'px,'+(Math.random()*28-6).toFixed(1)+'px) rotate('+(Math.random()*10-5).toFixed(1)+'deg)';
+    g.style.filter='blur(2.5px)';
+  });
+}
+function settle(root){
+  var gs=root.querySelectorAll('.g');
+  Array.prototype.forEach.call(gs,function(g,i){
+    g.style.transitionDelay=Math.min(i*40,460)+'ms';
+    g.style.transform='';g.style.filter='';
+  });
+  root.classList.add('settled');
+  setTimeout(function(){Array.prototype.forEach.call(gs,function(g){g.style.transitionDelay='0ms';});},1000);
+}
+var band=document.querySelector('.station-band'),monoTitle=$('monoTitle');
+function runTune(roots,midSwap){
+  if(RM){roots.forEach(function(r){r.classList.add('settled');});midSwap&&midSwap();return;}
+  band.classList.add('tuning');
+  roots.forEach(function(r){r.classList.remove('settled');scatter(r);});
+  setTimeout(function(){
+    midSwap&&midSwap();
+    roots.forEach(scatter);
+    requestAnimationFrame(function(){band.classList.remove('tuning');roots.forEach(settle);});
+  },200);
+}
+
+/* ===== 主题：light/dark/auto × 四时段（在下一个时段边界调度） ===== */
+var mode='auto',forcedTime=null,mqDark=window.matchMedia('(prefers-color-scheme: dark)');
+(function(){var hm=location.hash.match(/state=(light|dark|auto)-(day|dawn|dusk|night)/);if(hm){mode=hm[1];forcedTime=hm[2];}})();
+function timeSlot(h){if(h>=5&&h<8)return'dawn';if(h>=8&&h<17)return'day';if(h>=17&&h<20)return'dusk';return'night';}
+function applyTheme(){
+  var dark=mode==='dark'||(mode==='auto'&&mqDark.matches);
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  document.documentElement.setAttribute('data-time',forcedTime||timeSlot(new Date().getHours()));
+  $('themeBtn').textContent=mode==='auto'?'自动':mode==='light'?'明室':'暗房';
+  scheduleSlot();
+}
+var slotTimer=null;
+function scheduleSlot(){
+  if(forcedTime)return;
+  clearTimeout(slotTimer);
+  var d=new Date(),boundaries=[5,8,17,20],next=null;
+  for(var i=0;i<boundaries.length;i++){
+    var b=new Date(d);b.setHours(boundaries[i],0,0,0);
+    if(b>d){next=b;break;}
+  }
+  if(!next){next=new Date(d);next.setDate(next.getDate()+1);next.setHours(5,0,0,0);}
+  slotTimer=setTimeout(applyTheme,next.getTime()-d.getTime());
+}
+$('themeBtn').addEventListener('click',function(){mode=mode==='auto'?'light':mode==='light'?'dark':'auto';applyTheme();});
+if(mqDark.addEventListener)mqDark.addEventListener('change',applyTheme);else mqDark.addListener(applyTheme);
+applyTheme();
+
+/* ===== 日期行 ===== */
+var W=['周日','周一','周二','周三','周四','周五','周六'];
+function pad(n){return String(n).padStart(2,'0');}
+function tickDate(){var d=new Date();$('dateline').textContent=d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate())+' · '+W[d.getDay()]+' · '+pad(d.getHours())+':'+pad(d.getMinutes());}
+tickDate();setInterval(tickDate,30000);
+
+/* ===== nowPlaying 单例（同构 src/lib/music-controller） ===== */
+var nowPlaying=(function(){
+  var audio=null,actx=null,analyser=null,sourceMade=false;
+  var state={index:0,isPlaying:false,current:0,duration:0,loaded:false};
+  var listeners=new Set();
+  function emit(){listeners.forEach(function(f){f(state);});}
+  function ensureAudio(){
+    if(audio)return audio;
+    audio=new Audio();audio.preload='none';audio.volume=.82;
+    audio.addEventListener('timeupdate',function(){state.current=audio.currentTime;emit();});
+    audio.addEventListener('loadedmetadata',function(){state.duration=audio.duration||0;emit();});
+    audio.addEventListener('durationchange',function(){state.duration=audio.duration||0;emit();});
+    audio.addEventListener('play',function(){state.isPlaying=true;ensureAnalyser();emit();});
+    audio.addEventListener('pause',function(){state.isPlaying=false;emit();});
+    audio.addEventListener('ended',function(){api.select((state.index+1)%TRACKS.length);});
+    document.body.appendChild(audio);
+    return audio;
+  }
+  function ensureAnalyser(){
+    if(sourceMade)return;sourceMade=true;
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+      actx=new AC();
+      var src=actx.createMediaElementSource(audio);
+      analyser=actx.createAnalyser();analyser.fftSize=64;analyser.smoothingTimeConstant=.75;
+      src.connect(analyser);analyser.connect(actx.destination);
+      if(actx.state==='suspended')actx.resume().catch(function(){});
+    }catch(e){analyser=null;}
+  }
+  var api={
+    subscribe:function(f){listeners.add(f);f(state);return function(){listeners.delete(f);};},
+    select:function(i){
+      var a=ensureAudio();
+      state.index=(i+TRACKS.length)%TRACKS.length;
+      state.current=0;state.duration=0;state.loaded=true;
+      a.src=TRACKS[state.index].url;
+      var p=a.play();if(p&&p.catch)p.catch(function(){state.isPlaying=false;emit();});
+      emit();
+    },
+    toggle:function(){
+      var a=ensureAudio();
+      if(!a.src){a.src=TRACKS[0].url;var p=a.play();if(p&&p.catch)p.catch(function(){});return;}
+      if(a.paused){var p2=a.play();if(p2&&p2.catch)p2.catch(function(){});}else a.pause();
+    },
+    next:function(){api.select((state.index+1)%TRACKS.length);},
+    prev:function(){api.select((state.index-1+TRACKS.length)%TRACKS.length);},
+    seek:function(f){if(audio&&isFinite(audio.duration))audio.currentTime=audio.duration*Math.max(0,Math.min(1,f));},
+    getAnalyser:function(){return analyser;}
+  };
+  return api;
+})();
+
+/* ===== slim 条渲染 ===== */
+var oaCover=$('oaCover'),oaName=$('oaName'),oaArtist=$('oaArtist'),playBtn=$('playBtn'),
+    curTime=$('curTime'),durTime=$('durTime'),seekFill=$('seekFill'),seekKnob=$('seekKnob'),
+    lamp=$('lamp');
+function fmt(s){if(!s||!isFinite(s))return'00:00';return pad(Math.floor(s/60))+':'+pad(Math.floor(s%60));}
+nowPlaying.subscribe(function(s){
+  if(!s.loaded){
+    oaCover.innerHTML=NOTE_SVG;
+    oaName.textContent='未接入发射信号';oaArtist.textContent='点击曲目开始播出';
+    playBtn.innerHTML=PLAY_SVG;
+    curTime.textContent='00:00';durTime.textContent='--:--';
+    seekFill.style.width='0%';seekKnob.style.left='0%';
+    lamp.classList.remove('onair');$('lampText').textContent='STANDBY';
+    Array.prototype.forEach.call(document.querySelectorAll('.log-entry.track'),function(li){li.classList.remove('playing');});
+    stopVU();
+    return;
+  }
+  var t=TRACKS[s.index];
+  oaCover.innerHTML=t.pic?'<img src="'+t.pic+'" alt="">':NOTE_SVG;
+  oaName.textContent=t.name;oaArtist.textContent=t.artist;
+  playBtn.innerHTML=s.isPlaying?PAUSE_SVG:PLAY_SVG;
+  curTime.textContent=fmt(s.current);durTime.textContent=s.duration?fmt(s.duration):'--:--';
+  var pct=s.duration?s.current/s.duration*100:0;
+  seekFill.style.width=pct+'%';seekKnob.style.left=pct+'%';
+  lamp.classList.toggle('onair',s.isPlaying);
+  $('lampText').textContent=s.isPlaying?'ON AIR':'STANDBY';
+  Array.prototype.forEach.call(document.querySelectorAll('.log-entry.track'),function(li){
+    li.classList.toggle('playing',s.isPlaying&&Number(li.getAttribute('data-track'))===s.index);
+  });
+  if(s.isPlaying)startVU();else stopVU();
+});
+playBtn.addEventListener('click',function(){nowPlaying.toggle();});
+$('prevBtn').addEventListener('click',function(){nowPlaying.prev();});
+$('nextBtn').addEventListener('click',function(){nowPlaying.next();});
+$('seekBar').addEventListener('click',function(e){var r=this.getBoundingClientRect();nowPlaying.seek((e.clientX-r.left)/r.width);});
+
+/* mini VU：播放时才跑 rAF，暂停即停；RM 下不启动 */
+var vuMeter=$('vuMeter'),bars=[],vuRunning=false;
+for(var bi=0;bi<6;bi++){var ii=document.createElement('i');vuMeter.appendChild(ii);bars.push(ii);}
+function renderIdle(){if(typeof bars==='undefined'||!bars||!bars.length)return;bars.forEach(function(b){b.style.height='3px';b.classList.remove('hot');});}
+function vuFrame(){
+  if(!vuRunning)return;
+  var an=nowPlaying.getAnalyser(),data=null;
+  if(an){data=new Uint8Array(an.frequencyBinCount);an.getByteFrequencyData(data);}
+  for(var k=0;k<bars.length;k++){
+    var v;
+    if(data){v=data[Math.floor(k/bars.length*data.length*.7)]/255;}
+    else v=(.2+Math.random()*.7)*(1-k/bars.length*.4);
+    bars[k].style.height=(3+v*13).toFixed(1)+'px';
+    bars[k].classList.toggle('hot',v>.6);
+  }
+  requestAnimationFrame(vuFrame);
+}
+function startVU(){if(RM)return;if(vuRunning)return;vuRunning=true;requestAnimationFrame(vuFrame);}
+function stopVU(){vuRunning=false;renderIdle();}
+
+/* ===== 调谐往期 ===== */
+var monoCat=$('monoCat'),monoCue=$('monoCue'),monoDek=$('monoDek'),monoMeta=$('monoMeta'),
+    monoH=$('monoH'),snText=$('snText'),sbCall=$('sbCall'),
+    tunedNote=$('tunedNote'),tunedNoteText=$('tunedNoteText'),archiveList=$('archiveList'),
+    tuneSelect=$('tuneSelect'),snTags=$('snTags');
+function paintAll(p,idx){
+  monoCat.textContent=p.cat;monoCue.textContent='CUE '+p.dateDot;
+  monoTitle.textContent=p.title;splitGlyphs(monoTitle);
+  monoDek.textContent=p.dek;
+  monoMeta.innerHTML='<span>播出 <b>'+p.dateDot+'</b></span><span><b>'+p.words+'</b> 字</span><span>时长 <b>'+p.min+'</b> 分钟</span>';
+  monoH.textContent='独白 · '+p.min+' 分钟';
+  snText.textContent=p.ex;
+  snTags.innerHTML=p.tags.map(function(tg){return '<span>'+tg+'</span>';}).join('');
+  sbCall.innerHTML='第 <b>'+(POSTS.length-idx)+'</b> 次发射 · '+p.dateDot;
+}
+function renderArchive(excludeSlug){
+  var html='';
+  POSTS.forEach(function(p,idx){
+    if(p.slug===excludeSlug)return;
+    html+='<div class="arc-row" data-tune="'+p.slug+'"><span class="d">'+p.dateDot+'</span>'
+      +'<span><span class="ti">'+p.title+'</span><span class="cat">'+p.cat+'</span>'
+      +'<span class="de">'+p.dek+'</span></span></div>';
+  });
+  archiveList.innerHTML=html;
+}
+function findPost(slug){
+  for(var i=0;i<POSTS.length;i++)if(POSTS[i].slug===slug)return{p:POSTS[i],idx:i};
+  return null;
+}
+function tune(slug){
+  var f=findPost(slug);if(!f)return;
+  tuneSelect.value=slug;
+  runTune([monoTitle],function(){
+    paintAll(f.p,f.idx);renderArchive(slug);
+    tunedNote.classList.add('show');
+    tunedNoteText.textContent='已调谐至 '+f.p.dateDot+' 录音 · 非直播信号';
+  });
+}
+function goLive(){
+  tuneSelect.value='live';
+  runTune([monoTitle],function(){
+    paintAll(POSTS[0],0);renderArchive(POSTS[0].slug);
+    tunedNote.classList.remove('show');
+  });
+}
+tuneSelect.addEventListener('change',function(){this.value==='live'?goLive():tune(this.value);});
+$('backLiveBtn').addEventListener('click',goLive);
+/* 随机调谐：真实换一个旧频率 */
+$('randomBtn').addEventListener('click',function(){
+  var pool=POSTS.slice(1).map(function(p){return p.slug;});
+  tune(pool[Math.floor(Math.random()*pool.length)]);
+});
+
+/* 流程单 */
+Array.prototype.forEach.call(document.querySelectorAll('#programLog .log-entry'),function(li){
+  li.addEventListener('click',function(){
+    var ti=li.getAttribute('data-track'),tu=li.getAttribute('data-tune');
+    if(ti!==null)nowPlaying.select(Number(ti));else if(tu)tune(tu);
+  });
+});
+/* 往期委托 */
+archiveList.addEventListener('click',function(e){
+  var row=e.target.closest?e.target.closest('.arc-row'):null;
+  if(row&&row.getAttribute('data-tune'))tune(row.getAttribute('data-tune'));
+});
+
+/* ===== toast ===== */
+var toastEl=null,toastTimer=null;
+function toast(msg){
+  if(!toastEl){toastEl=document.createElement('div');
+    toastEl.style.cssText='position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--paper);font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;padding:8px 15px;border-radius:2px;opacity:0;transition:opacity .2s;pointer-events:none';
+    document.body.appendChild(toastEl);}
+  toastEl.textContent=msg;toastEl.style.opacity='1';
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){toastEl.style.opacity='0';},1700);
+}
+$('readFullBtn').addEventListener('click',function(){toast('演示预览：正式版跳转 /posts/'+POSTS[0].slug);});
+Array.prototype.forEach.call(document.querySelectorAll('.show-item'),function(it){
+  it.addEventListener('click',function(){toast('演示预览：进入固定节目「'+it.getAttribute('data-show')+'」');});
+});
+Array.prototype.forEach.call(document.querySelectorAll('#tagsLine a'),function(a){
+  a.addEventListener('click',function(){toast('演示预览：按关键词「'+a.getAttribute('data-tag')+'」检索');});
+});
+
+/* ===== 开机：首屏直接落定，不播散字 ===== */
+splitGlyphs(monoTitle);monoTitle.classList.add('settled');
+/* ===JS2=== */
+})();
+</script>
+</body>
+</html>

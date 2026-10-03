@@ -9,16 +9,23 @@
     <meta name="description" content="一份个人早报。一个用代码与文字搭起来的家。" />
 
     <!--
-      Fonts:
-      - Playfair Display → masthead + headlines (dramatic serif)
-      - Noto Serif SC → readable mixed Chinese/Latin headlines + prose
-      - Inter + Noto Sans SC → UI sans (buttons, nav)
+      Fonts — webfonts are for Latin only.
+
+      Chinese is set in the reader's own system CJK face (PingFang SC, Hiragino,
+      Microsoft YaHei, Source Han) instead of a webfont. Measured on the front
+      page, the two Noto SC families were 49 requests / ~2.75 MB — 95% of all
+      font bytes and larger than the JS bundle and hero image combined. System
+      CJK renders instantly, is better hinted at body sizes, and costs nothing.
+
+      - Playfair Display → masthead nameplate (Latin, dramatic serif)
+      - Inter         → UI sans (nav, buttons, labels)
       - JetBrains Mono → dates, classifieds, code
+      The exact stacks live in tailwind.config.ts.
     -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
 

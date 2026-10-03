@@ -15,3 +15,9 @@ public/Musics/manifest.json
 # 临时文件
 downloads/
 scan_lyrics.swift
+
+# Build-time image variants
+public/images/_optimized/
+
+# HMCL launcher data
+.hmcl/

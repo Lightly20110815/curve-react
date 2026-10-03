@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Curve Times · 曲線時報 — 首页改版示例</title>
+<!--
+  ────────────────────────────────────────────────────────────────
+  首页去 AI 味示例（静态稿，供审阅，不动项目代码）
+
+  保留的身份：纸色 / 印章红单色 / 宋体衬线 / 版号条 / 双线 / ✦ 饰花 / 汉字数字
+  清掉的 AI 味（对应诊断编号）：
+   ① 报头名字固定，不再打字机随机换名；全页零打字机、零闪烁光标
+   ② 副标题是一句固定的人写的话，不再每次由模型生成
+   ③ 删除 stats 三件套（累计/字数/今年）
+   ④ 版块目录删除 01/02 序号与小横线
+   ⑤ 箭头收敛：全页只保留一个「完整存档」出口
+   ⑥ 三栏不再重复四组；要闻改为 6/3/3 不等宽拼版
+   ⑦ Wanted/Notice/Reply 三联 CTA 卡 → 一行安静的尾注
+   ⑧ 双语眉标减半，导航只留中文
+   ⑨ 删除按标签匹配的"读前一眼"伪编辑语
+   ⑩ 无 backdrop-blur；hover 从下划线开始，红色只给真正的出口
+  ────────────────────────────────────────────────────────────────
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: hsl(43 42% 90%);
+    --paper-warm: hsl(39 38% 86%);
+    --paper-soft: hsl(44 40% 93%);
+    --ink: hsl(28 12% 9%);
+    --ink-strong: hsl(28 16% 5%);
+    --ink-body: hsl(28 12% 17%);
+    --ink-muted: hsl(28 9% 31%);
+    --ink-faded: hsl(28 7% 38%);
+    --rule: hsl(28 14% 14%);
+    --rule-soft: hsl(28 9% 28%);
+    --stamp: hsl(5 68% 36%);
+    color-scheme: light;
+  }
+  html[data-theme="dark"] {
+    --paper: hsl(0 0% 9%);
+    --paper-warm: hsl(0 0% 14%);
+    --paper-soft: hsl(0 0% 11%);
+    --ink: hsl(40 16% 91%);
+    --ink-strong: hsl(40 18% 96%);
+    --ink-body: hsl(40 11% 85%);
+    --ink-muted: hsl(38 8% 66%);
+    --ink-faded: hsl(38 6% 54%);
+    --rule: hsl(0 0% 32%);
+    --rule-soft: hsl(0 0% 24%);
+    --stamp: hsl(42 55% 58%);
+    color-scheme: dark;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--paper);
+    /* 只留一层极淡的纸纹点阵，替代原来五层渐变堆叠 */
+    background-image: radial-gradient(hsl(28 12% 9% / 0.014) 1px, transparent 1px);
+    background-size: 22px 22px;
+    color: var(--ink-body);
+    font-family: Georgia, "Times New Roman", "Songti SC", "Source Han Serif SC", "Noto Serif CJK SC", SimSun, serif;
+    font-size: 17px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  html[data-theme="dark"] body { background-image: none; }
+
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  a { color: inherit; text-decoration: none; }
+
+  .font-ui { font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, sans-serif; }
+  .font-mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  /* ── 版号条 ───────────────────────────── */
+  .edition-strip {
+    border-bottom: 1px solid color-mix(in srgb, var(--rule-soft) 55%, transparent);
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+  }
+  .edition-strip .container {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding-top: 6px; padding-bottom: 6px;
+  }
+
+  /* ── 报头：名字固定，不再每天随机换 ───── */
+  .masthead { text-align: center; padding: 28px 0 22px; }
+  .masthead h1 {
+    font-family: "Playfair Display", Georgia, "Songti SC", serif;
+    font-weight: 900;
+    font-size: clamp(34px, 6.4vw, 64px);
+    line-height: 1;
+    color: var(--ink-strong);
+    letter-spacing: 0;
+  }
+  .masthead .cn-name {
+    margin-top: 6px;
+    font-size: clamp(15px, 1.5vw, 18px);
+    font-weight: 500;
+    color: var(--stamp);
+    letter-spacing: 0.35em;
+    text-indent: 0.35em; /* 视觉居中补偿字距 */
+  }
+  .masthead .tagline {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+
+  /* ── 导航：只留中文，当前页一道红色下划线 ── */
+  .nav {
+    border-top: 3px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    position: sticky; top: 0; z-index: 10;
+    background: var(--paper); /* 不透明，无 backdrop-blur */
+  }
+  .nav ul {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    list-style: none;
+  }
+  .nav a {
+    display: block;
+    padding: 10px 14px;
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-strong);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .nav a:hover { color: var(--stamp); }
+  .nav a[aria-current="page"] { color: var(--stamp); border-bottom-color: var(--stamp); }
+
+  /* ── 头条 ─────────────────────────────── */
+  .lead { padding: 34px 0 30px; border-bottom: 1px solid color-mix(in srgb, var(--rule-soft) 40%, transparent); }
+  .lead .kicker {
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 12px; font-weight: 600;
+    color: var(--stamp);
+  }
+  .lead .kicker .date { color: var(--ink-muted); font-weight: 500; }
+  .lead h2 {
+    margin-top: 10px;
+    max-width: 20em;
+    font-size: clamp(28px, 4.6vw, 44px);
+    font-weight: 700;
+    line-height: 1.22;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  .lead h2 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+  .lead .lede {
+    margin-top: 14px;
+    max-width: 34em;
+    font-size: 19px;
+    line-height: 1.8;
+    color: var(--ink-strong);
+  }
+  .lead .byline {
+    margin-top: 14px;
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+  .lead .byline b { color: var(--ink-strong); font-weight: 600; }
+
+  /* ── 每日一句：静态引文，无打字机 ──────── */
+  .poetry {
+    padding: 30px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--rule-soft) 40%, transparent);
+    text-align: center;
+  }
+  .poetry blockquote {
+    font-size: clamp(18px, 2.2vw, 22px);
+    line-height: 1.9;
+    color: var(--ink-strong);
+  }
+  .poetry cite {
+    display: block;
+    margin-top: 10px;
+    font-style: normal;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .poetry cite b { color: var(--stamp); font-weight: 500; }
+
+  /* ── 区块标题：一道细线 + 两个字，不要双语眉标 ── */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 8px;
+    margin-bottom: 22px;
+  }
+  .section-head h2 {
+    font-size: 22px; font-weight: 700; color: var(--ink-strong);
+  }
+  .section-head .more {
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 12px; color: var(--ink-muted);
+  }
+  .section-head .more:hover { color: var(--stamp); text-decoration: underline; text-underline-offset: 3px; }
+
+  section.block { padding: 44px 0 8px; }
+
+  /* ── 头版要闻：6/3/3 不等宽拼版，栏目间竖线 ── */
+  .stories { display: grid; gap: 28px; }
+  @media (min-width: 768px) {
+    .stories { grid-template-columns: 6fr 3fr 3fr; }
+    .stories article + article { border-left: 1px solid color-mix(in srgb, var(--rule-soft) 35%, transparent); padding-left: 28px; }
+  }
+  .stories article .sect {
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--stamp);
+    border-bottom: 1px solid var(--rule);
+    display: block; padding-bottom: 6px;
+  }
+  .stories h3 { margin-top: 12px; font-weight: 700; color: var(--ink-strong); text-wrap: balance; }
+  .stories .big h3 { font-size: 26px; line-height: 1.35; }
+  .stories .small h3 { font-size: 19px; line-height: 1.45; }
+  .stories h3 a:hover { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+  .stories .snippet { margin-top: 10px; font-size: 15.5px; line-height: 1.8; color: var(--ink-body); }
+  .stories .meta {
+    margin-top: 12px;
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 11.5px; color: var(--ink-muted);
+  }
+
+  /* ── 更多文章 + 编辑台 ────────────────── */
+  .two-col { display: grid; gap: 44px; }
+  @media (min-width: 820px) {
+    .two-col { grid-template-columns: 1.5fr 1fr; }
+    .two-col aside { border-left: 1px solid color-mix(in srgb, var(--rule-soft) 35%, transparent); padding-left: 40px; }
+  }
+  .headline-list a {
+    display: grid; grid-template-columns: 64px 1fr auto; gap: 16px; align-items: baseline;
+    padding: 13px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--rule-soft) 25%, transparent);
+  }
+  .headline-list .d { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-muted); }
+  .headline-list .t { font-size: 18px; font-weight: 700; line-height: 1.5; color: var(--ink-strong); }
+  .headline-list a:hover .t { text-decoration: underline; text-underline-offset: 4px; }
+  .headline-list .s { font-family: Inter, "PingFang SC", -apple-system, sans-serif; font-size: 11.5px; color: var(--ink-muted); }
+
+  .desk blockquote {
+    font-size: 19px; line-height: 1.7; color: var(--ink-strong);
+  }
+  .desk .who { margin-top: 12px; font-size: 13px; color: var(--ink-muted); }
+  .desk .latest { margin-top: 28px; border-top: 1px solid color-mix(in srgb, var(--rule-soft) 35%, transparent); padding-top: 20px; }
+  .desk .latest .lbl { font-family: Inter, "PingFang SC", -apple-system, sans-serif; font-size: 11.5px; color: var(--ink-muted); }
+  .desk .latest h4 { margin-top: 8px; font-size: 19px; line-height: 1.45; color: var(--ink-strong); }
+  .desk .latest h4 a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .desk .latest p { margin-top: 8px; font-size: 15px; line-height: 1.75; }
+
+  /* ── 版块目录：无序号、无卡片，报馆名录式 ── */
+  .sections-index { display: grid; grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 768px) { .sections-index { grid-template-columns: repeat(4, 1fr); } }
+  .sections-index a {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 14px 18px 14px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--rule-soft) 30%, transparent);
+  }
+  .sections-index .name { font-size: 19px; font-weight: 700; color: var(--ink-strong); }
+  .sections-index a:hover .name { color: var(--stamp); }
+  .sections-index .count { font-family: Inter, "PingFang SC", -apple-system, sans-serif; font-size: 11.5px; color: var(--ink-muted); }
+
+  /* ── 关键词：纯文字流，无徽章无 chips ──── */
+  .tags-flow { font-size: 15px; line-height: 2.3; color: var(--ink-muted); }
+  .tags-flow a { color: var(--ink-body); }
+  .tags-flow a:hover { color: var(--stamp); text-decoration: underline; text-underline-offset: 3px; }
+  .tags-flow .sep { color: var(--ink-faded); margin: 0 10px; user-select: none; }
+
+  /* ── 尾注：替代三联 CTA 卡 ────────────── */
+  .colophon-note {
+    margin-top: 72px;
+    border-top: 3px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 26px 0;
+    text-align: center;
+  }
+  .colophon-note p { font-size: 15.5px; line-height: 2; color: var(--ink-body); }
+  .colophon-note .orn { color: var(--stamp); font-size: 13px; letter-spacing: 6px; display: block; margin-bottom: 10px; }
+  .colophon-note a { color: var(--ink-strong); border-bottom: 1px solid var(--ink-strong); padding-bottom: 1px; }
+  .colophon-note a:hover { color: var(--stamp); border-bottom-color: var(--stamp); }
+
+  /* ── 页脚：一行 ──────────────────────── */
+  footer {
+    margin-top: 0;
+    padding: 20px 0 28px;
+  }
+  footer .container {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px;
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 11.5px; letter-spacing: 0.06em; color: var(--ink-muted);
+  }
+  footer a:hover { color: var(--stamp); }
+
+  /* 主题小开关（示例用，最小实现） */
+  .theme-btn {
+    border: 1px solid color-mix(in srgb, var(--rule-soft) 60%, transparent);
+    background: transparent; color: var(--ink-muted);
+    font-family: Inter, "PingFang SC", -apple-system, sans-serif;
+    font-size: 11px; letter-spacing: 0.1em;
+    padding: 3px 10px; cursor: pointer;
+  }
+  .theme-btn:hover { color: var(--stamp); border-color: var(--stamp); }
+
+  ::selection { background: color-mix(in srgb, var(--stamp) 18%, transparent); color: var(--ink-strong); }
+
+  @media (max-width: 640px) {
+    .headline-list a { grid-template-columns: 1fr auto; }
+    .headline-list .d { display: none; }
+    .two-col aside { border-top: 1px solid color-mix(in srgb, var(--rule-soft) 35%, transparent); padding-top: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 版号条 -->
+<div class="edition-strip">
+  <div class="container">
+    <span>VOL. I · No. 001</span>
+    <span>二〇二六年九月三十日 · 星期三</span>
+    <span>免费发行</span>
+  </div>
+</div>
+
+<!-- 报头：名字是固定的。报纸不会每天给自己换名字。 -->
+<header class="masthead container">
+  <h1>The Curve Times</h1>
+  <p class="cn-name">曲線時報</p>
+  <p class="tagline">一份个人早报 —— 用代码与文字搭起来的家</p>
+</header>
+
+<!-- 导航：中文为主，去掉每个项目下面的英文小字 -->
+<nav class="nav">
+  <ul class="container">
+    <li><a href="#" aria-current="page">头版</a></li>
+    <li><a href="#">存档</a></li>
+    <li><a href="#">版块</a></li>
+    <li><a href="#">索引</a></li>
+    <li><a href="#">随笔</a></li>
+    <li><a href="#">光影</a></li>
+    <li><a href="#">倒计时</a></li>
+    <li><a href="#">友链</a></li>
+    <li><a href="#">编者</a></li>
+    <li style="margin-left:auto; align-self:center;"><button class="theme-btn" id="themeBtn">夜间</button></li>
+  </ul>
+</nav>
+
+<main class="container">
+
+  <!-- 头条：删掉「读前一眼」伪编辑语和斜体红字 whisper，只留新闻本身 -->
+  <article class="lead">
+    <p class="kicker">随笔 <span class="date">· 二〇二六年九月二十四日</span></p>
+    <h2><a href="#">她不只是一个用户名</a></h2>
+    <p class="lede">关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。</p>
+    <p class="byline">文 / <b>Sy</b> · 约 12 分钟 · 4300 字</p>
+  </article>
+
+  <!-- 每日一句：安静地排在那里，像报纸的卷首引文。无打字机、无光标、无「Daily Poetry · 清晨版」眉标 -->
+  <div class="poetry">
+    <blockquote>行到水穷处，坐看云起时</blockquote>
+    <cite><b>王维</b> ·《终南别业》</cite>
+  </div>
+
+  <!-- 头版要闻：6/3/3 不等宽，栏目间一道竖线 -->
+  <section class="block">
+    <div class="section-head">
+      <h2>头版要闻</h2>
+    </div>
+    <div class="stories">
+      <article class="big">
+        <span class="sect">纪念</span>
+        <h3><a href="#">晚安喵</a></h3>
+        <p class="snippet">后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。</p>
+        <p class="meta">九月二十四日 · 约 9 分钟</p>
+      </article>
+      <article class="small">
+        <span class="sect">随笔</span>
+        <h3><a href="#">没有下一版</a></h3>
+        <p class="snippet">她没能见到 GPT 6，我也再没等到一个已读。</p>
+        <p class="meta">九月二十一日</p>
+      </article>
+      <article class="small">
+        <span class="sect">随笔</span>
+        <h3><a href="#">过期的存档点</a></h3>
+        <p class="snippet">想回去的那一天，印在一瓶过期可乐的瓶身上。</p>
+        <p class="meta">九月十九日</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 更多文章 + 编辑台 -->
+  <section class="block two-col">
+    <div>
+      <div class="section-head">
+        <h2>更多文章</h2>
+        <!-- 全页唯一的箭头出口，留给真正的索引页 -->
+        <a class="more" href="#">完整存档 · 二十四篇 →</a>
+      </div>
+      <div class="headline-list">
+        <a href="#"><span class="d">06-18</span><span class="t">六月没有主线任务</span><span class="s">随笔</span></a>
+        <a href="#"><span class="d">04-25</span><span class="t">依恋的形状</span><span class="s">随笔</span></a>
+        <a href="#"><span class="d">03-22</span><span class="t">关于「德智青少年成长中心」的维权报告</span><span class="s">权益维护</span></a>
+        <a href="#"><span class="d">10-20</span><span class="t">给你的 Curve 主题添加 DeepSeek 侧边栏问候</span><span class="s">开发教程</span></a>
+      </div>
+    </div>
+
+    <!-- 编辑台：删掉 stats 三件套，只留人的话 -->
+    <aside class="desk">
+      <div class="section-head"><h2>编辑台</h2></div>
+      <blockquote>“我总希望能给别人带来欢乐，但最终带来的几乎只是烦恼。”</blockquote>
+      <p class="who">—— Sy，偶尔把这里当草稿纸</p>
+      <div class="latest">
+        <p class="lbl">刚写下的</p>
+        <h4><a href="#">过期的存档点</a></h4>
+        <p>想回去的那一天，印在一瓶过期可乐的瓶身上。后来我再没见过那个味道的夏天。</p>
+      </div>
+    </aside>
+  </section>
+
+  <!-- 版块目录：报名 + 篇数，一行一栏，没有 01/02 序号 -->
+  <section class="block">
+    <div class="section-head"><h2>版块</h2></div>
+    <div class="sections-index">
+      <a href="#"><span class="name">随笔</span><span class="count">十四篇</span></a>
+      <a href="#"><span class="name">纪念</span><span class="count">三篇</span></a>
+      <a href="#"><span class="name">开发教程</span><span class="count">四篇</span></a>
+      <a href="#"><span class="name">权益维护</span><span class="count">两篇</span></a>
+      <a href="#"><span class="name">工具箱</span><span class="count">一篇</span></a>
+      <a href="#"><span class="name">光影</span><span class="count">不定期</span></a>
+      <a href="#"><span class="name">随笔小记</span><span class="count">六篇</span></a>
+      <a href="#"><span class="name">站务</span><span class="count">两篇</span></a>
+    </div>
+  </section>
+
+  <!-- 关键词：文字流，不要徽章 chips，不要高亮逻辑 -->
+  <section class="block">
+    <div class="section-head">
+      <h2>索引</h2>
+      <a class="more" href="#">全部标签</a>
+    </div>
+    <p class="tags-flow">
+      <a href="#">依恋</a><span class="sep">·</span><a href="#">心理</a><span class="sep">·</span><a href="#">自我剖析</a><span class="sep">·</span><a href="#">Epheia</a><span class="sep">·</span><a href="#">纪念</a><span class="sep">·</span><a href="#">AI</a><span class="sep">·</span><a href="#">建站</a><span class="sep">·</span><a href="#">Curve</a><span class="sep">·</span><a href="#">DeepSeek</a><span class="sep">·</span><a href="#">前端</a><span class="sep">·</span><a href="#">报告</a><span class="sep">·</span><a href="#">夏天</a><span class="sep">·</span><a href="#">存档</a><span class="sep">·</span><a href="#">你好世界</a>
+    </p>
+  </section>
+
+  <!-- 尾注：三联 CTA 卡塌缩成一段安静的话 -->
+  <div class="colophon-note">
+    <span class="orn">✦ ✦ ✦</span>
+    <p>本报不定期更新，没有发刊周期，一切以「想写」为准。<br />
+    想说点什么，<a href="#">写信给编者</a>，或在随笔下留言。谢谢你读到这里。</p>
+  </div>
+
+</main>
+
+<footer>
+  <div class="container">
+    <span>© 2026 The Curve Times · All wrongs reserved</span>
+    <span><a href="#">RSS</a> · <a href="#">GitHub</a> · <a href="#">Email</a></span>
+    <span>Printed in 赛博空间 · Vite + React</span>
+  </div>
+</footer>
+
+<script>
+  // 示例用最小主题切换：默认跟随系统，按钮在明暗间切换
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeBtn');
+    function systemDark() { return window.matchMedia('(prefers-color-scheme: dark)').matches; }
+    function apply(theme) {
+      root.dataset.theme = theme;
+      btn.textContent = theme === 'dark' ? '日间' : '夜间';
+    }
+    apply(systemDark() ? 'dark' : 'light');
+    btn.addEventListener('click', function () {
+      apply(root.dataset.theme === 'dark' ? 'light' : 'dark');
+    });
+  })();
+</script>
+
+</body>
+</html>

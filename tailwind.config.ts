@@ -43,33 +43,43 @@ const config: Config = {
         // Masthead — heaviest serif for the nameplate
         masthead: [
           '"Playfair Display"',
-          '"Noto Serif SC"',
           "Georgia",
+          '"Songti SC"',
+          '"Source Han Serif SC"',
+          "SimSun",
           "serif",
         ],
-        // Display headlines — keep mixed Chinese/Latin titles in one readable CJK serif.
+        // Display headlines — Latin falls to Georgia, Chinese to the system
+        // Song/Ming face. Both are newspaper faces and both are already installed,
+        // so a headline paints on the first frame instead of after a webfont.
         display: [
-          '"Noto Serif SC"',
-          '"Source Han Serif SC"',
+          "Georgia",
+          '"Times New Roman"',
           '"Songti SC"',
+          '"Source Han Serif SC"',
+          '"Noto Serif CJK SC"',
+          "STSong",
           "SimSun",
-          '"Playfair Display"',
           "serif",
         ],
         // Body — readable Chinese-first serif; Latin display faces stay out of prose.
         serif: [
-          '"Noto Serif SC"',
-          '"Source Han Serif SC"',
-          '"Songti SC"',
-          "SimSun",
           "Georgia",
           '"Times New Roman"',
+          '"Songti SC"',
+          '"Source Han Serif SC"',
+          '"Noto Serif CJK SC"',
+          "STSong",
+          "SimSun",
           "serif",
         ],
         // UI sans — only for nav links + buttons + minor labels
         sans: [
           "Inter",
-          '"Noto Sans SC"',
+          '"PingFang SC"',
+          '"Hiragino Sans GB"',
+          '"Microsoft YaHei"',
+          '"Noto Sans CJK SC"',
           "-apple-system",
           "BlinkMacSystemFont",
           '"Segoe UI"',
@@ -79,10 +89,11 @@ const config: Config = {
         // Mono — classifieds, dates, edition numbers
         mono: [
           '"JetBrains Mono"',
-          '"Noto Sans SC"',
           "ui-monospace",
           "SFMono-Regular",
           "Menlo",
+          '"PingFang SC"',
+          '"Microsoft YaHei"',
           "monospace",
         ],
       },

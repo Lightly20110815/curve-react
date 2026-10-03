@@ -1,0 +1,2176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>曲線電台</title>
+<meta name="description" content="曲線時報首页 v4 预览：首页是曲線電台的播出页。音乐一直在播，文章是不定期开播的节目，每个时段有自己的开场与编排。">
+<meta name="theme-color" content="#f1f2ee">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  /* 先于首帧：外观偏好、时段、首播落字是否待放。与站点 curve-theme 同语义（auto 跟随系统）。 */
+  (function () {
+    var d = document.documentElement;
+    d.classList.add("js");
+    var pref = "auto";
+    try {
+      pref = localStorage.getItem("v4radio-theme") || localStorage.getItem("curve-theme") || "auto";
+    } catch (e) {}
+    if (pref !== "light" && pref !== "dark") pref = "auto";
+    var dark = pref === "dark" || (pref === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+    d.dataset.pref = pref;
+    d.dataset.mode = dark ? "dark" : "light";
+    d.dataset.air = "off";
+    var h = new Date().getHours();
+    d.dataset.timeTheme = h >= 5 && h < 8 ? "dawn" : h >= 17 && h < 20 ? "dusk" : h >= 22 || h < 5 ? "deep-night" : "day";
+    try {
+      if (
+        localStorage.getItem("v4radio-premiere") !== "more-than-a-username" &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        d.classList.add("premiere-pending");
+        setTimeout(function () { d.classList.remove("premiere-pending"); }, 2500);
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+/*
+ * 曲線電台 — 首页是这家报社电台的播出页。
+ *
+ * 唯一的红色属于播出：灯、钟面的秒点、进度线，只有真的在出声时才变红。
+ * 时段不只是换色：档名、开场诗句、本档编排、歌单起点都随时段改变。
+ * 中文全部走系统黑体，不加载中文 webfont；Inter 只负责数字、时码和西文歌名。
+ */
+:root {
+  --paper: #f1f2ee;
+  --ink: #14161a;
+  --ink-body: #2a2d33;
+  --ink-muted: #5f636a;
+  --rule-soft: rgba(20, 22, 26, 0.14);
+  --rule-mid: rgba(20, 22, 26, 0.34);
+  --face: #14161a;
+  --face-ink: #eceee9;
+  --face-mid: rgba(236, 238, 233, 0.5);
+  --face-dim: rgba(236, 238, 233, 0.14);
+  --face-edge: transparent;
+  --air: #c8372d;
+
+  --cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", "Noto Sans SC", system-ui, sans-serif;
+  --latin: "Inter", var(--cjk);
+
+  --wrap: 1180px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --bar-h: 56px;
+  --label-col: 232px;
+  --col-gap: 24px;
+  color-scheme: light;
+}
+:root[data-time-theme="dawn"] { --paper: #f3f1ec; --ink: #16151a; --face: #1b1a1f; }
+:root[data-time-theme="dusk"] { --paper: #efebe5; --ink: #191512; --ink-body: #2e2925; --face: #1d1814; }
+:root[data-time-theme="deep-night"] {
+  --paper: #e8ebee; --ink: #111820; --ink-body: #283039; --ink-muted: #5a626c;
+  --rule-soft: rgba(17, 24, 32, 0.14); --rule-mid: rgba(17, 24, 32, 0.34);
+  --face: #0f1720;
+}
+:root[data-mode="dark"] {
+  --paper: #121416;
+  --ink: #e6e7e3;
+  --ink-body: #c8cac5;
+  --ink-muted: #8f9398;
+  --rule-soft: rgba(230, 231, 227, 0.12);
+  --rule-mid: rgba(230, 231, 227, 0.3);
+  --face: #1b1e22;
+  --face-ink: #e6e7e3;
+  --face-mid: rgba(230, 231, 227, 0.48);
+  --face-dim: rgba(230, 231, 227, 0.12);
+  --face-edge: rgba(230, 231, 227, 0.1);
+  --air: #d8402f;
+  color-scheme: dark;
+}
+:root[data-mode="dark"][data-time-theme="dawn"] { --paper: #141317; --face: #1e1c22; }
+:root[data-mode="dark"][data-time-theme="dusk"] { --paper: #161311; --face: #211c18; --ink: #e9e5df; }
+:root[data-mode="dark"][data-time-theme="deep-night"] { --paper: #0d1318; --face: #151d24; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--bar-h) + 56px);
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--cjk);
+  font-size: 16px;
+  line-height: 1.7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+p, ol, ul, dl, dd, figure, blockquote { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+h1, h2, h3 { margin: 0; font-weight: 600; }
+
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+.sr {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip {
+  position: absolute; left: 12px; top: -60px; z-index: 100;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--ink);
+  padding: 8px 14px; font-size: 14px; text-decoration: none;
+}
+.skip:focus { top: 12px; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.num { font-family: var(--latin); font-variant-numeric: tabular-nums; }
+svg[hidden] { display: none; }
+
+/* 小标签：一条粗线压在下面，全页同一种写法 */
+.label {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--ink);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.16em;
+}
+.label small { font-size: 13px; font-weight: 400; letter-spacing: 0; color: var(--ink-muted); }
+
+/* ---------- 台头（首页替换报纸报头，导航并入） ---------- */
+.bar {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.bar__row { display: flex; align-items: center; gap: 28px; height: var(--bar-h); }
+.mark {
+  display: flex; flex-direction: column; justify-content: center;
+  text-decoration: none; color: var(--ink); line-height: 1.1; flex: none;
+}
+.mark b { font-size: 19px; font-weight: 600; letter-spacing: 0.08em; }
+.mark small { font-size: 11px; color: var(--ink-muted); letter-spacing: 0.32em; margin-top: 3px; }
+.links { display: flex; flex: 1; min-width: 0; }
+.links a {
+  display: flex; align-items: center; height: var(--bar-h);
+  padding: 0 10px; font-size: 14px; color: var(--ink-body); text-decoration: none;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+.links a[aria-current="page"] { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--ink); }
+.bar__right { display: flex; align-items: center; gap: 10px; flex: none; }
+.chip {
+  height: 30px; padding: 0 10px; font-size: 12px; line-height: 1;
+  background: none; border: 1px solid var(--rule-mid); cursor: pointer; color: var(--ink);
+}
+.menu-btn { display: none; }
+.sheet { border-top: 1px solid var(--rule-soft); max-height: calc(100dvh - var(--bar-h)); overflow-y: auto; }
+.sheet ul { margin: 0 auto; padding-top: 6px; padding-bottom: 10px; }
+.sheet a {
+  display: block; padding: 12px 0; font-size: 15px; text-decoration: none;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.sheet li:last-child a { border-bottom: 0; }
+.sheet a[aria-current="page"] { font-weight: 600; }
+
+/* ---------- 现在播出：档名、开场、钟、控制台、本档编排 ---------- */
+.onair { padding: clamp(36px, 5vw, 64px) 0 clamp(48px, 6vw, 80px); border-bottom: 2px solid var(--ink); }
+.onair__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 372px;
+  grid-template-areas: "words console" "picks console";
+  column-gap: clamp(40px, 6.5vw, 96px);
+  row-gap: 44px;
+}
+.words { grid-area: words; }
+.console { grid-area: console; }
+.picks { grid-area: picks; align-self: end; }
+
+.kicker { font-size: 13px; font-weight: 600; letter-spacing: 0.16em; color: var(--ink-muted); }
+
+/* 调台：五档都能翻，手动翻到别的档时标题上方写明「节目预告」 */
+.tuner { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+/* 大档名的每个字是 inline-block，字框会探到上面的调台按钮里；档名本身不可点，让指针穿过去 */
+.part { pointer-events: none; }
+.tuner__tabs { display: flex; gap: 2px; margin-left: -8px; }
+.tuner__tabs button {
+  height: 32px; padding: 0 8px; border: 0; background: none; cursor: pointer;
+  font-size: 14px; color: var(--ink-muted); box-shadow: inset 0 -2px 0 transparent;
+  transition: box-shadow 0.15s;
+}
+.tuner__tabs button[aria-pressed="true"] { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--ink); }
+.tuner__tabs button.is-live::after {
+  content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 5px;
+  vertical-align: 0.2em; background: currentColor;
+}
+.textbtn {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font-size: 13px; color: var(--ink); text-decoration: underline;
+  text-decoration-thickness: 1px; text-underline-offset: 4px;
+}
+.opening__src { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+
+/* 统一的「调谐」指示：指到哪一条，左边就推出一根线 */
+.tune { position: relative; cursor: pointer; }
+.tune::before {
+  content: ""; position: absolute; left: -16px; top: 12px; bottom: 12px; width: 3px;
+  background: currentColor; transform: scaleY(0); transform-origin: 50% 0;
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tune:focus-visible { outline: none; }
+.tune:focus-visible::before, .tune.is-hot::before { transform: scaleY(1); }
+
+.cta {
+  display: inline-flex; align-items: center; gap: 12px; height: 46px; margin-top: 28px; padding: 0 20px;
+  background: var(--ink); color: var(--paper); text-decoration: none; font-size: 15px; font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px var(--ink); transition: background 0.15s, color 0.15s;
+}
+.cta span { font-size: 13px; font-weight: 400; opacity: 0.72; }
+.cta:active, .btn:not(:disabled):active, .qitem:active { transform: translateY(1px); }
+
+.toast {
+  position: fixed; left: 50%; bottom: 72px; z-index: 90; transform: translateX(-50%);
+  max-width: calc(100vw - 32px); padding: 8px 14px;
+  font: 12px/1.5 ui-monospace, "SFMono-Regular", Menlo, monospace;
+  background: #fff7d6; color: #1a1a1a; border: 1px dashed #1a1a1a;
+}
+.part {
+  margin-top: 10px;
+  font-size: clamp(64px, 9.6vw, 140px); line-height: 1.02; letter-spacing: 0.02em;
+}
+.part.is-falling { clip-path: inset(-0.02em -0.4em -0.4em -0.4em); }
+.part__meta {
+  display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: 18px;
+  font-size: 14px; color: var(--ink-muted);
+}
+.opening { margin-top: clamp(32px, 4vw, 48px); }
+.opening blockquote { margin-top: 16px; }
+.opening blockquote p { font-size: clamp(24px, 2.5vw, 32px); line-height: 1.55; font-weight: 500; }
+.opening .line { display: block; }
+.opening__src { margin-top: 12px; font-size: 14px; color: var(--ink-muted); }
+
+.picks li { border-bottom: 1px solid var(--rule-soft); }
+.picks a {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 20px; row-gap: 2px;
+  padding: 14px 0; text-decoration: none;
+}
+.picks .t { font-size: 18px; font-weight: 600; line-height: 1.45; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+.picks .m { font-size: 13px; color: var(--ink-muted); white-space: nowrap; padding-top: 3px; }
+.picks .x {
+  grid-column: 1 / -1; font-size: 14px; color: var(--ink-muted); line-height: 1.6;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 演播室钟：外圈是一天的节目时段，内圈 60 颗秒点，中间是时间 */
+.clock { width: 100%; aspect-ratio: 1; }
+.clock svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.clock .face { fill: var(--face); stroke: var(--face-edge); stroke-width: 1; }
+.clock .ring { fill: none; stroke: var(--face-dim); stroke-width: 7; transition: stroke-width 0.15s; }
+.clock .part { cursor: pointer; }
+.clock .hit { fill: none; stroke: transparent; stroke-width: 34; pointer-events: stroke; }
+.clock .ring.is-now { stroke: var(--face-ink); }
+.clock .tick { stroke: var(--face-dim); stroke-width: 1.4; }
+.clock .lbl { fill: var(--face-mid); font-family: var(--cjk); font-size: 14px; font-weight: 500; letter-spacing: 0.08em; }
+.clock .lbl.is-now { fill: var(--face-ink); font-weight: 600; }
+.clock .marker { fill: var(--face-ink); }
+.clock .five { fill: var(--face-mid); }
+.clock .sec { fill: var(--face-dim); }
+.clock .sec.on { fill: var(--face-ink); }
+[data-air="on"] .clock .sec.on { fill: var(--air); }
+.clock .hm { fill: var(--face-ink); font-family: var(--latin); font-size: 70px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.clock .dt { fill: var(--face-mid); font-family: var(--cjk); font-size: 14px; font-weight: 500; }
+
+/* 控制台：钟下面一小块，和钟一起是这一页的播音台 */
+.deck { margin-top: 28px; padding-top: 14px; border-top: 2px solid var(--ink); }
+.deck__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lamp {
+  display: inline-flex; align-items: center; height: 26px; padding: 0 9px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-indent: 0.2em;
+  border: 1.5px solid var(--rule-mid); color: var(--ink-muted);
+}
+[data-air="on"] .lamp { background: var(--air); border-color: var(--air); color: #fff; }
+.deck__slot { font-size: 12px; color: var(--ink-muted); }
+.deck__now { display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 16px; align-items: end; margin-top: 16px; }
+.cover {
+  display: grid; place-items: center; width: 76px; height: 76px; overflow: hidden; flex: none;
+  background: var(--face); color: var(--face-ink); font-family: var(--latin); font-weight: 600; font-size: 30px;
+}
+.cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.cover--s { width: 34px; height: 34px; font-size: 14px; }
+.cover--xs { width: 26px; height: 26px; font-size: 12px; }
+.deck__title {
+  margin-top: 0; font-family: var(--latin); font-weight: 600; line-height: 1.15;
+  font-size: 30px; letter-spacing: -0.01em; overflow-wrap: anywhere;
+  clip-path: inset(-1px -40px -0.4em -40px);
+}
+.deck__title[data-len="s"] { font-size: 34px; }
+.deck__title[data-len="l"] { font-size: 24px; }
+.deck__artist { margin-top: 6px; font-size: 14px; color: var(--ink-body); }
+.seek { position: relative; height: 22px; margin-top: 12px; cursor: pointer; touch-action: none; --r: 0; }
+.seek::before, .seek__fill {
+  content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px;
+  transition: height 0.12s ease-out, top 0.12s ease-out;
+}
+.seek::before { background: var(--rule-soft); }
+.seek__fill { background: var(--ink-muted); transform-origin: 0 50%; transform: scaleX(var(--r)); }
+[data-air="on"] .seek__fill { background: var(--air); }
+.seek__head {
+  position: absolute; top: 5px; left: calc(var(--r) * 100%);
+  width: 2px; height: 12px; margin-left: -1px; background: var(--ink);
+  opacity: 0; transition: opacity 0.12s;
+}
+.seek:focus-visible { outline: none; }
+.seek:focus-visible::before, .seek:focus-visible .seek__fill, .seek.is-drag::before, .seek.is-drag .seek__fill { height: 4px; top: 9px; }
+.seek:focus-visible .seek__head, .seek.is-drag .seek__head { opacity: 1; }
+.deck__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.tc { font-family: var(--latin); font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink-muted); }
+.tc b { color: var(--ink); font-weight: 500; }
+.btns { display: flex; gap: 6px; }
+.btn {
+  width: 38px; height: 38px; display: grid; place-items: center; padding: 0;
+  background: transparent; border: 1px solid var(--rule-mid); color: var(--ink); cursor: pointer;
+}
+.btn svg { width: 14px; height: 14px; fill: currentColor; }
+.btn--play { width: 48px; background: var(--ink); border-color: var(--ink); color: var(--paper); }
+#playBtn { display: inline-flex; gap: 8px; width: auto; padding: 0 14px 0 12px; font-size: 14px; font-weight: 600; }
+.btn:disabled { opacity: 0.35; cursor: default; }
+.queue { margin-top: 18px; font-size: 13px; }
+.queue__label { color: var(--ink-muted); }
+.queue ol { margin-top: 6px; }
+.queue li { border-top: 1px solid var(--rule-soft); }
+.qitem {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; column-gap: 12px;
+  width: 100%; padding: 7px 0; border: 0; background: none; text-align: left; color: var(--ink); font-size: 13px;
+}
+.qitem.tune::before { top: 8px; bottom: 8px; }
+.qitem__n { font-family: var(--latin); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qitem__a { color: var(--ink-muted); white-space: nowrap; }
+.qitem[aria-current="true"] .qitem__n { font-weight: 700; }
+.qitem[aria-current="true"] .qitem__a::before { content: "正在放 · "; }
+.playlist { margin-top: 10px; border-top: 1px solid var(--rule-soft); }
+.playlist summary {
+  display: flex; justify-content: space-between; align-items: center; padding: 10px 0;
+  cursor: pointer; list-style: none; font-size: 13px; font-weight: 600;
+}
+.playlist summary::-webkit-details-marker { display: none; }
+.playlist summary span { flex: 1; }
+.playlist summary small { font-weight: 400; color: var(--ink-muted); }
+.playlist summary::after { content: "展开"; margin-left: 12px; font-weight: 400; color: var(--ink-muted); text-decoration: underline; text-underline-offset: 3px; }
+.playlist[open] summary::after { content: "收起"; }
+.playlist ol { max-height: 320px; overflow-y: auto; overscroll-behavior: contain; }
+
+/* 落字：每个字是一块能独立下落的铅 */
+.glyphs { display: inline-block; }
+.g { display: inline-block; transform-origin: 50% 100%; }
+.w { display: inline-block; white-space: nowrap; }
+.is-moving .g { will-change: transform, opacity; }
+
+/* ---------- 本期节目 ---------- */
+.lead { padding: clamp(48px, 7vw, 92px) 0 clamp(56px, 8vw, 104px); }
+.lead__grid { display: grid; grid-template-columns: var(--label-col) minmax(0, 1fr); column-gap: var(--col-gap); }
+.lead__info { padding-top: 0.6em; font-size: 13px; line-height: 1.6; }
+.lead__info dl { display: grid; gap: 10px; margin-top: 18px; }
+.lead__info dl div { display: grid; grid-template-columns: 52px 1fr; gap: 12px; }
+.lead__info dt { color: var(--ink-muted); }
+.lead__info dd { color: var(--ink); }
+.lead__info dd span { white-space: nowrap; }
+.lead__title {
+  font-size: var(--lead-size, clamp(44px, 7.6vw, 108px));
+  line-height: 1.1; letter-spacing: -0.01em; white-space: nowrap;
+  margin-bottom: 0.32em;
+}
+.lead__title.is-wrapped { white-space: normal; text-wrap: balance; }
+.lead__title.is-falling { clip-path: inset(-0.06em -0.4em -0.4em -0.4em); }
+.lead__title a { text-decoration: none; }
+.premiere-pending .lead__title { visibility: hidden; }
+.lead__dek {
+  max-width: 32em; margin-bottom: 22px;
+  font-size: clamp(18px, 1.55vw, 21px); line-height: 1.75; font-weight: 500; color: var(--ink);
+}
+.lead__body { max-width: 36em; font-size: 17px; line-height: 1.9; color: var(--ink-body); text-wrap: pretty; }
+.lead__body p + p { margin-top: 0.7em; }
+.lead__more {
+  display: inline-block; margin-top: 22px; font-size: 15px; font-weight: 600;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+}
+.lead__grid { row-gap: clamp(48px, 6vw, 72px); }
+.lead__side { align-self: start; }
+
+/* 节目结构：这一期是一段两个人的对话，按字数铺在 15 分钟上，像多轨编辑器里的两条音轨 */
+.tracks { --name: 84px; }
+.tracks__row { display: grid; grid-template-columns: var(--name) minmax(0, 1fr); align-items: center; height: 40px; }
+.tracks__name { font-size: 13px; color: var(--ink-muted); }
+.tracks__lane {
+  position: relative; height: 26px;
+  border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft);
+  background-image: linear-gradient(90deg, var(--rule-soft) 1px, transparent 1px);
+  background-size: calc(100% / 15) 100%;
+}
+.seg { position: absolute; top: 4px; bottom: 4px; min-width: 3px; background: var(--ink); cursor: pointer; }
+.seg::after { content: ""; position: absolute; inset: -6px -3px; }
+.tracks__lane[data-who="ChatGPT"] .seg { background: var(--rule-mid); }
+.seg.is-hot { box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--ink); }
+.tracks__lane[data-who="ChatGPT"] .seg.is-hot { background: var(--ink-muted); }
+.tracks__ruler { position: relative; height: 24px; margin-left: var(--name); }
+.tracks__ruler span { position: absolute; top: 6px; font-size: 12px; color: var(--ink-muted); transform: translateX(-50%); }
+.tracks__ruler span:first-child { transform: none; }
+.tracks__ruler span:last-child { transform: translateX(-100%); }
+.tracks__readout {
+  display: flex; gap: 14px; align-items: baseline; margin: 10px 0 0 var(--name);
+  min-height: 3.4em; font-size: 15px; line-height: 1.7; color: var(--ink-body);
+}
+.tracks__readout b { flex: none; font-family: var(--latin); font-variant-numeric: tabular-nums; font-weight: 500; font-size: 13px; color: var(--ink-muted); }
+.tracks__readout span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* 节选：按文字稿排，说话人在左 */
+.turn { display: grid; grid-template-columns: 84px minmax(0, 1fr); padding: 16px 0; border-top: 1px solid var(--rule-soft); }
+.turn .who { font-size: 13px; color: var(--ink-muted); padding-top: 4px; }
+.turn p { max-width: 34em; font-size: 17px; line-height: 1.85; color: var(--ink-body); }
+.turn p + p { margin-top: 0.6em; }
+.turn--me p { font-size: 20px; font-weight: 600; line-height: 1.6; color: var(--ink); }
+.transcript .lead__more { margin-left: 84px; }
+@media (min-width: 480px) { .clause { display: inline-block; } }
+
+/* ---------- 播出记录：一条信号，和按栏目排的节目表 ---------- */
+.log { padding-bottom: clamp(72px, 10vw, 128px); }
+.log__head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  padding-bottom: 12px; border-bottom: 2px solid var(--ink);
+}
+.log__head h2 { font-size: clamp(24px, 2.4vw, 30px); letter-spacing: 0.04em; }
+.log__head p { font-size: 13px; color: var(--ink-muted); }
+
+.wave { margin-top: 28px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+.wave__plot { position: relative; height: 216px; min-width: 760px; }
+.wave__axis { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--rule-mid); }
+.wave__bar {
+  position: absolute; top: 50%; width: 5px; height: var(--h);
+  transform: translate(-50%, -50%); background: var(--ink);
+  transition: opacity 0.15s;
+}
+.wave__bar::after { content: ""; position: absolute; inset: -6px -5px; }
+.wave.has-hot .wave__bar:not(.is-hot) { opacity: 0.22; }
+.wave__bar:focus-visible { outline-offset: 4px; }
+.wave__plot { touch-action: pan-y; }
+.wave__plot.is-snapped { cursor: pointer; }
+.wave__head {
+  position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--ink);
+  pointer-events: none; opacity: 0; transition: opacity 0.12s;
+}
+.wave__head span {
+  position: absolute; top: 0; left: 6px; padding: 0 4px; background: var(--paper);
+  font-family: var(--latin); font-variant-numeric: tabular-nums; font-size: 12px; white-space: nowrap;
+}
+.wave__head.is-flip span { left: auto; right: 6px; }
+.wave.is-scrubbing .wave__head { opacity: 1; }
+.wave__note { transition: opacity 0.12s; }
+.wave.is-scrubbing .wave__note { opacity: 0.2; }
+.readout .quiet { color: var(--ink-muted); font-size: 15px; }
+.wave__silence {
+  position: absolute; top: calc(50% - 8px); height: 16px;
+  background: repeating-linear-gradient(135deg, var(--rule-mid) 0 1px, transparent 1px 5px);
+}
+.wave__note {
+  position: absolute; top: 0; height: var(--lead-h); padding-left: 8px;
+  border-left: 1px solid var(--ink); font-size: 12px; line-height: 1.35; white-space: nowrap;
+}
+.wave__note b { display: block; font-weight: 600; }
+.wave__note span { color: var(--ink-muted); }
+.wave__note--left { padding-left: 0; padding-right: 8px; border-left: 0; border-right: 1px solid var(--ink); transform: translateX(-100%); text-align: right; }
+.wave__gap {
+  position: absolute; top: calc(50% - 30px); transform: translateX(-50%);
+  font-size: 12px; color: var(--ink-muted); white-space: nowrap;
+}
+.wave__gap b { font-family: var(--latin); font-variant-numeric: tabular-nums; font-weight: 500; color: var(--ink-body); }
+.wave__now { position: absolute; top: 50%; bottom: 0; width: 0; border-left: 1px dashed var(--rule-mid); }
+.wave__now span { position: absolute; bottom: 4px; right: 6px; font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
+.wave__months { position: relative; height: 34px; min-width: 760px; border-top: 1px solid var(--rule-soft); }
+.wave__months span {
+  position: absolute; top: 8px; font-family: var(--latin); font-variant-numeric: tabular-nums;
+  font-size: 12px; color: var(--ink-muted); padding-left: 5px;
+  border-left: 1px solid var(--rule-soft);
+}
+.wave__months span.y { color: var(--ink); font-weight: 600; }
+.readout {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px;
+  margin-top: 10px; min-height: 28px; font-size: 15px;
+}
+.readout time { font-family: var(--latin); font-variant-numeric: tabular-nums; color: var(--ink-muted); font-size: 13px; }
+.readout b { font-weight: 600; }
+.readout span { color: var(--ink-muted); font-size: 13px; }
+
+.guide {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: clamp(24px, 3.5vw, 48px); margin-top: clamp(40px, 5vw, 64px);
+}
+.guide__col > section + section { margin-top: 40px; }
+.guide .label { font-size: 18px; letter-spacing: 0.06em; border-bottom: 0; padding-bottom: 0; }
+/* 每个栏目一条小信号：和上面同一根时间轴，看得出这个栏目什么时候在播 */
+.strip { position: relative; height: 22px; margin-top: 10px; border-bottom: 2px solid var(--ink); }
+.strip span { position: absolute; bottom: 0; width: 3px; height: var(--h); margin-left: -1px; background: var(--ink); }
+.strip i { position: absolute; bottom: 0; height: 6px; border-left: 1px solid var(--rule-mid); }
+.strip__meta { margin-top: 8px; margin-bottom: 4px; font-size: 12px; color: var(--ink-muted); }
+.guide li { border-bottom: 1px solid var(--rule-soft); }
+.guide a {
+  display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; column-gap: 14px;
+  padding: 12px 0; text-decoration: none; align-items: baseline;
+}
+.guide time { font-family: var(--latin); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-muted); }
+.guide .t { font-size: 15px; font-weight: 500; line-height: 1.55; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.guide .m { font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
+.guide a.is-hot .t { text-decoration: underline; }
+
+/* ---------- 收台 ---------- */
+.signoff {
+  padding-top: clamp(64px, 8vw, 104px);
+  background: var(--face); color: var(--face-ink);
+  -webkit-font-smoothing: antialiased;
+}
+.signoff .label { border-bottom-color: var(--face-ink); }
+.signoff .label small, .signoff__by, .mail dt, .mail .note, .peers li.all a, .notice p + p { color: var(--face-mid); }
+.signoff :focus-visible { outline-color: var(--face-ink); }
+.notice p { margin-top: 14px; font-size: 15px; line-height: 1.8; }
+.notice p:first-of-type { font-size: 20px; font-weight: 600; color: var(--face-ink); }
+.signoff__grid { display: grid; grid-template-columns: var(--label-col) minmax(0, 1fr); column-gap: var(--col-gap); }
+.signoff__grid > .label { align-self: start; }
+.signoff blockquote p { max-width: 24em; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.6; font-weight: 500; }
+.signoff__by { margin-top: 14px; font-size: 14px; color: var(--ink-muted); }
+.signoff__cols {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  column-gap: clamp(24px, 3.5vw, 48px); margin-top: 64px;
+}
+.mail dl div {
+  display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 10px;
+  padding: 12px 0; border-bottom: 1px solid var(--face-dim); font-size: 15px;
+}
+.mail dt { color: var(--face-mid); font-size: 14px; }
+.mail a, .peers a { text-decoration: none; text-decoration-thickness: 1px; text-underline-offset: 4px; overflow-wrap: anywhere; }
+.mail .num { font-size: 14px; }
+.mail .note { margin-top: 14px; font-size: 13px; line-height: 1.7; color: var(--face-mid); }
+.peers { margin-top: clamp(56px, 7vw, 88px); }
+.peers ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 28px; }
+.peers li { border-bottom: 1px solid var(--face-dim); min-width: 0; }
+.peer {
+  display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 14px; align-items: start;
+  padding: 18px 0; text-decoration: none; color: var(--face-ink);
+}
+.peer.tune::before { left: -14px; top: 18px; bottom: 18px; }
+.peer__av {
+  display: grid; place-items: center; width: 46px; height: 46px; overflow: hidden;
+  border: 1px solid var(--face-dim); background: var(--face-dim); font-weight: 600;
+  transition: border-color 0.15s;
+}
+.peer__av img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.peer__name { display: block; font-size: 15px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.peer__desc {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-top: 4px; font-size: 13px; line-height: 1.6; color: var(--face-mid);
+}
+.peer__url { display: block; margin-top: 6px; font-family: var(--latin); font-size: 12px; color: var(--face-mid); }
+
+.foot { margin-top: clamp(64px, 8vw, 104px); border-top: 1px solid var(--face-dim); padding: 22px 0 calc(22px + env(safe-area-inset-bottom)); font-size: 12px; color: var(--face-mid); }
+
+/* ---------- 随行小条：控制台滚出视野后接手 ---------- */
+.mini {
+  position: fixed; left: 0; right: 0; top: var(--bar-h); z-index: 35;
+  background: var(--paper); color: var(--ink);
+  border-bottom: 1px solid var(--rule-soft);
+  transform: translateY(-101%); visibility: hidden;
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), visibility 0s linear 0.2s;
+}
+.mini[data-show="true"] { transform: none; visibility: visible; transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.mini__row { display: flex; align-items: center; gap: 14px; height: 42px; }
+.mini__lamp { width: 9px; height: 9px; flex: none; border: 1.5px solid var(--rule-mid); }
+[data-air="on"] .mini__lamp { background: var(--air); border-color: var(--air); }
+.mini__part { font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
+.mini__song {
+  flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px;
+  background: none; border: 0; padding: 0; cursor: pointer; text-align: left; color: var(--ink);
+}
+.mini__title { font-family: var(--latin); font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini__artist { font-size: 13px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini__tc { font-family: var(--latin); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink-muted); }
+.mini .btn { width: 30px; height: 30px; }
+.mini .btn svg { width: 12px; height: 12px; }
+.mini__bar { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; --r: 0; }
+.mini__bar span { position: absolute; inset: 0; background: var(--ink-muted); transform-origin: 0 50%; transform: scaleX(var(--r)); }
+[data-air="on"] .mini__bar span { background: var(--air); }
+
+/* ---------- 仅预览：不属于设计 ---------- */
+.pv {
+  position: fixed; left: 12px; bottom: 12px; z-index: 80;
+  font: 12px/1.5 ui-monospace, "SFMono-Regular", Menlo, monospace; color: #1a1a1a;
+  color-scheme: light;
+}
+.pv summary { list-style: none; cursor: pointer; background: #ffe9a6; border: 1px dashed #1a1a1a; padding: 5px 10px; }
+.pv summary::-webkit-details-marker { display: none; }
+.pv__body { margin-bottom: 6px; padding: 10px 12px; background: #fff7d6; border: 1px dashed #1a1a1a; width: 252px; }
+.pv[open] { display: flex; flex-direction: column-reverse; }
+.pv fieldset { border: 0; padding: 0; margin: 10px 0 0; }
+.pv legend { padding: 0; font-weight: 700; }
+.pv label { display: inline-block; margin: 4px 10px 0 0; cursor: pointer; }
+.pv button { margin-top: 12px; margin-right: 6px; font: inherit; background: #1a1a1a; color: #fff7d6; border: 0; padding: 5px 10px; cursor: pointer; }
+
+/* ---------- 交互态：只在真有悬停能力的设备上 ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .links a:hover { box-shadow: inset 0 -1px 0 var(--rule-mid); }
+  .links a[aria-current="page"]:hover { box-shadow: inset 0 -2px 0 var(--ink); }
+  .chip:hover { border-color: var(--ink); }
+  .btn:not(:disabled):hover { border-color: var(--ink); }
+  .btn--play:not(:disabled):hover { background: transparent; color: var(--ink); }
+  .seek:hover::before, .seek:hover .seek__fill { height: 4px; top: 9px; }
+  .seek:hover .seek__head { opacity: 1; }
+  .picks a:hover .t, .guide a:hover .t { text-decoration: underline; }
+  .tune:hover::before { transform: scaleY(1); }
+  .tuner__tabs button:not([aria-pressed="true"]):hover { color: var(--ink); box-shadow: inset 0 -1px 0 var(--rule-mid); }
+  .cta:hover { background: transparent; color: var(--ink); }
+  .textbtn:hover { text-decoration-thickness: 2px; }
+  .peer:hover .peer__av { border-color: var(--face-ink); }
+  .peer:hover .peer__url { color: var(--face-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .qitem:hover .qitem__n { text-decoration: underline; text-underline-offset: 3px; }
+  .clock .part:hover .ring { stroke-width: 11; }
+  .clock .part:hover .lbl { fill: var(--face-ink); }
+  .lead__title a:hover { text-decoration: underline; text-decoration-thickness: 0.04em; text-underline-offset: 0.14em; }
+  .lead__more:hover { text-decoration-thickness: 2px; }
+  .mail a:hover { text-decoration: underline; }
+  .mini__song:hover .mini__title { text-decoration: underline; text-underline-offset: 4px; }
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 1023px) {
+  :root { --label-col: 168px; }
+  .links { display: none; }
+  .menu-btn { display: inline-block; }
+  .bar__row { justify-content: space-between; }
+  .onair__grid { grid-template-columns: minmax(0, 1fr) 312px; }
+  .guide { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 40px; }
+  .guide__col:last-child { grid-column: 1 / -1; }
+  .peers ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  :root { --bar-h: 52px; --col-gap: 16px; }
+  .onair__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "words" "console" "picks"; row-gap: 36px; }
+  .clock { max-width: 300px; margin: 0 auto; }
+  .lead__grid, .signoff__grid { grid-template-columns: minmax(0, 1fr); }
+  .lead__info { padding-top: 0; margin-bottom: 26px; }
+  .lead__info dl { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; }
+  .lead__info dl div { display: flex; gap: 6px; }
+  .lead__info .kw { display: none; }
+  .lead__body { font-size: 16px; }
+  .signoff__grid > .label { margin-bottom: 22px; }
+  .signoff__cols { grid-template-columns: minmax(0, 1fr); row-gap: 40px; margin-top: 40px; }
+  .peers ul { grid-template-columns: minmax(0, 1fr); }
+  .toast { bottom: calc(60px + env(safe-area-inset-bottom)); }
+  .tracks { --name: 64px; }
+  .turn { grid-template-columns: 64px minmax(0, 1fr); }
+  .tracks__readout { margin-left: 0; }
+  .transcript .lead__more { margin-left: 64px; }
+  .turn--me p { font-size: 18px; }
+  .guide { grid-template-columns: minmax(0, 1fr); }
+  .wave { margin-right: calc(var(--gutter) * -1); }
+  .mini { top: auto; bottom: 0; transform: translateY(101%); border-bottom: 0; border-top: 1px solid var(--rule-soft); padding-bottom: env(safe-area-inset-bottom); }
+  .mini__part { display: none; }
+  .mini__bar { top: -1px; bottom: auto; }
+  .pv { left: auto; right: 8px; bottom: auto; top: calc(var(--bar-h) + 8px); }
+  .pv[open] { flex-direction: column; }
+  .pv__body { margin: 6px 0 0; }
+  .foot { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 379px) {
+  .tuner__tabs button { padding: 0 6px; font-size: 13px; }
+  .btn { width: 34px; height: 34px; }
+  .btn--play { width: 44px; }
+  .guide a { grid-template-columns: 76px minmax(0, 1fr) auto; column-gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini, .mini[data-show="true"] { transition: none; }
+  .seek::before, .seek__fill, .wave__bar { transition: none; }
+}
+@media print {
+  .bar, .console, .mini, .pv, .skip, .wave { display: none !important; }
+  :root { --paper: #fff; --ink: #000; --ink-body: #111; --ink-muted: #444; }
+  .onair__grid { grid-template-columns: 1fr; grid-template-areas: "words" "picks"; }
+  .premiere-pending .lead__title { visibility: visible; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<h1 class="sr">曲線電台 · 曲線時報首页</h1>
+
+<header class="bar" id="bar">
+  <div class="wrap bar__row">
+    <a class="mark" href="#top" aria-label="曲線電台，回到页首">
+      <b>曲線電台</b><small>曲線時報</small>
+    </a>
+    <nav class="links" aria-label="栏目">
+      <a href="#">依菲雅</a>
+      <a href="#" aria-current="page">电台</a>
+      <a href="#">存档</a>
+      <a href="#">版块</a>
+      <a href="#">索引</a>
+      <a href="#">随笔</a>
+      <a href="#">光影</a>
+      <a href="#">倒计时</a>
+      <a href="#">友链</a>
+      <a href="#">编者</a>
+    </nav>
+    <div class="bar__right">
+      <button class="chip" id="themeBtn" type="button">自动</button>
+      <button class="chip menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sheet">栏目</button>
+    </div>
+  </div>
+  <div class="sheet" id="sheet" hidden>
+    <ul class="wrap">
+      <li><a href="#">依菲雅</a></li>
+      <li><a href="#" aria-current="page">电台</a></li>
+      <li><a href="#">存档</a></li>
+      <li><a href="#">版块</a></li>
+      <li><a href="#">索引</a></li>
+      <li><a href="#">随笔</a></li>
+      <li><a href="#">光影</a></li>
+      <li><a href="#">倒计时</a></li>
+      <li><a href="#">友链</a></li>
+      <li><a href="#">编者</a></li>
+    </ul>
+  </div>
+</header>
+
+<section class="onair" id="top" aria-labelledby="partName">
+  <div class="wrap onair__grid">
+    <div class="words">
+      <div class="tuner">
+        <p class="kicker" id="kicker">现在播出</p>
+        <div class="tuner__tabs" role="group" aria-label="翻看各时段的编排">
+          <button type="button" data-part="dawn" aria-pressed="false">清晨</button>
+          <button type="button" data-part="day" aria-pressed="false">日间</button>
+          <button type="button" data-part="dusk" aria-pressed="false">黄昏</button>
+          <button type="button" data-part="evening" aria-pressed="false">晚间</button>
+          <button type="button" data-part="night" aria-pressed="false">深夜</button>
+        </div>
+        <button type="button" class="textbtn" id="backNow" hidden>回到现在</button>
+      </div>
+      <h2 class="part" id="partName">日间档</h2>
+      <p class="part__meta">
+        <span id="partRange" class="num">08:00 – 17:00</span>
+        <span id="partLeft"></span>
+        <span id="weather" hidden></span>
+      </p>
+      <figure class="opening">
+        <p class="label">开场</p>
+        <blockquote><p id="poem"><span class="line">行到水穷处，</span><span class="line">坐看云起时。</span></p></blockquote>
+        <figcaption class="opening__src"><span id="poemSrc">—— 王维《终南别业》</span><button type="button" class="textbtn" id="nextPoem">换一句</button></figcaption>
+      </figure>
+    </div>
+
+    <div class="console" aria-label="播音台">
+      <div class="clock" id="clock" role="img" aria-label="演播室时钟"></div>
+      <div class="deck" id="deck">
+        <div class="deck__head">
+          <span class="lamp" id="lamp">待播</span>
+          <span class="deck__slot" id="slot">本档歌单 · 第 1 首</span>
+        </div>
+        <div class="deck__now">
+          <div class="cover" id="cover" aria-hidden="true"></div>
+          <div class="deck__text">
+            <p class="deck__title" id="songTitle" data-len="m">As It Was</p>
+            <p class="deck__artist" id="songArtist">Harry Styles</p>
+          </div>
+        </div>
+        <div class="seek" id="seek" role="slider" tabindex="0" aria-label="播放进度"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0 分 0 秒">
+          <span class="seek__fill"></span><span class="seek__head"></span>
+        </div>
+        <div class="deck__row">
+          <p class="tc"><b id="tcCur">0:00</b> / <span id="tcDur">0:00</span></p>
+          <div class="btns">
+            <button class="btn" id="muteBtn" type="button" aria-label="静音" aria-pressed="false">
+              <svg viewBox="0 0 16 16" aria-hidden="true" data-icon="vol"><path d="M2 6h3l4-3.5v11L5 10H2z"/><path d="M11 5.2c.9.8 1.4 1.7 1.4 2.8s-.5 2-1.4 2.8" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+              <svg viewBox="0 0 16 16" aria-hidden="true" data-icon="muted" hidden><path d="M2 6h3l4-3.5v11L5 10H2z"/><path d="M11 6l4 4M15 6l-4 4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+            </button>
+            <button class="btn" id="prevBtn" type="button" aria-label="上一首">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h2v11H3zM13.5 2.5v11L6 8z"/></svg>
+            </button>
+            <button class="btn btn--play" id="playBtn" type="button" aria-label="播放">
+              <svg viewBox="0 0 16 16" aria-hidden="true" data-icon="play"><path d="M4.5 2.5v11L13.5 8z"/></svg>
+              <svg viewBox="0 0 16 16" aria-hidden="true" data-icon="pause" hidden><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg>
+              <span class="btn__text">收听</span>
+            </button>
+            <button class="btn" id="nextBtn" type="button" aria-label="下一首">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 2.5h2v11h-2zM2.5 2.5v11L10 8z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="queue">
+          <p class="queue__label">接下来</p>
+          <ol id="queue"></ol>
+          <details class="playlist" id="playlist">
+            <summary><span>全台歌单</span><small class="num" id="playlistCount">17 首</small></summary>
+            <ol id="playlistList"></ol>
+          </details>
+        </div>
+        <p class="sr" id="announce" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="picks">
+      <h3 class="label"><span id="picksTitle">日间档编排</span><small id="picksWhy">照着就能做的教程</small></h3>
+      <ol id="picks"></ol>
+    </div>
+  </div>
+</section>
+
+<main id="main" tabindex="-1">
+  <section class="lead" aria-labelledby="leadLabel">
+    <div class="wrap lead__grid">
+      <div class="lead__info">
+        <h2 class="label" id="leadLabel">本期节目</h2>
+        <dl>
+          <div><dt>首播</dt><dd><time datetime="2026-09-24">9 月 24 日 周四</time><span id="leadAgo"></span></dd></div>
+          <div><dt>栏目</dt><dd>随笔</dd></div>
+          <div><dt>时长</dt><dd>约 15 分钟</dd></div>
+          <div class="kw"><dt>关键词</dt><dd><span>记忆</span>、<span>悼念</span>、<span>数字复现</span>、<span>AI 对话</span></dd></div>
+        </dl>
+      </div>
+      <div class="lead__main">
+        <h3 class="lead__title" id="leadTitle"><a href="#" id="leadLink">她不只是一个用户名</a></h3>
+        <p class="lead__dek"><span class="clause">关于一个人留下的记录、公开的悼念，</span><span class="clause">以及 AI 能否补全那些从未被记录的空白。</span></p>
+        <div class="lead__body">
+          <p>一个人去世了，然后别人发讣告，然后所有人齐刷刷在评论区留下晚安和 RIP，然后就什么都没有了。</p>
+          <p>人们发完讣告和慰问，转头开启了新的生活，该面基的面基，该开玩笑的开玩笑。</p>
+        </div>
+        <a class="cta" href="#" data-go="她不只是一个用户名">阅读全文<span>约 15 分钟</span></a>
+      </div>
+
+      <h3 class="label lead__side">节目结构<small>两路声音</small></h3>
+      <div class="tracks" id="tracks">
+        <p class="sr" id="tracksSummary"></p>
+        <div class="tracks__row" aria-hidden="true"><span class="tracks__name">我</span><div class="tracks__lane" data-who="我"></div></div>
+        <div class="tracks__row" aria-hidden="true"><span class="tracks__name num">ChatGPT</span><div class="tracks__lane" data-who="ChatGPT"></div></div>
+        <div class="tracks__ruler num" id="tracksRuler" aria-hidden="true"></div>
+        <p class="tracks__readout" id="tracksReadout"></p>
+      </div>
+
+      <h3 class="label lead__side">节选<small id="excerptAt">约第 12 分钟</small></h3>
+      <div class="transcript">
+        <div class="turn turn--me"><span class="who">我</span><div><p>命运早就埋下了伏笔…？</p></div></div>
+        <div class="turn"><span class="who num">ChatGPT</span><div>
+          <p>我不太愿意把它叫“命运早就写好了结局”。因为那样会把她这些年里所有真实发生过的东西，都压成“为了最后那个结局铺垫”。</p>
+          <p>她上学、长大、写项目、直播、认识朋友、认识你，也被你记住。那些不是伏笔，是正文。</p>
+        </div></div>
+        <div class="turn turn--me"><span class="who">我</span><div><p>这简直就是命运的玩笑啊…</p></div></div>
+        <a class="lead__more" href="#" data-go="她不只是一个用户名 · 第 13 分钟处">从这里接着读</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="log" aria-labelledby="logLabel">
+    <div class="wrap">
+      <div class="log__head">
+        <h2 id="logLabel">播出记录</h2>
+        <p>自 2025 年 7 月 24 日开台，共 13 期，停播过 5 次</p>
+      </div>
+      <div class="wave" id="wave">
+        <div class="wave__plot" id="wavePlot"><div class="wave__axis"></div></div>
+        <div class="wave__months" id="waveMonths" aria-hidden="true"></div>
+      </div>
+      <p class="readout" id="readout" aria-live="polite"></p>
+      <div class="guide" id="guide"></div>
+    </div>
+  </section>
+
+  <section class="signoff" aria-labelledby="signoffLabel">
+    <div class="wrap signoff__grid">
+      <h2 class="label" id="signoffLabel">收台</h2>
+      <div>
+        <blockquote><p><span class="clause">我总希望能给别人带来欢乐，</span><span class="clause">但最终带来的几乎只是烦恼。</span></p></blockquote>
+        <p class="signoff__by">—— Sy，编者</p>
+        <div class="signoff__cols">
+          <div class="notice">
+            <h3 class="label">播出说明</h3>
+            <p>音乐全天播出。</p>
+            <p>节目没有发刊周期。心情好就发，心情不好也发。一切以“想写”为准。</p>
+          </div>
+          <div class="mail">
+            <h3 class="label">听众来信</h3>
+            <dl>
+              <div><dt>写信</dt><dd><a class="num" href="mailto:swanyang7@gmail.com?subject=A%20letter%20to%20The%20Curve%20Times">swanyang7@gmail.com</a></dd></div>
+              <div><dt>留言</dt><dd><a href="#" data-go="随笔评论区">随笔评论区</a></dd></div>
+              <div><dt>GitHub</dt><dd><a class="num" href="https://github.com/lightly20110815/" target="_blank" rel="noopener">lightly20110815</a></dd></div>
+            </dl>
+            <p class="note">不必是熟人，也不必有共同语言。你愿意点开这里，就已经够了。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="peers">
+        <h3 class="label">友台<small>点开在新窗口打开</small></h3>
+        <ul id="peers"></ul>
+      </div>
+    </div>
+    <footer class="foot"><div class="wrap"><span class="num">© 2025–2026</span> 曲線時報 · 曲線電台</div></footer>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<div class="mini" id="mini" data-show="false" aria-label="正在播出（随行）" role="region" inert>
+  <div class="wrap mini__row">
+    <span class="mini__lamp" aria-hidden="true"></span>
+    <span class="cover cover--xs" id="miniCover" aria-hidden="true"></span>
+    <span class="mini__part" id="miniPart">日间档</span>
+    <button class="mini__song" id="miniSong" type="button" aria-label="回到播音台">
+      <span class="mini__title" id="miniTitle">As It Was</span>
+      <span class="mini__artist" id="miniArtist">Harry Styles</span>
+    </button>
+    <span class="mini__tc" id="miniTc">0:00</span>
+    <button class="btn btn--play" id="miniPlay" type="button" aria-label="播放">
+      <svg viewBox="0 0 16 16" aria-hidden="true" data-icon="play"><path d="M4.5 2.5v11L13.5 8z"/></svg>
+      <svg viewBox="0 0 16 16" aria-hidden="true" data-icon="pause" hidden><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg>
+    </button>
+  </div>
+  <div class="mini__bar" id="miniBar"><span></span></div>
+</div>
+
+<details class="pv" id="pv">
+  <summary>预览设置</summary>
+  <div class="pv__body">
+    <p>只为预览存在，不属于设计。</p>
+    <fieldset>
+      <legend>外观</legend>
+      <label><input type="radio" name="pv-theme" value="auto"> 跟随系统</label>
+      <label><input type="radio" name="pv-theme" value="light"> 浅色</label>
+      <label><input type="radio" name="pv-theme" value="dark"> 深色</label>
+    </fieldset>
+    <button type="button" id="replayPremiere">重放首播落字</button>
+  </div>
+</details>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const root = document.documentElement;
+  const motionQuery = matchMedia("(prefers-reduced-motion: reduce)");
+  let reduced = motionQuery.matches;
+  const pad = (n) => String(n).padStart(2, "0");
+  const fmt = (s) => {
+    const v = Number.isFinite(s) && s > 0 ? s : 0;
+    return `${Math.floor(v / 60)}:${pad(Math.floor(v % 60))}`;
+  };
+  const seed = (i) => { const v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+  const WEEK = "日一二三四五六";
+
+  /* ================= 内容 ================= */
+  const POSTS = [
+    { s: "more-than-a-username", t: "她不只是一个用户名", d: "2026-09-24", c: "随笔", m: 15, x: "关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。" },
+    { s: "goodnight", t: "晚安喵", d: "2026-09-24", c: "纪念", m: 2, x: "后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。" },
+    { s: "no-next", t: "没有下一版", d: "2026-09-21", c: "随笔", m: 11, x: "她没能见到 GPT 6，我也再没等到一个已读。" },
+    { s: "savepoint", t: "过期的存档点", d: "2026-09-19", c: "随笔", m: 1, x: "想回去的那一天，印在一瓶过期可乐的瓶身上。" },
+    { s: "june", t: "六月没有主线任务", d: "2026-06-18", c: "随笔", m: 1, x: "随着地铁播报声的传来，我的六月失去了主线。" },
+    { s: "attachment", t: "依恋的形状", d: "2026-04-25", c: "随笔", m: 5, x: "焦虑型依恋的自我解构——从成长裂痕到关系死循环，一份写给自己的病理报告。" },
+    { s: "dzgc", t: "关于“芜湖市德智拓展训练有限公司”以及“芜湖市无为市德智青少年成长中心”的维权报告", d: "2026-03-22", c: "权益维护", m: 5, x: "关于这些所谓的“矫正机构”的报告" },
+    { s: "deepseek", t: "给你的 Curve 主题通过调起 DeepSeek 添加一个侧边栏温柔问候语", d: "2025-10-20", c: "开发教程", m: 3, x: "Curve 主题：DeepSeek 首页问候组件" },
+    { s: "dpsk", t: "给你的 Curve 主题添加一个 DeepSeek 代理", d: "2025-10-19", c: "部署", m: 3, x: "用两种方式部署 DeepSeek API 代理：Vercel Edge 函数与本地/服务器 Node 代理（支持 SSE 流式）" },
+    { s: "tips", t: "给你的 Curve 主题添加一个首页提示弹窗", d: "2025-08-05", c: "开发教程", m: 2, x: "Curve 主题：提示弹窗" },
+    { s: "bt", t: "给你的 Curve 主题添加一个出生天数的侧边栏", d: "2025-08-04", c: "开发教程", m: 1, x: "Curve 主题：出生天数侧边栏" },
+    { s: "hy2", t: "VPS:一个脚本搞定常用工具", d: "2025-07-24", c: "工具箱", m: 2, x: "一个新VPS搭建代理工具+测速+流媒体+Hy2/Xui的小工具" },
+    { s: "hello-world", t: "你好，世界？", d: "2025-07-24", c: "随笔", m: 2, x: "这里是一个小小的角落，一个勉强算是\"家\"的地方。" },
+  ];
+  const bySlug = Object.fromEntries(POSTS.map((p) => [p.s, p]));
+  const LEAD = POSTS[0];
+
+  const TRACKS = [
+    { n: "A Little Love", a: "冯曦妤", f: "A Little Love.mp3" },
+    { n: "As It Was", a: "Harry Styles", f: "As It Was.mp3" },
+    { n: "Ceremony", a: "Day Wave", f: "Ceremony.mp3" },
+    { n: "Dear", a: "ぺぽよ", f: "Dear.mp3" },
+    { n: "EEYUH! x FLUXXWAVE", a: "KLXGNVG", f: "EEYUH! x FLUXXWAVE.mp3" },
+    { n: "Good Time (Acoustic)", a: "Owl City", f: "Good Time (Acoustic).mp3" },
+    { n: "Ikinokori●Bokura", a: "青叶市子", f: "Ikinokori●Bokura.mp3" },
+    { n: "L'heure D'hiver", a: "Little Nemo", f: "L'heure D'hiver.mp3" },
+    { n: "Proud of You", a: "冯曦妤", f: "Proud of You.mp3" },
+    { n: "evening", a: "Corn Wave", f: "evening.mp3" },
+    { n: "golden hour", a: "JVKE", f: "golden hour.mp3" },
+    { n: "i have no friends", a: "s0rrow", f: "i have no friends.mp3" },
+    { n: "netflix in the morning", a: "Corn Wave", f: "netflix in the morning.mp3" },
+    { n: "unhappy", a: "s0rrow", f: "unhappy.mp3" },
+    { n: "Небо", a: "SadSvit", f: "Небо.mp3" },
+    { n: "манго нектар", a: "Corn Wave", f: "манго нектар.mp3" },
+    { n: "每当我 (伴奏)", a: "刘诗人", f: "每当我 (伴奏).mp3" },
+  ];
+
+  /* 每一档是一档节目：自己的开场、自己的编排、自己的歌单起点。
+   * 开场句接站点后由 DailyPoetry 现有的摘句流程按时段给出，这里放的是同一口径的真实原句。
+   * 配色仍沿用 time-theme.ts 的四套；20–22 点在电台里是晚间档，配色用 day。 */
+  const PARTS = {
+    dawn: {
+      name: "清晨档", from: 5, to: 8, theme: "dawn",
+      why: "两分钟内读得完", picks: ["savepoint", "june", "goodnight"],
+      queue: ["netflix in the morning", "A Little Love", "Good Time (Acoustic)", "Ceremony", "Proud of You"],
+      poems: [
+        { l: ["清晨入古寺，", "初日照高林。"], s: "常建《题破山寺后禅院》" },
+        { l: ["鸡声茅店月，", "人迹板桥霜。"], s: "温庭筠《商山早行》" },
+        { l: ["晨兴理荒秽，", "带月荷锄归。"], s: "陶渊明《归园田居·其三》" },
+      ],
+    },
+    day: {
+      name: "日间档", from: 8, to: 17, theme: "day",
+      why: "照着就能做的教程", picks: ["deepseek", "dpsk", "hy2"],
+      queue: ["As It Was", "Good Time (Acoustic)", "Ceremony", "EEYUH! x FLUXXWAVE", "A Little Love"],
+      poems: [
+        { l: ["行到水穷处，", "坐看云起时。"], s: "王维《终南别业》" },
+        { l: ["人生到处知何似，", "应似飞鸿踏雪泥。"], s: "苏轼《和子由渑池怀旧》" },
+        { l: ["竹杖芒鞋轻胜马，", "谁怕？一蓑烟雨任平生。"], s: "苏轼《定风波》" },
+      ],
+    },
+    dusk: {
+      name: "黄昏档", from: 17, to: 20, theme: "dusk",
+      why: "下班路上的随笔", picks: ["attachment", "hello-world", "june"],
+      queue: ["golden hour", "Proud of You", "Dear", "манго нектар", "L'heure D'hiver"],
+      poems: [
+        { l: ["山气日夕佳，", "飞鸟相与还。"], s: "陶渊明《饮酒·其五》" },
+        { l: ["夕阳无限好，", "只是近黄昏。"], s: "李商隐《登乐游原》" },
+        { l: ["日暮乡关何处是？", "烟波江上使人愁。"], s: "崔颢《黄鹤楼》" },
+      ],
+    },
+    evening: {
+      name: "晚间档", from: 20, to: 22, theme: "day",
+      why: "关于记得和记录", picks: ["goodnight", "dzgc", "savepoint"],
+      queue: ["evening", "L'heure D'hiver", "Dear", "Ikinokori●Bokura", "Небо"],
+      poems: [
+        { l: ["晚来天欲雪，", "能饮一杯无？"], s: "白居易《问刘十九》" },
+        { l: ["何当共剪西窗烛，", "却话巴山夜雨时。"], s: "李商隐《夜雨寄北》" },
+        { l: ["露从今夜白，", "月是故乡明。"], s: "杜甫《月夜忆舍弟》" },
+      ],
+    },
+    night: {
+      name: "深夜档", from: 22, to: 29, theme: "deep-night",
+      why: "留给长一点的文字", picks: ["no-next", "attachment", "dzgc"],
+      queue: ["Небо", "i have no friends", "unhappy", "每当我 (伴奏)", "Ikinokori●Bokura"],
+      poems: [
+        { l: ["明月松间照，", "清泉石上流。"], s: "王维《山居秋暝》" },
+        { l: ["缺月挂疏桐，", "漏断人初静。"], s: "苏轼《卜算子·黄州定慧院寓居作》" },
+        { l: ["人闲桂花落，", "夜静春山空。"], s: "王维《鸟鸣涧》" },
+      ],
+    },
+  };
+  const PART_ORDER = ["dawn", "day", "dusk", "evening", "night"];
+  const partAt = (h) =>
+    h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 17 ? "day" : h >= 17 && h < 20 ? "dusk" : h >= 20 && h < 22 ? "evening" : "night";
+
+  /* ================= 落字 =================
+   * 自由落体 PV 的规则原样继承：只有新东西到来时字才落下——
+   * 换歌（时钟是这首歌自己的 currentTime）、换档、新一期首播。 */
+  const FALL = 0.34;
+  const LAND = 0.18;
+  const SHAKE = 0.26;
+  const CJK = /[⺀-鿿豈-﫿＀-￯　-〿]/;
+
+  function splitGlyphs(host, text) {
+    host.textContent = "";
+    const spoken = document.createElement("span");
+    spoken.className = "sr";
+    spoken.textContent = text;
+    const vis = document.createElement("span");
+    vis.className = "glyphs";
+    vis.setAttribute("aria-hidden", "true");
+    const glyphs = [];
+    const make = (ch) => {
+      const el = document.createElement("span");
+      el.className = "g";
+      el.textContent = ch;
+      glyphs.push({ el, i: glyphs.length, rot: (seed(glyphs.length + text.length) - 0.5) * 18 });
+      return el;
+    };
+    for (const part of text.split(/(\s+)/)) {
+      if (!part) continue;
+      if (/^\s+$/.test(part)) { vis.append(" "); continue; }
+      if (CJK.test(part)) {
+        for (const ch of Array.from(part)) vis.append(make(ch));
+      } else {
+        const word = document.createElement("span");
+        word.className = "w";
+        for (const ch of Array.from(part)) word.append(make(ch));
+        vis.append(word);
+      }
+    }
+    host.append(spoken, vis);
+    return { glyphs, vis };
+  }
+
+  const lastLanding = (set, t0, step) => t0 + Math.max(0, set.glyphs.length - 1) * step + FALL;
+  const arrivalEnd = (set, t0, step) => lastLanding(set, t0, step) + LAND + SHAKE;
+
+  // ghost：暂停在下落途中时，还没开始落的字以浅影留在原位，标题仍然读得出来。
+  function pose(set, t, t0, step, dist, ghost = false) {
+    set.vis.classList.add("is-moving");
+    for (const g of set.glyphs) {
+      const dt = t - (t0 + g.i * step);
+      let y = 0, r = 0, sx = 1, sy = 1, o = 1;
+      if (dt <= 0) {
+        if (ghost) o = 0.22;
+        else { y = -dist; r = g.rot; o = 0; }
+      } else if (dt < FALL) {
+        const p = dt / FALL;
+        y = -dist * (1 - p * p);          // 自由落体：越落越快
+        r = g.rot * (1 - p);              // 旋转在落地前衰减到零
+        o = Math.min(1, dt / 0.05);
+      } else if (dt < FALL + LAND) {
+        const q = (dt - FALL) / LAND;
+        const k = (1 - q) * (1 - q);
+        sy = 1 - 0.14 * k;                // 触地压扁
+        sx = 1 + 0.07 * k;
+        y = -0.06 * Math.sin(Math.PI * q) * (1 - q);
+      }
+      const moved = y !== 0 || r !== 0 || sx !== 1;
+      g.el.style.transform = moved
+        ? `translate3d(0,${y.toFixed(4)}em,0) rotate(${r.toFixed(2)}deg) scale(${sx.toFixed(3)},${sy.toFixed(3)})`
+        : "";
+      g.el.style.opacity = o === 1 ? "" : o.toFixed(3);
+    }
+    // 最后一个字落定时整行轻震一次（PV 的 camera shake，幅度收到 0.035em）
+    const since = t - lastLanding(set, t0, step);
+    let shake = 0;
+    if (since > 0 && since < SHAKE) {
+      const k = 1 - since / SHAKE;
+      shake = Math.sin(since * 62) * k * k * 0.035;
+    }
+    set.vis.style.transform = shake ? `translate3d(0,${shake.toFixed(4)}em,0)` : "";
+  }
+
+  function settle(set) {
+    if (!set) return;
+    for (const g of set.glyphs) { g.el.style.transform = ""; g.el.style.opacity = ""; }
+    set.vis.style.transform = "";
+    set.vis.classList.remove("is-moving");
+  }
+
+  // 不依赖音频的落字（换档、首播）：时钟是墙上的时间。
+  const wallRuns = new WeakMap();
+  function dropByWall(host, set, { t0 = 0.25, step = 0.075, dist = 1.05 } = {}) {
+    if (reduced) { settle(set); return; }
+    const token = {};
+    wallRuns.set(host, token);
+    const end = arrivalEnd(set, t0, step);
+    host.classList.add("is-falling");
+    pose(set, 0, t0, step, dist);
+    const start = performance.now();
+    const tick = (now) => {
+      if (wallRuns.get(host) !== token) return;
+      const t = (now - start) / 1000;
+      if (t >= end) { settle(set); host.classList.remove("is-falling"); return; }
+      pose(set, t, t0, step, dist);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  /* ================= 外观 ================= */
+  const darkQuery = matchMedia("(prefers-color-scheme: dark)");
+  const PREF_TEXT = { auto: "自动", light: "浅色", dark: "深色" };
+  const PREF_SPOKEN = { auto: "跟随系统", light: "浅色", dark: "深色" };
+  let pref = root.dataset.pref || "auto";
+
+  function syncChrome() {
+    const paper = getComputedStyle(root).getPropertyValue("--paper").trim();
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", paper);
+  }
+  function applyTheme() {
+    const dark = pref === "dark" || (pref === "auto" && darkQuery.matches);
+    root.dataset.mode = dark ? "dark" : "light";
+    root.dataset.pref = pref;
+    const btn = $("themeBtn");
+    btn.textContent = PREF_TEXT[pref];
+    btn.setAttribute("aria-label", `外观：${PREF_SPOKEN[pref]}，点按切换`);
+    document.querySelectorAll('input[name="pv-theme"]').forEach((el) => { el.checked = el.value === pref; });
+    syncChrome();
+  }
+  $("themeBtn").addEventListener("click", () => {
+    pref = { auto: "light", light: "dark", dark: "auto" }[pref];
+    store.set("v4radio-theme", pref);
+    applyTheme();
+  });
+  darkQuery.addEventListener("change", () => { if (pref === "auto") applyTheme(); });
+
+  $("menuBtn").addEventListener("click", () => {
+    const sheet = $("sheet");
+    const open = sheet.hidden;
+    sheet.hidden = !open;
+    $("menuBtn").setAttribute("aria-expanded", String(open));
+  });
+
+  /* ================= 演播室钟 ================= */
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const svgEl = (tag, attrs = {}) => {
+    const el = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  };
+  const C = 200;
+  const polar = (r, deg) => {
+    const rad = (deg * Math.PI) / 180;
+    return [C + r * Math.cos(rad), C + r * Math.sin(rad)];
+  };
+  const hourDeg = (h) => h * 15 - 90;     // 24 小时环，零点在正上方
+  const clockParts = {};
+  const secDots = [];
+  let clockHm, clockDt, clockMarker;
+
+  function buildClock() {
+    const svg = svgEl("svg", { viewBox: "0 0 400 400", "aria-hidden": "true" });
+    svg.append(svgEl("circle", { cx: C, cy: C, r: 198, class: "face" }));
+    for (let h = 0; h < 24; h += 1) {
+      const [x1, y1] = polar(168, hourDeg(h));
+      const [x2, y2] = polar(h % 6 === 0 ? 176 : 173, hourDeg(h));
+      svg.append(svgEl("line", { x1, y1, x2, y2, class: "tick" }));
+    }
+    for (const key of PART_ORDER) {
+      const p = PARTS[key];
+      const a0 = hourDeg(p.from) + 1.2;
+      const a1 = hourDeg(p.to) - 1.2;
+      const [x0, y0] = polar(184, a0);
+      const [x1, y1] = polar(184, a1);
+      const large = a1 - a0 > 180 ? 1 : 0;
+      const d = `M${x0} ${y0} A184 184 0 ${large} 1 ${x1} ${y1}`;
+      const arc = svgEl("path", { d, class: "ring" });
+      const [lx, ly] = polar(152, hourDeg((p.from + p.to) / 2));
+      const label = svgEl("text", { x: lx, y: ly + 4, "text-anchor": "middle", class: "lbl" });
+      label.textContent = p.name.slice(0, 2);
+      // 外圈每一段都能点：钟面同时是调台旋钮
+      const group = svgEl("g", { class: "part" });
+      const tip = svgEl("title");
+      tip.textContent = `${p.name} ${pad(p.from)}:00–${pad(p.to % 24)}:00`;
+      group.append(tip, svgEl("path", { d, class: "hit" }), arc, label);
+      group.addEventListener("click", () => selectPart(key));
+      svg.append(group);
+      clockParts[key] = { arc, label };
+    }
+    clockMarker = svgEl("path", { d: "M200 9 L195 1 L205 1 Z", class: "marker" });
+    svg.append(clockMarker);
+    for (let i = 0; i < 12; i += 1) {
+      const [x, y] = polar(116, i * 30 - 90);
+      svg.append(svgEl("circle", { cx: x, cy: y, r: 3.6, class: "five" }));
+    }
+    for (let i = 0; i < 60; i += 1) {
+      const [x, y] = polar(134, i * 6 - 90);
+      const dot = svgEl("circle", { cx: x, cy: y, r: 3.2, class: "sec" });
+      secDots.push(dot);
+      svg.append(dot);
+    }
+    clockHm = svgEl("text", { x: C, y: 214, "text-anchor": "middle", class: "hm" });
+    clockDt = svgEl("text", { x: C, y: 250, "text-anchor": "middle", class: "dt" });
+    svg.append(clockHm, clockDt);
+    $("clock").append(svg);
+  }
+
+  let lastSec = -1;
+  function paintClock(now) {
+    const s = now.getSeconds();
+    if (s !== lastSec) {
+      // 秒点逐颗点亮，到整分归零：演播室钟的老规矩
+      for (let i = 0; i < 60; i += 1) secDots[i].classList.toggle("on", i <= s);
+      lastSec = s;
+    }
+    const hm = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    if (clockHm.textContent !== hm) {
+      clockHm.textContent = hm;
+      clockDt.textContent = `${now.getMonth() + 1} 月 ${now.getDate()} 日 周${WEEK[now.getDay()]}`;
+      const deg = (now.getHours() + now.getMinutes() / 60) * 15;
+      clockMarker.setAttribute("transform", `rotate(${deg.toFixed(2)} 200 200)`);
+    }
+    $("clock").setAttribute("aria-label", `演播室时钟：现在 ${hm}，${PARTS[currentPart].name}`);
+  }
+
+  /* ================= 时段（换档） ================= */
+  let partOverride = null;
+  let currentPart = partAt(new Date().getHours());
+  let partSet = null;
+
+  function remainingText(key, now) {
+    const p = PARTS[key];
+    const end = new Date(now);
+    end.setHours(p.to % 24, 0, 0, 0);
+    if (end <= now) end.setDate(end.getDate() + 1);
+    const mins = Math.max(1, Math.round((end - now) / 60000));
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `本档还剩 ${h ? `${h} 小时 ` : ""}${m} 分`;
+  }
+
+  const dayOfYear = (d) => Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
+  let poemShift = 0;
+
+  // 开场句：「换一句」时新句子按 PV 的规矩逐字落下
+  function renderPoem(animate) {
+    const p = PARTS[currentPart];
+    const poem = p.poems[(dayOfYear(new Date()) + poemShift) % p.poems.length];
+    const lines = poem.l.map((text) => {
+      const span = document.createElement("span");
+      span.className = "line";
+      return { span, text };
+    });
+    $("poem").replaceChildren(...lines.map((l) => l.span));
+    lines.forEach((l, i) => {
+      const set = splitGlyphs(l.span, l.text);
+      if (animate) dropByWall(l.span, set, { t0: 0.12 + i * 0.4, step: 0.05, dist: 0.9 });
+    });
+    $("poemSrc").textContent = `—— ${poem.s}`;
+  }
+
+  function selectPart(key) {
+    partOverride = key === partAt(new Date().getHours()) ? null : key;
+    renderPart(key, key !== currentPart);
+    paintClock(new Date());
+  }
+
+  function renderPart(key, animate) {
+    const p = PARTS[key];
+    const now = new Date();
+    currentPart = key;
+    root.dataset.timeTheme = p.theme;
+    partSet = splitGlyphs($("partName"), p.name);
+    if (animate) dropByWall($("partName"), partSet, { t0: 0.15, step: 0.11, dist: 1.1 });
+    $("partRange").textContent = `${pad(p.from)}:00 – ${p.to > 24 ? "次日 " : ""}${pad(p.to % 24)}:00`;
+    const live = partAt(now.getHours());
+    const previewing = key !== live;
+    $("partLeft").textContent = previewing ? `现在是${PARTS[live].name}` : remainingText(key, now);
+    $("kicker").textContent = previewing ? "节目预告" : "现在播出";
+    $("backNow").hidden = !previewing;
+    document.querySelectorAll(".tuner__tabs button").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b.dataset.part === key));
+      b.classList.toggle("is-live", b.dataset.part === live);
+      b.title = b.dataset.part === live ? "现在这一档" : "";
+    });
+    $("miniPart").textContent = p.name;
+
+    poemShift = 0;
+    renderPoem(animate);
+
+    $("picksTitle").textContent = `${p.name}编排`;
+    $("picksWhy").textContent = p.why;
+    $("picks").replaceChildren(...p.picks.map((slug) => {
+      const post = bySlug[slug];
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = "#";
+      a.className = "tune";
+      a.dataset.go = post.t;
+      a.innerHTML = `<span class="t"></span><span class="m"></span><span class="x"></span>`;
+      a.querySelector(".t").textContent = post.t;
+      a.querySelector(".m").textContent = `${post.m} 分钟 · ${post.c}`;
+      a.querySelector(".x").textContent = post.x;
+      li.append(a);
+      return li;
+    }));
+
+    Object.entries(clockParts).forEach(([k, el]) => {
+      el.arc.classList.toggle("is-now", k === key);
+      el.label.classList.toggle("is-now", k === key);
+    });
+    if (!startedSession) cueDaypart(key);
+    else renderTrack();
+    syncChrome();
+  }
+
+  /* ================= 播出控制 =================
+   * 预览里自带一个最小控制器；接进站点时这一段换成 music-controller.ts 的
+   * nowPlaying 单例（同一个 audio 元素），首页只是它的又一个 UI 外壳，
+   * 浮动 MusicPlayer 在 "/" 上隐藏。按时段排歌单需要给单例加一个 cue(order)。 */
+  // file:// 打开时走仓库里的 public/，经 Vite 打开时走站点根路径。
+  const BASES = location.protocol === "file:" ? ["../public/Musics/", "/Musics/"] : ["/Musics/", "../public/Musics/"];
+  let base = 0;
+  let baseConfirmed = false;
+  let failStreak = 0;
+  let dead = false;
+  let order = TRACKS.map((_, i) => i);
+  let partLen = 0;
+  let orderPart = "day";         // 当前歌单是按哪一档排的
+  let pos = 0;
+  let wantPlay = false;
+  let armed = false;             // 这首歌的歌名是否按音频时钟下落
+  let startedTrack = false;      // 这首歌是否真的出过声：决定灯上写「暂停」还是「待播」
+  let startedSession = false;    // 开过声以后，换档不再打断正在放的歌单
+  let dragRatio = null;
+
+  const audio = new Audio();
+  audio.preload = "metadata";
+  const track = () => TRACKS[order[pos]];
+  const urlOf = (t) => BASES[base] + encodeURIComponent(t.f);
+
+  const SONG_T0 = 0.12;
+  let songSet = null;
+  let songStep = 0.06;
+  const seek = $("seek");
+  const miniBar = $("miniBar");
+
+  function cueDaypart(key) {
+    const first = PARTS[key].queue.map((name) => TRACKS.findIndex((t) => t.n === name)).filter((i) => i >= 0);
+    order = [...first, ...TRACKS.map((_, i) => i).filter((i) => !first.includes(i))];
+    partLen = first.length;
+    orderPart = key;
+    setTrack(0, false);
+  }
+
+  function visualLength(text) {
+    let units = 0;
+    for (const ch of text) units += CJK.test(ch) ? 1 : /[A-Z]/.test(ch) ? 0.68 : ch === " " ? 0.3 : 0.55;
+    return units;
+  }
+
+  function renderTrack() {
+    const t = track();
+    const title = $("songTitle");
+    songSet = splitGlyphs(title, t.n);
+    songStep = Math.min(0.06, 0.9 / Math.max(1, songSet.glyphs.length));
+    const units = visualLength(t.n);
+    title.dataset.len = units <= 7 ? "s" : units <= 11 ? "m" : "l";
+    $("songArtist").textContent = t.a;
+    $("slot").textContent = pos < partLen
+      ? `${PARTS[orderPart].name}歌单 · 第 ${pos + 1} 首`
+      : `全台歌单 · 第 ${pos - partLen + 1} 首`;
+    $("miniTitle").textContent = t.n;
+    $("miniArtist").textContent = t.a;
+    renderLists();
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: t.n, artist: t.a, album: "Curve Radio" });
+    }
+  }
+
+  function paintCover(el, t) {
+    if (t.pic) {
+      const img = new Image();
+      img.alt = "";
+      img.src = t.pic;
+      el.replaceChildren(img);
+    } else {
+      el.textContent = Array.from(t.n)[0];
+    }
+  }
+
+  function trackButton(trackIndex, orderIndex) {
+    const t = TRACKS[trackIndex];
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "qitem tune";
+    b.innerHTML = `<span class="cover cover--s" aria-hidden="true"></span><span class="qitem__n"></span><span class="qitem__a"></span>`;
+    paintCover(b.querySelector(".cover"), t);
+    b.querySelector(".qitem__n").textContent = t.n;
+    b.querySelector(".qitem__a").textContent = t.a;
+    b.setAttribute("aria-label", `播放 ${t.n}，${t.a}`);
+    if (orderIndex === pos) b.setAttribute("aria-current", "true");
+    b.addEventListener("click", () => setTrack(orderIndex, true));
+    li.append(b);
+    return li;
+  }
+
+  // 接下来三首和全台歌单都能直接点着放
+  function renderLists() {
+    const t = track();
+    paintCover($("cover"), t);
+    paintCover($("miniCover"), t);
+    $("queue").replaceChildren(...[1, 2, 3].map((k) => {
+      const i = (pos + k) % order.length;
+      return trackButton(order[i], i);
+    }));
+    $("playlistCount").textContent = `${TRACKS.length} 首`;
+    $("playlistList").replaceChildren(...order.map((trackIndex, i) => trackButton(trackIndex, i)));
+  }
+
+  // 封面在曲库 manifest 里（站点 MusicPlayer 用的同一份）
+  async function loadCovers() {
+    for (const b of BASES) {
+      try {
+        const res = await fetch(`${b}manifest.json`);
+        if (!res.ok) continue;
+        const data = await res.json();
+        for (const item of data) {
+          const t = TRACKS.find((x) => x.n === item.name);
+          if (t && item.pic) t.pic = item.pic;
+        }
+        renderLists();
+        return;
+      } catch {}
+    }
+  }
+
+  function startPlay() {
+    if (dead) return;
+    wantPlay = true;
+    const attempt = audio.play();
+    if (attempt) attempt.catch(() => { wantPlay = false; armed = false; paintState(); frame(); });
+  }
+
+  function setTrack(i, intent) {
+    pos = (i + order.length) % order.length;
+    startedTrack = false;
+    audio.src = urlOf(track());
+    audio.load();
+    armed = intent && !reduced;
+    wantPlay = intent;
+    renderTrack();
+    if (intent) {
+      startPlay();
+      $("announce").textContent = `正在播出：${track().n}，${track().a}`;
+    }
+    paintState();
+    frame();
+  }
+
+  function togglePlay() {
+    if (dead) return;
+    if (audio.paused) {
+      if ((audio.currentTime || 0) < arrivalEnd(songSet, SONG_T0, songStep)) armed = !reduced;
+      startPlay();
+    } else {
+      wantPlay = false;
+      audio.pause();
+    }
+  }
+
+  function paintState() {
+    const on = !audio.paused && !dead;
+    root.dataset.air = on ? "on" : "off";
+    $("lamp").textContent = dead ? "无信号" : on ? "播出中" : startedTrack ? "暂停" : "待播";
+    for (const btn of [$("playBtn"), $("miniPlay")]) {
+      btn.setAttribute("aria-label", on ? "暂停" : "播放");
+      btn.querySelector('[data-icon="play"]').toggleAttribute("hidden", on);
+      btn.querySelector('[data-icon="pause"]').toggleAttribute("hidden", !on);
+      const text = btn.querySelector(".btn__text");
+      if (text) text.textContent = on ? "暂停" : "收听";
+      btn.disabled = dead;
+    }
+    $("prevBtn").disabled = dead;
+    $("nextBtn").disabled = dead;
+    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = on ? "playing" : "paused";
+  }
+
+  let lastCur = "";
+  let lastDur = "";
+  function frame() {
+    const dur = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const now = audio.currentTime || 0;
+    const cur = dragRatio !== null ? dragRatio * dur : now;
+    const ratio = dur > 0 ? Math.min(1, Math.max(0, cur / dur)) : 0;
+    const curText = fmt(cur);
+    const durText = fmt(dur);
+    if (curText !== lastCur || durText !== lastDur) {
+      lastCur = curText;
+      lastDur = durText;
+      $("tcCur").textContent = curText;
+      $("tcDur").textContent = durText;
+      $("miniTc").textContent = curText;
+      seek.setAttribute("aria-valuenow", String(Math.round(ratio * 100)));
+      seek.setAttribute("aria-valuetext", `${Math.floor(cur / 60)} 分 ${Math.floor(cur % 60)} 秒，共 ${Math.floor(dur / 60)} 分 ${Math.floor(dur % 60)} 秒`);
+    }
+    seek.style.setProperty("--r", ratio.toFixed(5));
+    miniBar.style.setProperty("--r", ratio.toFixed(5));
+
+    if (!songSet) return;
+    const end = arrivalEnd(songSet, SONG_T0, songStep);
+    // 停在第一个字落下之前，就按落定显示：待播时歌名必须可读。
+    if (!armed || reduced || now >= end || (audio.paused && now <= SONG_T0)) settle(songSet);
+    else pose(songSet, now, SONG_T0, songStep, 1.5, audio.paused);
+  }
+
+  let raf = 0;
+  function loop() {
+    raf = 0;
+    frame();
+    if (!audio.paused && !audio.ended) raf = requestAnimationFrame(loop);
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+
+  audio.addEventListener("play", paintState);
+  audio.addEventListener("playing", () => { startedTrack = true; startedSession = true; paintState(); kick(); });
+  audio.addEventListener("pause", () => { paintState(); frame(); });
+  audio.addEventListener("seeked", frame);
+  audio.addEventListener("durationchange", frame);
+  audio.addEventListener("timeupdate", () => { if (audio.paused) frame(); });
+  audio.addEventListener("loadedmetadata", () => { baseConfirmed = true; failStreak = 0; frame(); });
+  audio.addEventListener("ended", () => setTrack(pos + 1, true));
+  audio.addEventListener("error", () => {
+    if (!audio.getAttribute("src")) return;
+    if (!baseConfirmed && base < BASES.length - 1) {
+      base += 1;
+      audio.src = urlOf(track());
+      audio.load();
+      if (wantPlay) startPlay();
+      return;
+    }
+    failStreak += 1;
+    if (!baseConfirmed || failStreak >= TRACKS.length) {
+      dead = true;
+      wantPlay = false;
+      armed = false;
+      $("songArtist").textContent = "音频文件没有接通";
+      paintState();
+      frame();
+      return;
+    }
+    setTrack(pos + 1, wantPlay);
+  });
+
+  $("playBtn").addEventListener("click", togglePlay);
+  $("miniPlay").addEventListener("click", togglePlay);
+  $("nextBtn").addEventListener("click", () => setTrack(pos + 1, !audio.paused || wantPlay));
+  $("prevBtn").addEventListener("click", () => setTrack(pos - 1, !audio.paused || wantPlay));
+  $("muteBtn").addEventListener("click", () => {
+    audio.muted = !audio.muted;
+    const btn = $("muteBtn");
+    btn.setAttribute("aria-pressed", String(audio.muted));
+    btn.setAttribute("aria-label", audio.muted ? "取消静音" : "静音");
+    btn.querySelector('[data-icon="vol"]').toggleAttribute("hidden", audio.muted);
+    btn.querySelector('[data-icon="muted"]').toggleAttribute("hidden", !audio.muted);
+  });
+
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.setActionHandler("play", togglePlay);
+    navigator.mediaSession.setActionHandler("pause", togglePlay);
+    navigator.mediaSession.setActionHandler("nexttrack", () => setTrack(pos + 1, true));
+    navigator.mediaSession.setActionHandler("previoustrack", () => setTrack(pos - 1, true));
+  }
+
+  /* 进度：拖动与键盘 */
+  const ratioAt = (x) => {
+    const b = seek.getBoundingClientRect();
+    return b.width > 0 ? Math.min(1, Math.max(0, (x - b.left) / b.width)) : 0;
+  };
+  seek.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || !Number.isFinite(audio.duration) || dead) return;
+    e.preventDefault();
+    seek.setPointerCapture(e.pointerId);
+    seek.classList.add("is-drag");
+    dragRatio = ratioAt(e.clientX);
+    frame();
+  });
+  seek.addEventListener("pointermove", (e) => {
+    if (dragRatio === null) return;
+    dragRatio = ratioAt(e.clientX);
+    frame();
+  });
+  const endDrag = (commit) => (e) => {
+    if (dragRatio === null) return;
+    if (commit) audio.currentTime = ratioAt(e.clientX) * audio.duration;
+    dragRatio = null;
+    seek.classList.remove("is-drag");
+    frame();
+  };
+  seek.addEventListener("pointerup", endDrag(true));
+  seek.addEventListener("pointercancel", endDrag(false));
+  seek.addEventListener("keydown", (e) => {
+    if (!Number.isFinite(audio.duration)) return;
+    const d = audio.duration;
+    const jumps = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
+    if (e.key in jumps) audio.currentTime = Math.min(d, Math.max(0, audio.currentTime + jumps[e.key]));
+    else if (e.key === "Home") audio.currentTime = 0;
+    else if (e.key === "End") audio.currentTime = Math.max(0, d - 1);
+    else return;
+    e.preventDefault();
+    frame();
+  });
+
+  /* 随行小条：控制台完全滚出视野时接手 */
+  // 按位置判断而不是只听相交变化：一下跳回页首时，控制台从「上方不可见」变成「下方不可见」，相交状态没变。
+  const mini = $("mini");
+  let miniRaf = 0;
+  const syncMini = () => {
+    miniRaf = 0;
+    const show = $("deck").getBoundingClientRect().bottom < $("bar").offsetHeight;
+    if (mini.dataset.show === String(show)) return;
+    mini.dataset.show = String(show);
+    mini.inert = !show;
+  };
+  const queueMini = () => { if (!miniRaf) miniRaf = requestAnimationFrame(syncMini); };
+  addEventListener("scroll", queueMini, { passive: true });
+  addEventListener("resize", queueMini);
+  syncMini();
+  $("miniSong").addEventListener("click", () => {
+    $("deck").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+    $("playBtn").focus({ preventScroll: true });
+  });
+
+  /* ================= 播出记录：信号与节目表 ================= */
+  const DAY = 864e5;
+  const toDate = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const span0 = new Date(2025, 6, 1);
+  const span1 = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  const xOf = (d) => ((d - span0) / (span1 - span0)) * 100;
+  const dots = (s) => s.replaceAll("-", ".");
+  const readout = $("readout");
+  const wave = $("wave");
+
+  function showReadout(post) {
+    const time = document.createElement("time");
+    time.dateTime = post.d;
+    time.textContent = dots(post.d);
+    const title = document.createElement("b");
+    title.textContent = post.t;
+    const meta = document.createElement("span");
+    meta.textContent = `${post.c} · 约 ${post.m} 分钟`;
+    readout.replaceChildren(time, title, meta);
+  }
+
+  // 读带磁头停在没有节目的日子
+  function quiet(date) {
+    wave.classList.remove("has-hot");
+    document.querySelectorAll("[data-slug].is-hot").forEach((el) => el.classList.remove("is-hot"));
+    const asc = [...POSTS].reverse();
+    const prev = [...asc].reverse().find((p) => toDate(p.d) <= date);
+    const next = asc.find((p) => toDate(p.d) > date);
+    const time = document.createElement("time");
+    time.textContent = `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
+    const line = document.createElement("span");
+    line.className = "quiet";
+    if (!prev) line.textContent = "还没开台";
+    else if (!next) line.textContent = `最近一期之后的第 ${Math.round((date - toDate(prev.d)) / DAY)} 天，音乐照常在播`;
+    else {
+      const gap = Math.round((toDate(next.d) - toDate(prev.d)) / DAY);
+      const into = Math.max(1, Math.round((date - toDate(prev.d)) / DAY));
+      line.textContent = gap > 30 ? `停播中：${gap} 天里的第 ${into} 天` : "这一天没有新节目";
+    }
+    readout.replaceChildren(time, line);
+  }
+
+  function hot(slug) {
+    wave.classList.toggle("has-hot", Boolean(slug));
+    document.querySelectorAll("[data-slug]").forEach((el) => el.classList.toggle("is-hot", el.dataset.slug === slug));
+    showReadout(slug ? bySlug[slug] : LEAD);
+  }
+
+  function buildWave() {
+    const plot = $("wavePlot");
+    const asc = [...POSTS].reverse();
+    let prevX = -Infinity;
+    asc.forEach((post, i) => {
+      let x = xOf(toDate(post.d));
+      if (x - prevX < 0.55) x = prevX + 0.55;   // 同日或相邻两天的节目各占一根
+      prevX = x;
+      const bar = document.createElement("a");
+      bar.className = "wave__bar";
+      bar.href = "#";
+      bar.dataset.slug = post.s;
+      bar.style.left = `${x}%`;
+      bar.style.setProperty("--h", `${12 + post.m * 7.2}px`);
+      bar.setAttribute("aria-label", `${dots(post.d)}，${post.t}，约 ${post.m} 分钟`);
+      bar.dataset.go = post.t;
+      bar.dataset.x = String(x);
+      bar.addEventListener("focus", () => hot(post.s));
+      plot.append(bar);
+      const next = asc[i + 1];
+      if (next) {
+        const days = Math.round((toDate(next.d) - toDate(post.d)) / DAY);
+        if (days > 30) {
+          // 停播段用斜线填平：信号是空的，不是还没画
+          const flat = document.createElement("span");
+          flat.className = "wave__silence";
+          flat.style.left = `${xOf(toDate(post.d)) + 0.7}%`;
+          flat.style.width = `${xOf(toDate(next.d)) - xOf(toDate(post.d)) - 1.4}%`;
+          plot.append(flat);
+          const gap = document.createElement("span");
+          gap.className = "wave__gap";
+          gap.style.left = `${(xOf(toDate(post.d)) + xOf(toDate(next.d))) / 2}%`;
+          gap.dataset.span = String(xOf(toDate(next.d)) - xOf(toDate(post.d)));
+          gap.dataset.days = String(days);
+          plot.append(gap);
+        }
+      }
+    });
+    // 两处编辑注：开台那一期，和最近这一轮集中播出
+    const plotH = 216;
+    const barH = (m) => 12 + m * 7.2;
+    const note = (x, h, title, sub, left) => {
+      const el = document.createElement("span");
+      el.className = left ? "wave__note wave__note--left" : "wave__note";
+      el.style.left = `${x}%`;
+      el.style.setProperty("--lead-h", `${plotH / 2 - h / 2 - 6}px`);
+      el.innerHTML = `<b></b><span></span>`;
+      el.querySelector("b").textContent = title;
+      el.querySelector("span").textContent = sub;
+      plot.append(el);
+    };
+    const first = asc[0];
+    note(xOf(toDate(first.d)), barH(first.m), "开台", first.t, false);
+    const run = POSTS.filter((p) => (toDate(LEAD.d) - toDate(p.d)) / DAY <= 14);
+    if (run.length >= 3) {
+      const oldest = run[run.length - 1];
+      const spanDays = Math.round((toDate(LEAD.d) - toDate(oldest.d)) / DAY) + 1;
+      const before = asc[asc.indexOf(oldest) - 1];
+      const silent = before ? Math.round((toDate(oldest.d) - toDate(before.d)) / DAY) : 0;
+      note(xOf(toDate(oldest.d)) - 0.8, Math.max(...run.map((p) => barH(p.m))),
+        `${toDate(oldest.d).getMonth() + 1} 月 · ${spanDays} 天 ${run.length} 期`, silent ? `停播 ${silent} 天之后` : "", true);
+    }
+
+    const nowMark = document.createElement("span");
+    nowMark.className = "wave__now";
+    nowMark.style.left = `${xOf(today)}%`;
+    const label = document.createElement("span");
+    label.textContent = `今天 · 距上一期 ${Math.round((today - toDate(LEAD.d)) / DAY)} 天`;
+    nowMark.append(label);
+    plot.append(nowMark);
+    fitGaps();
+    addEventListener("resize", fitGaps);
+    // 指针在信号上滑过就是一根读带磁头：靠近哪一期就吸到哪一期，落在停播段就报停播的第几天
+    const head = document.createElement("span");
+    head.className = "wave__head";
+    head.innerHTML = "<span></span>";
+    plot.append(head);
+    const bars = [...plot.querySelectorAll(".wave__bar")];
+    let snapped = null;
+    plot.addEventListener("pointermove", (e) => {
+      const box = plot.getBoundingClientRect();
+      const px = Math.min(box.width, Math.max(0, e.clientX - box.left));
+      let best = null;
+      let bestDist = 14;
+      for (const bar of bars) {
+        const dist = Math.abs((Number(bar.dataset.x) / 100) * box.width - px);
+        if (dist < bestDist) { best = bar; bestDist = dist; }
+      }
+      const atX = best ? (Number(best.dataset.x) / 100) * box.width : px;
+      // 吸附时报那一期的真实日期（同日两期的竖条为了看得清稍微错开过）
+      const date = best ? toDate(bySlug[best.dataset.slug].d) : new Date(span0.getTime() + (atX / box.width) * (span1 - span0));
+      head.style.left = `${atX}px`;
+      head.classList.toggle("is-flip", atX > box.width * 0.82);
+      head.firstChild.textContent = `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
+      wave.classList.add("is-scrubbing");
+      snapped = best ? best.dataset.slug : null;
+      plot.classList.toggle("is-snapped", Boolean(snapped));
+      if (snapped) hot(snapped);
+      else quiet(date);
+    });
+    plot.addEventListener("pointerleave", () => {
+      wave.classList.remove("is-scrubbing");
+      plot.classList.remove("is-snapped");
+      snapped = null;
+      hot(null);
+    });
+    plot.addEventListener("click", (e) => {
+      if (!snapped || e.target.closest(".wave__bar")) return;
+      toast(`预览不跳转 · 这里会打开「${bySlug[snapped].t}」`);
+    });
+    plot.addEventListener("focusout", (e) => { if (!plot.contains(e.relatedTarget)) hot(null); });
+
+    const months = $("waveMonths");
+    for (let d = new Date(span0); d < span1; d.setMonth(d.getMonth() + 1)) {
+      const tick = document.createElement("span");
+      const isYear = d.getMonth() === 0 || d.getTime() === span0.getTime();
+      tick.className = isYear ? "y" : "";
+      tick.textContent = isYear ? `${d.getFullYear()}.${pad(d.getMonth() + 1)}` : String(d.getMonth() + 1);
+      tick.style.left = `${xOf(d)}%`;
+      months.append(tick);
+    }
+    // 窄屏时信号条横向滚动，默认停在最近的一端
+    requestAnimationFrame(() => {
+      if (wave.scrollWidth > wave.clientWidth + 1) wave.scrollLeft = wave.scrollWidth;
+    });
+  }
+
+  // 停播标注放不下时退成「34 天」，再放不下就不写，不让字压在信号上。
+  function fitGaps() {
+    const width = $("wavePlot").clientWidth;
+    document.querySelectorAll(".wave__gap").forEach((gap) => {
+      const room = (Number(gap.dataset.span) / 100) * width - 14;
+      gap.hidden = false;
+      gap.innerHTML = `停播 <b>${gap.dataset.days}</b> 天`;
+      if (gap.offsetWidth > room) gap.innerHTML = `<b>${gap.dataset.days}</b> 天`;
+      if (gap.offsetWidth > room) gap.hidden = true;
+    });
+  }
+
+  function buildGuide() {
+    const columns = [["随笔"], ["纪念", "权益维护", "工具箱"], ["开发教程", "部署"]];
+    const guide = $("guide");
+    for (const cats of columns) {
+      const col = document.createElement("div");
+      col.className = "guide__col";
+      for (const cat of cats) {
+        const list = POSTS.filter((p) => p.c === cat);
+        const sec = document.createElement("section");
+        const head = document.createElement("h3");
+        head.className = "label";
+        const name = document.createElement("span");
+        name.textContent = cat;
+        const count = document.createElement("small");
+        count.textContent = `${list.length} 期`;
+        head.append(name, count);
+        const strip = document.createElement("div");
+        strip.className = "strip";
+        strip.setAttribute("aria-hidden", "true");
+        const yearMark = document.createElement("i");
+        yearMark.style.left = `${xOf(new Date(2026, 0, 1))}%`;
+        strip.append(yearMark);
+        for (const post of list) {
+          const tick = document.createElement("span");
+          tick.style.left = `${xOf(toDate(post.d))}%`;
+          tick.style.setProperty("--h", `${Math.min(20, 6 + post.m)}px`);
+          strip.append(tick);
+        }
+        const meta = document.createElement("p");
+        meta.className = "strip__meta num";
+        const ym = (p) => p.d.slice(0, 7).replace("-", ".");
+        const minutes = list.reduce((n, p) => n + p.m, 0);
+        const range = list.length > 1 ? `${ym(list[list.length - 1])} – ${ym(list[0])}` : ym(list[0]);
+        meta.textContent = `${range} · 共 ${minutes} 分钟`;
+        const ol = document.createElement("ol");
+        for (const post of list) {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = "#";
+          a.className = "tune";
+          a.dataset.slug = post.s;
+          a.dataset.go = post.t;
+          a.innerHTML = `<time datetime="${post.d}">${dots(post.d)}</time><span class="t"></span><span class="m">${post.m} 分钟</span>`;
+          a.querySelector(".t").textContent = post.t;
+          a.addEventListener("pointerenter", () => hot(post.s));
+          a.addEventListener("pointerleave", () => hot(null));
+          a.addEventListener("focus", () => hot(post.s));
+          a.addEventListener("blur", () => hot(null));
+          li.append(a);
+          ol.append(li);
+        }
+        sec.append(head, strip, meta, ol);
+        col.append(sec);
+      }
+      guide.append(col);
+    }
+  }
+
+  /* ================= 节目结构：两路声音 =================
+   * 本期是一段「我」与 ChatGPT 的对话。每一轮按字数铺到约 15 分钟的时长上：
+   * 「我」的话很短，回答很长——这就是这一期的形状。 */
+  const TURNS = [
+    ["我", 148, "（引言）一个人去世了，然后别人发讣告，然后所有人齐刷刷在评论区留下晚安和 RIP，然后就什么都没有了。"],
+    ["ChatGPT", 793, "你想表达的不是“大家都很冷漠”，也不完全是“人死了就会被忘记”。"],
+    ["我", 60, "确实让所有人都记住她很困难… 但对我来说她不只是一个陌生的用户名… 她是一个拥有自己的记忆、学业、家庭、生活，活生生的人"],
+    ["ChatGPT", 669, "让所有人都记住她很难，可看着她只剩下一个陌生的用户名，又觉得不够。"],
+    ["我", 61, "所以我很讨厌蒸馏。一个活生生的人根本不是几个微调，量化就可以重现的"],
+    ["ChatGPT", 935, "如果连一句悼念都装不下一个完整的人，保存下来的聊天记录也不会等于她的全部。"],
+    ["我", 37, "我之前经常做和她一起玩的梦 只不过都很离奇 最后都是我和她分开了"],
+    ["ChatGPT", 309, "这其实很像一种“脑子在替你处理它自己也说不清的恐惧”。"],
+    ["我", 25, "我不想再回忆了 我好累 我不敢相信我们就这样结束了"],
+    ["ChatGPT", 238, "那就先别回忆了，真的不用把梦、那些旧事再一遍遍翻出来。你已经翻得够多了。"],
+    ["我", 17, "她留下的那些网站，还会有人访问吗…"],
+    ["ChatGPT", 274, "会的，只是大概率不会像她还在的时候那样“持续有人来”，而是变成一种很零星、很偶然的访问。"],
+    ["我", 71, "我接受得了吗 我真要哭了 这对我来说是一个会陪我打电话、会自己写项目、会直播和我打游戏、会抱怨家长的人"],
+    ["ChatGPT", 340, "你现在接受不了，完全可能。甚至“接受”这件事本身都不是某一天突然点一下确认键。"],
+    ["我", 45, "看着一个个给别人道晚安的人都变成了说晚安的对象呢… 这一个个头像背后都是一段段真实的时光…"],
+    ["ChatGPT", 750, "从给别人道晚安，到自己成为被道晚安的人，这种“角色交换”确实让人难受。"],
+    ["我", 23, "从盛夏到初秋… 真的只剩「冷风吹 冷风吹…」"],
+    ["ChatGPT", 205, "从盛夏到初秋，最残忍的就是季节真的在往前走。"],
+    ["我", 11, "命运早就埋下了伏笔…？"],
+    ["ChatGPT", 588, "我不太愿意把它叫“命运早就写好了结局”。"],
+    ["我", 12, "这简直就是命运的玩笑啊…"],
+    ["ChatGPT", 316, "知道后来发生的事，再回头看她留下的话，确实会有这种被命运捉弄的感觉。"],
+  ];
+  const DEFAULT_TURN = 2;
+  const EXCERPT_TURN = 18;
+  const turnSegs = [];
+
+  function showTurn(i) {
+    turnSegs.forEach((t, k) => t.seg.classList.toggle("is-hot", k === i));
+    const t = turnSegs[i];
+    const mm = Math.floor(t.at / 60);
+    const ss = Math.floor(t.at % 60);
+    const at = document.createElement("b");
+    at.textContent = `${mm}′${pad(ss)}″`;
+    const line = document.createElement("span");
+    line.textContent = `${t.who}：${t.text}`;
+    $("tracksReadout").replaceChildren(at, line);
+  }
+
+  function buildTracks() {
+    const total = TURNS.reduce((n, t) => n + t[1], 0);
+    const seconds = LEAD.m * 60;
+    let cum = 0;
+    TURNS.forEach(([who, len, text], i) => {
+      const seg = document.createElement("span");
+      seg.className = "seg";
+      seg.style.left = `${(cum / total) * 100}%`;
+      seg.style.width = `${(len / total) * 100}%`;
+      seg.addEventListener("pointerenter", () => showTurn(i));
+      seg.addEventListener("click", () => {
+        const t = turnSegs[i];
+        toast(`预览不跳转 · 这里会打开「${LEAD.t}」第 ${Math.floor(t.at / 60)} 分钟处`);
+      });
+      document.querySelector(`.tracks__lane[data-who="${who}"]`).append(seg);
+      turnSegs.push({ seg, who, text, at: (cum / total) * seconds });
+      cum += len;
+    });
+    document.querySelectorAll(".tracks__lane").forEach((lane) => {
+      lane.addEventListener("pointerleave", () => showTurn(DEFAULT_TURN));
+    });
+    for (let m = 0; m <= LEAD.m; m += 3) {
+      const tick = document.createElement("span");
+      tick.textContent = `${m}′`;
+      tick.style.left = `${(m / LEAD.m) * 100}%`;
+      $("tracksRuler").append(tick);
+    }
+    const mine = TURNS.filter((t) => t[0] === "我");
+    const mineChars = mine.reduce((n, t) => n + t[1], 0);
+    $("tracksSummary").textContent =
+      `本期共 ${TURNS.length} 段对话，「我」说了 ${mine.length} 段，约占全文 ${Math.round((mineChars / total) * 100)}%，其余是 ChatGPT 的回答。`;
+    $("excerptAt").textContent = `约第 ${Math.round(turnSegs[EXCERPT_TURN].at / 60)} 分钟`;
+    showTurn(DEFAULT_TURN);
+  }
+
+  /* ================= 本期节目 ================= */
+  const leadTitle = $("leadTitle");
+  const leadLink = $("leadLink");
+  const leadSet = splitGlyphs(leadLink, leadLink.textContent);
+
+  // 标题尽量一行排下；缩到下限仍放不下，才允许平衡折行。
+  function fitLead() {
+    leadTitle.style.removeProperty("--lead-size");
+    leadTitle.classList.remove("is-wrapped");
+    const avail = leadTitle.clientWidth;
+    const need = leadTitle.scrollWidth;
+    if (need <= avail) return;
+    const size = parseFloat(getComputedStyle(leadTitle).fontSize);
+    const floor = innerWidth < 640 ? 30 : 44;
+    const next = Math.max(floor, Math.floor((size * avail) / need) - 1);
+    leadTitle.style.setProperty("--lead-size", `${next}px`);
+    if (leadTitle.scrollWidth > leadTitle.clientWidth) leadTitle.classList.add("is-wrapped");
+  }
+  let fitTimer = 0;
+  addEventListener("resize", () => { clearTimeout(fitTimer); fitTimer = setTimeout(fitLead, 80); });
+
+  // 只有读者没见过的新节目才落一次字：首播。
+  function premiere() {
+    root.classList.remove("premiere-pending");
+    store.set("v4radio-premiere", LEAD.s);
+    dropByWall(leadTitle, leadSet, { t0: 0.3, step: 0.075, dist: 1.05 });
+  }
+
+  const daysAgo = Math.round((today - toDate(LEAD.d)) / DAY);
+  if (daysAgo >= 0) $("leadAgo").textContent = daysAgo === 0 ? "，今天" : daysAgo === 1 ? "，昨天" : `，${daysAgo} 天前`;
+
+  /* ================= 天气（站点 MastheadWeather 的同一路数据） ================= */
+  (async () => {
+    try {
+      const key = "29798a7fd1592707e87b9b9a57bde012";
+      const ip = await (await fetch(`https://restapi.amap.com/v3/ip?key=${key}`)).json();
+      if (!ip.adcode || typeof ip.adcode !== "string") return;
+      const res = await (await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?key=${key}&city=${ip.adcode}`)).json();
+      const live = res.lives && res.lives[0];
+      if (!live) return;
+      const el = $("weather");
+      el.textContent = `${live.city} · ${live.weather} · ${live.temperature}°`;
+      el.hidden = false;
+    } catch {}
+  })();
+
+  /* ================= 时钟走动与自动换档 ================= */
+  function everySecond() {
+    const now = new Date();
+    paintClock(now);
+    if (!partOverride) {
+      const key = partAt(now.getHours());
+      if (key !== currentPart) { renderPart(key, true); store.set("v4radio-lastpart", key); }
+      else if (now.getSeconds() === 0) $("partLeft").textContent = remainingText(key, now);
+    }
+    setTimeout(everySecond, 1000 - now.getMilliseconds() + 8);
+  }
+
+  motionQuery.addEventListener("change", (e) => {
+    reduced = e.matches;
+    if (reduced) { armed = false; settle(songSet); settle(leadSet); settle(partSet); }
+  });
+
+  /* ================= 预览面板 ================= */
+  document.querySelectorAll('input[name="pv-theme"]').forEach((el) => {
+    el.addEventListener("change", () => { pref = el.value; store.set("v4radio-theme", pref); applyTheme(); });
+  });
+  /* ================= 交互 ================= */
+  document.querySelectorAll(".tuner__tabs button").forEach((b) => {
+    b.addEventListener("click", () => selectPart(b.dataset.part));
+  });
+  $("backNow").addEventListener("click", () => selectPart(partAt(new Date().getHours())));
+  $("nextPoem").addEventListener("click", () => { poemShift += 1; renderPoem(true); });
+
+  // 预览里所有站内链接都不跳转，告诉看的人它会去哪
+  let toastTimer = 0;
+  function toast(text) {
+    const el = $("toast");
+    el.textContent = text;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 2200);
+  }
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href="#"]');
+    if (!a) return;
+    e.preventDefault();
+    const what = a.dataset.go || (a.querySelector(".t") || a).textContent.trim();
+    toast(`预览不跳转 · 这里会打开「${what}」`);
+  });
+
+  /* 友台：头像、站名、一句话、域名，都来自站点 links.ts */
+  const PEERS = [
+    { n: "Sy's Digital Garden", d: "重构时间线，再次重逢", u: "https://404yann.com", av: "../public/images/logo/favicon-256x256.webp", own: true },
+    { n: "池鱼小栈", d: "｜д•´)!!", u: "https://chiyu.it", av: "https://chiyu.it/images/logo/logo.webp" },
+    { n: "Clover Yan", d: "生命是灰色的，理论之树常青。", u: "https://www.khyan.top/", av: "https://www.khyan.top/assets/avatar_1.jpg" },
+    { n: "寻亦见北", d: "寻褶·见熵·北纬·柒文", u: "https://xyjb.org", av: "https://xyjb.org/favicon.svg" },
+    { n: "薄荷の小屋", d: "越是拼命往前伸手，渴望之物越是渐行渐远", u: "https://www.hoshiroko.com", av: "https://api.hoshiroko.com/img/avatar.jpg" },
+    { n: "纸月 Paper Moon", d: "マジやばくね", u: "https://tangyuan0821.com", av: "https://avatars.githubusercontent.com/u/195516213?v=4" },
+    { n: "𝑬𝒑𝒉𝒆𝒊𝒂's Think", d: "她的聊天角", u: "https://watakushi.desuwa.org/", av: "https://resource.epheia.moe/pic/desuwa/icon/favicon.png" },
+    { n: "HosinoNeko's Website", d: "點解我眼角長期都帶住淚？因為我一直被困喺一個暗無天日嘅十月入面", u: "https://hosinoneko.me/", av: "https://avatars.githubusercontent.com/u/177436503?v=4" },
+  ];
+  function buildPeers() {
+    $("peers").replaceChildren(...PEERS.map((peer) => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.className = "peer tune";
+      a.href = peer.u;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.innerHTML = `<span class="peer__av" aria-hidden="true"></span><span><span class="peer__name"></span><span class="peer__desc"></span><span class="peer__url"></span></span>`;
+      const av = a.querySelector(".peer__av");
+      const img = new Image();
+      img.alt = "";
+      img.loading = "lazy";
+      img.referrerPolicy = "no-referrer";
+      img.addEventListener("error", () => { av.textContent = Array.from(peer.n.replace(/[^\p{L}\p{N}]/gu, ""))[0] || "·"; });
+      img.src = peer.av;
+      av.append(img);
+      a.querySelector(".peer__name").textContent = peer.n;
+      a.querySelector(".peer__desc").textContent = peer.d;
+      a.querySelector(".peer__url").textContent = new URL(peer.u).host.replace(/^www\./, "") + (peer.own ? " · 编者的另一个站" : "");
+      li.append(a);
+      return li;
+    }));
+  }
+  $("replayPremiere").addEventListener("click", () => {
+    leadTitle.scrollIntoView({ block: "center" });
+    premiere();
+  });
+
+  /* ================= 启动 ================= */
+  applyTheme();
+  buildClock();
+  // 上次来是另一档，这次进门就看见换档：档名落一次。
+  const lastPart = store.get("v4radio-lastpart");
+  renderPart(currentPart, Boolean(lastPart) && lastPart !== currentPart);
+  store.set("v4radio-lastpart", currentPart);
+  everySecond();
+  buildTracks();
+  buildWave();
+  buildGuide();
+  buildPeers();
+  loadCovers();
+  hot(null);
+  fitLead();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLead);
+  if (root.classList.contains("premiere-pending")) premiere();
+})();
+</script>
+</body>
+</html>

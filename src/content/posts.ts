@@ -15,6 +15,8 @@ export interface Post {
   memorialName?: string;
   memorialYears?: string;
   articleGPT: boolean;
+  /** 点击进入这篇文章时是否默认打开禅模式 */
+  zen: boolean;
   html: string;
   readingMinutes: number;
   wordCount: number;

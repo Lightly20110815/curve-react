@@ -11,7 +11,8 @@ description: "后来我才发现，关于 Epheia，我还有很多事情没来�
 layout: memorial
 memorialName: Epheia
 memorialYears: 2009–2026
-articleGPT: true
+articleGPT: false
+zen: true
 ---
 
 对我来说 Epheia 不只是一个陌生的用户名…\

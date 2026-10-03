@@ -10,7 +10,8 @@ tags:
   - 时间
   - AI 对话
 description: 她没能见到 GPT 6，我也再没等到一个已读。
-articleGPT: true
+articleGPT: false
+zen: true
 ---
 
 > 9 月 21 日，和 ChatGPT 的聊天记录。

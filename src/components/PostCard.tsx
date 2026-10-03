@@ -51,7 +51,7 @@ export function PostCard({ post, variant = "default", className }: PostCardProps
               <span className="mx-2 text-ink-muted">·</span>
               <span>约 {post.readingMinutes} 分钟 · {post.wordCount} 字</span>
             </p>
-            <p className="mt-2.5 max-w-2xl pl-1 font-serif text-[14px] italic leading-[1.7] text-stamp/85">
+            <p className="mt-2.5 max-w-2xl pl-1 font-serif text-[14px] italic leading-[1.7] text-stamp">
               {leadWhisper}
             </p>
           </div>

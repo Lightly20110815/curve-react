@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from "react";
+import { scrollBehavior } from "@/lib/utils";
 
 const LINE_THRESHOLD = 22;
 const ENHANCED_FLAG = "data-code-enhanced";
@@ -116,7 +117,7 @@ export function useCodeBlockEnhancements(
           const code = figure.querySelector<HTMLElement>("code");
           const lineCount = code?.querySelectorAll("span[data-line]").length ?? 0;
           actionEl.textContent = `展开剩余 ${Math.max(lineCount - LINE_THRESHOLD, 0)} 行`;
-          figure.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          figure.scrollIntoView({ behavior: scrollBehavior(), block: "nearest" });
         }
       }
     }

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Minimize2 } from "lucide-react";
 import { Kicker, Ornament } from "@/components/Editorial";
+import { useZenMode } from "@/components/ZenModeProvider";
 import type { Post } from "@/content/posts";
 import { formatArticleDateline } from "@/lib/han-date";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils";
 export default function MemorialPostPage({ post }: { post: Post }) {
   const section = post.categories[0] ?? "随笔";
   const name = post.memorialName ?? post.title;
+  const { isZen, exitZen } = useZenMode();
   const ripRef = useRef<HTMLDivElement>(null);
   const [ripShown, setRipShown] = useState(false);
 
@@ -39,6 +41,17 @@ export default function MemorialPostPage({ post }: { post: Post }) {
 
   return (
     <article className="container py-5 md:py-8">
+      {isZen && (
+        <button
+          type="button"
+          onClick={exitZen}
+          className="fixed right-4 top-4 z-50 inline-flex items-center gap-1.5 border border-rule-soft/60 bg-paper/95 px-3 py-1.5 font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted shadow-sm transition-colors hover:border-stamp hover:text-stamp"
+          aria-label="退出禅模式"
+        >
+          <Minimize2 className="h-3.5 w-3.5" />
+          退出禅模式 · Esc
+        </button>
+      )}
       <div className="mx-auto max-w-[820px] overflow-hidden border-y-[3px] border-rule bg-paper/95 shadow-[0_1px_0_hsl(var(--rule-soft)/0.35)]">
         <div className="px-4 pt-4 md:px-6 md:pt-5 lg:px-7">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-2.5">

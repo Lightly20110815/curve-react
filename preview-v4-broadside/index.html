@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曲線時報 · The Curve Times · 丙午年秋卷特刊 (Vol. XIII)</title>
+<script>
+document.documentElement.classList.add('js');
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    if (!window.__v4boot) document.documentElement.classList.remove('js');
+  }, 1500);
+});
+</script>
+<style>
+/* ==========================================================================
+   THE CURVE TIMES · RESTRAINED BROADSIDE FRONT PAGE (V4 REFINED)
+   Philosophy: The Homepage is a Front Page, not a database sprawl.
+   Hierarchy: Strong Lead Story + Curated Dispatches + Discreet Portals into Deeper Layers.
+   Disciplines: Cold Newsprint White + Carbon Ink + Technical Red / Phosphor Amber
+   ========================================================================== */
+
+:root {
+  --bg: #eceee8;
+  --bg-surface: #f4f6f0;
+  --bg-card: #fafbf8;
+  --ink: #0a0c10;
+  --ink-strong: #000000;
+  --ink-body: #1e2229;
+  --ink-soft: #4b515d;
+  --ink-faint: #787f8d;
+  --rule: #0a0c10;
+  --rule-soft: #c8cec2;
+  --rule-hair: #d9ded4;
+  --signal: #e8331d;          /* Electric telemetry signal red */
+  --signal-soft: rgba(232, 51, 29, 0.08);
+  --curve-wave: #e8331d;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: "Songti SC", "Source Han Serif SC", "Noto Serif CJK SC", "STSong", "SimSun", Georgia, serif;
+  --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --page-max: 1280px;
+}
+
+html.dark {
+  --bg: #07090d;
+  --bg-surface: #0e1218;
+  --bg-card: #131720;
+  --ink: #eef1ea;
+  --ink-strong: #ffffff;
+  --ink-body: #ccd2c7;
+  --ink-soft: #8e9589;
+  --ink-faint: #575e54;
+  --rule: #2a313d;
+  --rule-soft: #1c222b;
+  --rule-hair: #141820;
+  --signal: #ffb04a;          /* Darkroom amber safelight & phosphor */
+  --signal-soft: rgba(255, 176, 74, 0.12);
+  --curve-wave: #52e5a4;       /* Phosphor oscilloscope green */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background-color: var(--bg);
+  color: var(--ink-body);
+  font-family: var(--sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.22s ease, color 0.22s ease;
+  overflow-x: hidden;
+}
+
+/* 示波器细线微底网 */
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 999;
+  background-image:
+    linear-gradient(to right, var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule-soft) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.16;
+}
+
+::selection { background: var(--signal); color: #fff; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+
+.frame-wrap {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3.5vw, 44px);
+  position: relative;
+}
+
+/* ==========================================================================
+   1. 天头技术控制标尺行
+   ========================================================================== */
+.telemetry-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 0 10px;
+  border-bottom: 2px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.telemetry-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.signal-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--signal);
+  font-weight: 700;
+}
+.signal-dot::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--signal);
+  animation: pulse-ring 1.4s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(0.8); opacity: 1; }
+}
+
+.telemetry-ctrls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hud-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.hud-btn:hover {
+  background: var(--signal);
+  color: #fff;
+  border-color: var(--signal);
+}
+
+/* ==========================================================================
+   2. 巨构报头与动态曲线 (BROADSIDE MASTHEAD & LIVING CURVE)
+   ========================================================================== */
+.broadside-masthead {
+  position: relative;
+  padding: 24px 0 16px;
+  border-bottom: 2px solid var(--rule);
+  overflow: hidden;
+}
+
+.curve-canvas-layer {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.masthead-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.masthead-row-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.masthead-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.title-cn {
+  font-family: var(--serif);
+  font-size: clamp(48px, 8.2vw, 108px);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+  text-shadow: 2px 2px 0 var(--bg);
+}
+
+.title-en {
+  font-family: var(--mono);
+  font-size: clamp(12px, 1.4vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  color: var(--signal);
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.dossier-id-card {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  background: var(--bg-surface);
+  border: 1px solid var(--rule);
+  padding: 12px 18px;
+  max-width: 360px;
+}
+.dossier-id-card b { color: var(--ink-strong); }
+
+/* 核心栏目导航：通往深层页面的清晰航道 */
+.masthead-nav-bar {
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--rule-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+.nav-links-cluster {
+  display: flex;
+  gap: 20px;
+}
+.nav-links-cluster a {
+  transition: color 0.15s ease;
+  position: relative;
+}
+.nav-links-cluster a:hover, .nav-links-cluster a.active {
+  color: var(--signal);
+}
+.nav-links-cluster a.active::before {
+  content: "▶";
+  font-size: 8px;
+  vertical-align: 1px;
+  margin-right: 4px;
+}
+
+/* ==========================================================================
+   3. 头版核心专稿 (LEAD MONOGRAPH: 自由落体击发 + 电传打字吐墨)
+   ========================================================================== */
+.lead-monograph-section {
+  padding: 40px 0 48px;
+  border-bottom: 2px solid var(--rule);
+  position: relative;
+}
+
+.camera-stage {
+  will-change: transform;
+}
+
+.monograph-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--signal);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.monograph-meta-bar .line {
+  flex: 1; height: 1px; background: var(--signal); opacity: 0.4;
+}
+
+.monograph-headline-wrap {
+  position: relative;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.monograph-headline {
+  font-family: var(--serif);
+  font-size: clamp(38px, 6.4vw, 84px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  color: var(--ink-strong);
+  text-wrap: balance;
+}
+.monograph-headline .char-glyph {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.monograph-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(340px, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.monograph-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 电传打字机吐墨视窗 */
+.teletype-box {
+  border: 1px solid var(--rule);
+  background: var(--bg-surface);
+  padding: 20px 24px;
+  position: relative;
+}
+.teletype-box::before {
+  content: "TELETYPE RECORD // HEFEI // CARRIER: 2026-09-24";
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--signal);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--rule-soft);
+}
+.teletype-stream {
+  font-family: var(--serif);
+  font-size: clamp(16px, 1.7vw, 21px);
+  line-height: 1.85;
+  color: var(--ink-strong);
+  text-align: justify;
+}
+.teletype-caret {
+  display: inline-block;
+  width: 9px;
+  height: 1.15em;
+  background: var(--signal);
+  vertical-align: -2px;
+  margin-left: 4px;
+  animation: caret-blink 0.8s steps(2, start) infinite;
+}
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.monograph-docket-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--rule-soft);
+  padding-top: 14px;
+}
+.monograph-docket-tags b { color: var(--ink); }
+.monograph-docket-tags .tag { color: var(--signal); font-weight: 700; }
+
+.monograph-action-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.read-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 11px 22px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: all 0.18s ease;
+  border: 1px solid var(--ink);
+}
+.read-action-btn:hover {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+
+/* 右列：底片接触印样 + 实时声学控制中枢 */
+.monograph-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.film-plate-box {
+  background: #000;
+  color: #e5e5e5;
+  padding: 10px;
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+}
+.film-meta-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: #888;
+  margin-bottom: 6px;
+}
+.film-photo-wrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+.film-photo-wrap img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: contrast(1.12) grayscale(1);
+  transition: filter 0.3s ease;
+}
+.film-photo-wrap:hover img {
+  filter: contrast(1.15) grayscale(0.7);
+}
+.film-footer-meta {
+  margin-top: 8px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #aaa;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* 实时声学示波中枢 */
+.acoustic-station-panel {
+  background: var(--bg-card);
+  border: 2px solid var(--rule);
+  padding: 18px;
+  position: relative;
+}
+
+.station-top-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+.station-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: var(--signal);
+  font-weight: 700;
+}
+.station-format {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.station-title-box {
+  margin-bottom: 12px;
+}
+.station-track-title {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  letter-spacing: 0.04em;
+}
+.station-artist-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+
+.station-eq-visualizer {
+  height: 36px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: 10px;
+}
+.station-eq-bar {
+  flex: 1;
+  background: var(--ink-soft);
+  height: 3px;
+  min-height: 2px;
+  transform-origin: bottom;
+  transition: height 0.08s ease, background-color 0.15s ease;
+}
+.station-eq-bar.active {
+  background: var(--signal);
+}
+
+.station-time-digits {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.station-time-digits .live {
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.station-seek-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--rule-soft);
+  position: relative;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+.station-seek-progress {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;
+  background: var(--signal);
+}
+
+.station-ctrl-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.station-main-play-btn {
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+.station-main-play-btn:hover {
+  background: var(--signal);
+  color: #fff;
+}
+.station-aux-btn {
+  background: transparent;
+  border: 1px solid var(--rule-soft);
+  color: var(--ink);
+  padding: 5px 10px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.station-aux-btn:hover {
+  border-color: var(--ink);
+  background: var(--bg-surface);
+}
+
+/* ==========================================================================
+   4. 头版要目精选 (CURATED RECENT DISPATCHES · 3 篇严选要闻)
+   只展示当季 3 篇核心短讯，不把 13 篇文章全盘倾倒在首页
+   ========================================================================== */
+.curated-dispatches-section {
+  padding: 44px 0 48px;
+  border-bottom: 2px solid var(--rule);
+}
+
+.section-tag-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--rule);
+  padding-bottom: 10px;
+  margin-bottom: 24px;
+}
+.section-heading-text {
+  font-family: var(--serif);
+  font-size: clamp(24px, 2.8vw, 34px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+}
+.section-meta-indicator {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--signal);
+  font-weight: 700;
+}
+
+.dispatches-three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.dispatch-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  transition: all 0.18s ease;
+}
+.dispatch-card:hover {
+  border-color: var(--signal);
+  background: var(--signal-soft);
+  transform: translateY(-2px);
+}
+
+.dispatch-top-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+.dispatch-cat {
+  color: var(--signal);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.dispatch-date {
+  color: var(--ink-faint);
+}
+
+.dispatch-title {
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.34;
+  color: var(--ink-strong);
+  margin-bottom: 8px;
+  transition: color 0.15s ease;
+}
+.dispatch-card:hover .dispatch-title {
+  color: var(--signal);
+}
+
+.dispatch-summary {
+  font-family: var(--serif);
+  font-size: 14.5px;
+  line-height: 1.72;
+  color: var(--ink-body);
+  margin-bottom: 16px;
+}
+
+.dispatch-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule-soft);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.dispatch-read-link {
+  font-weight: 700;
+  color: var(--ink-strong);
+  transition: color 0.15s ease;
+}
+.dispatch-card:hover .dispatch-read-link {
+  color: var(--signal);
+}
+
+/* 完整卷宗索引通道路由条 */
+.full-archive-route-card {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.archive-route-info {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.archive-route-info b { color: var(--ink-strong); }
+.archive-route-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--signal);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.archive-route-btn:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ==========================================================================
+   5. 深度栏目门牌 (DELIBERATE PORTALS INTO DEEPER LAYERS)
+   深度内涵藏在门牌后，保持首页克制，读者自主探索
+   ========================================================================== */
+.deep-portals-section {
+  padding: 44px 0 52px;
+  border-bottom: 2px solid var(--rule);
+  background: var(--bg-surface);
+}
+
+.portals-header-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--rule);
+  padding-bottom: 10px;
+  margin-bottom: 24px;
+}
+.portals-title {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+}
+.portals-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.portals-three-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.portal-docket {
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 2px 2px 0 var(--rule);
+  transition: all 0.18s ease;
+}
+.portal-docket:hover {
+  border-color: var(--signal);
+  box-shadow: 2px 2px 0 var(--signal);
+  transform: translateY(-2px);
+}
+
+.portal-label-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--signal);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.portal-entry-heading {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ink-strong);
+  margin-bottom: 10px;
+}
+.portal-quote-blurb {
+  font-family: var(--serif);
+  font-size: 14.5px;
+  line-height: 1.76;
+  color: var(--ink-body);
+  margin-bottom: 20px;
+}
+
+.portal-action-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px dashed var(--rule-soft);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.portal-action-link {
+  font-weight: 700;
+  color: var(--ink-strong);
+  letter-spacing: 0.1em;
+  transition: color 0.15s ease;
+}
+.portal-docket:hover .portal-action-link {
+  color: var(--signal);
+}
+.portal-audio-subtrigger {
+  background: transparent;
+  border: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--signal);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.portal-audio-subtrigger:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   6. 头版结语与报社识 (BROADSIDE SIGN-OFF & COLOPHON)
+   ========================================================================== */
+.front-colophon-footer {
+  padding: 40px 0 96px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.8;
+}
+
+.colophon-flex-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  border-top: 1px solid var(--rule-soft);
+  padding-top: 20px;
+}
+.colophon-motto {
+  max-width: 480px;
+}
+.colophon-motto em {
+  font-style: normal;
+  color: var(--signal);
+  font-weight: 700;
+}
+
+.colophon-deep-routes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+.colophon-deep-routes a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 0.15s ease;
+}
+.colophon-deep-routes a:hover {
+  color: var(--signal);
+}
+
+/* ==========================================================================
+   7. 滚动常驻声学坞 (FLOATING ACOUSTIC DOCK)
+   ========================================================================== */
+.fixed-acoustic-dock {
+  position: fixed;
+  bottom: 20px;
+  right: clamp(16px, 3.5vw, 44px);
+  z-index: 100;
+  background: var(--bg-card);
+  border: 2px solid var(--rule);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--mono);
+  transform: translateY(140%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.25), opacity 0.22s ease;
+  pointer-events: none;
+}
+.fixed-acoustic-dock.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.dock-play-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dock-play-btn:hover {
+  background: var(--signal);
+  color: #fff;
+}
+
+/* ==========================================================================
+   响应式断点
+   ========================================================================== */
+@media (max-width: 980px) {
+  .monograph-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .dispatches-three-col {
+    grid-template-columns: 1fr;
+  }
+  .portals-three-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="frame-wrap">
+  
+  <!-- ==========================================================================
+       1. 天头技术控制标尺行
+       ========================================================================== -->
+  <header class="telemetry-strip">
+    <div class="telemetry-left">
+      <span class="signal-dot">LIVE CHRONOMETER</span>
+      <span>EDITION: AUTUMN-2026</span>
+      <span>HFE / UTC+8</span>
+      <span>VOL. XIII · FRONT PAGE</span>
+    </div>
+    <div class="telemetry-ctrls">
+      <button class="hud-btn" id="replayKineticBtn" title="重新触发自由落体与电传打字动量">
+        <span>↻</span> 重新击发
+      </button>
+      <button class="hud-btn" id="themeSwitchBtn" title="切换暗房显影模式">
+        <span id="themeBtnGlyph">◐</span> 暗房模式
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       2. 巨构报头与动态曲线 (BROADSIDE MASTHEAD & OSCILLOGRAPH CANVAS)
+       ========================================================================== -->
+  <section class="broadside-masthead">
+    <canvas id="curveWaveCanvas" class="curve-canvas-layer"></canvas>
+
+    <div class="masthead-inner">
+      <div class="masthead-row-top">
+        <div class="masthead-titles">
+          <h1 class="title-cn">曲線時報</h1>
+          <div class="title-en">THE CURVE TIMES // OSCILLOGRAPH &amp; DOSSIER</div>
+        </div>
+        <div class="dossier-id-card">
+          <div><b>VOL. XIII · 丙午年秋卷特刊</b></div>
+          <div>收录十三篇断代文章 · 累计 17,987 字</div>
+          <div style="color: var(--signal); font-weight: 700; margin-top: 4px;">
+            ● 深度卷宗请由下方专栏进入
+          </div>
+        </div>
+      </div>
+
+      <nav class="masthead-nav-bar">
+        <div class="nav-links-cluster">
+          <a href="#" class="active">01 头版 / FRONT</a>
+          <a href="/epheia">02 依菲雅 / EPHEIA</a>
+          <a href="/archives">03 编年卷宗 / ARCHIVES</a>
+          <a href="/notes">04 随笔桌面 / OPINION</a>
+          <a href="/photos">05 光影相册 / GALLERY</a>
+          <a href="/about">06 编者识 / ABOUT</a>
+        </div>
+        <div style="color: var(--ink-faint);">
+          RANGE: 2025.07.24 ⇄ 2026.09.24
+        </div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       3. 头版核心专稿 (LEAD MONOGRAPH: 自由落体击发 + 电传打字吐墨)
+       ========================================================================== -->
+  <section class="lead-monograph-section" id="leadMonograph">
+    <div class="camera-stage" id="cameraRecoilStage">
+      
+      <div class="monograph-meta-bar">
+        <span>SPECIAL DOSSIER · LEAD MONOGRAPH</span>
+        <div class="line"></div>
+        <span>REC. 2026.09.24 // 5,192 WORDS</span>
+      </div>
+
+      <!-- 机械击发落字标题 -->
+      <div class="monograph-headline-wrap">
+        <h2 class="monograph-headline" id="monographHeadline" aria-label="她不只是一个用户名">
+          她不只是一个用户名
+        </h2>
+      </div>
+
+      <!-- 专稿双列网格 -->
+      <div class="monograph-main-grid">
+        
+        <!-- 左列：电传终端逐字打字吐墨与实录剖析 -->
+        <div class="monograph-col-left">
+          
+          <div class="teletype-box">
+            <div class="teletype-stream" id="teletypeStream"></div>
+            <span class="teletype-caret" id="teletypeCaret"></span>
+          </div>
+
+          <div class="monograph-docket-tags">
+            <span>执笔：<b>Sy</b></span>
+            <span>·</span>
+            <span>字数：<b style="color: var(--signal);">5,192 字</b></span>
+            <span>·</span>
+            <span>阅读时长：约 15 分钟</span>
+            <span>·</span>
+            <span class="tag">#记忆 #悼念 #数字复现 #大模型局限</span>
+          </div>
+
+          <div class="monograph-action-row">
+            <a href="/posts/more-than-a-username" class="read-action-btn">
+              展开完整专稿阅读 →
+            </a>
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--ink-faint);">
+              [ 案卷编号：HFE-20260924-01 ]
+            </span>
+          </div>
+        </div>
+
+        <!-- 右列：底片接触印样 + 实时声学控制中枢 -->
+        <div class="monograph-col-right">
+          
+          <!-- 底片印样框 -->
+          <div class="film-plate-box">
+            <div class="film-meta-header">
+              <span>SAFETY FILM 400</span>
+              <span>24A</span>
+              <span>EXP. 2026.09</span>
+            </div>
+            <div class="film-photo-wrap">
+              <img src="./lead-art.jpg" alt="底片接触印样" onerror="this.src='../public/images/posts/savepoint/01-apple-store.jpg';">
+            </div>
+            <div class="film-footer-meta">
+              <span>PLATE 24A / 停止更新的对话模型地层</span>
+              <span>SY 摄于合肥</span>
+            </div>
+          </div>
+
+          <!-- 真实声学控制中枢 -->
+          <div class="acoustic-station-panel" id="acousticStationPanel">
+            <div class="station-top-hud">
+              <span class="station-tag">● 声学测绘台 // OSCILLOGRAPH</span>
+              <span class="station-format">44.1kHz · SINGLETON ENGINE</span>
+            </div>
+
+            <div class="station-title-box">
+              <div class="station-track-title" id="panelTrackName">リリィ</div>
+              <div class="station-artist-name" id="panelTrackArtist">依菲雅 · 原声收录</div>
+            </div>
+
+            <!-- 动态电平振幅柱 -->
+            <div class="station-eq-visualizer" id="eqVisualizer" aria-hidden="true">
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+              <div class="station-eq-bar"></div><div class="station-eq-bar"></div>
+            </div>
+
+            <div class="station-time-digits">
+              <span class="live" id="panelCurrentTime">00:00.00</span>
+              <span id="panelTotalDuration">03:47.00</span>
+            </div>
+
+            <div class="station-seek-bar" id="panelSeekBar">
+              <div class="station-seek-progress" id="panelSeekProgress"></div>
+            </div>
+
+            <div class="station-ctrl-buttons">
+              <button class="station-main-play-btn" id="panelPlayTrigger">
+                <span id="panelPlayIcon">▶</span> <span id="panelPlayText">启动声轨</span>
+              </button>
+              <div style="display: flex; gap: 8px;">
+                <button class="station-aux-btn" id="panelPrevBtn">PREV</button>
+                <button class="station-aux-btn" id="panelNextBtn">NEXT</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       4. 头版要目精选 (CURATED RECENT DISPATCHES · 3 篇严选要目)
+       克制编排：首页只呈现当季 3 篇核心短讯，不把 13 篇文章全盘倾倒在首页
+       ========================================================================== -->
+  <section class="curated-dispatches-section" id="curatedDispatches">
+    <div class="section-tag-bar">
+      <div>
+        <h3 class="section-heading-text">头版要目 · 本期精选</h3>
+      </div>
+      <div class="section-meta-indicator">
+        VOLUME XIII RECENT DISPATCHES
+      </div>
+    </div>
+
+    <div class="dispatches-three-col">
+      
+      <!-- Dispatch 1 -->
+      <a href="/posts/goodnight" class="dispatch-card">
+        <div>
+          <div class="dispatch-top-meta">
+            <span class="dispatch-cat">[ 纪念 / 特辑 ]</span>
+            <span class="dispatch-date">2026.09.24</span>
+          </div>
+          <h4 class="dispatch-title">晚安喵</h4>
+          <p class="dispatch-summary">
+            后来我才发现，关于 Epheia，我还有很多事情没来得及问，也有很多东西是在她离开以后才慢慢看懂的。
+          </p>
+        </div>
+        <div class="dispatch-foot">
+          <span>730 字 · 2 分钟</span>
+          <span class="dispatch-read-link">调阅 →</span>
+        </div>
+      </a>
+
+      <!-- Dispatch 2 -->
+      <a href="/posts/no-next" class="dispatch-card">
+        <div>
+          <div class="dispatch-top-meta">
+            <span class="dispatch-cat">[ 随笔 ]</span>
+            <span class="dispatch-date">2026.09.21</span>
+          </div>
+          <h4 class="dispatch-title">没有下一版</h4>
+          <p class="dispatch-summary">
+            她没能见到 GPT 6，我也再没等到一个已读。不是记忆过时了，是共同未来停止更新了。
+          </p>
+        </div>
+        <div class="dispatch-foot">
+          <span>3,709 字 · 11 分钟</span>
+          <span class="dispatch-read-link">调阅 →</span>
+        </div>
+      </a>
+
+      <!-- Dispatch 3 -->
+      <a href="/posts/savepoint" class="dispatch-card">
+        <div>
+          <div class="dispatch-top-meta">
+            <span class="dispatch-cat">[ 随笔 ]</span>
+            <span class="dispatch-date">2026.09.19</span>
+          </div>
+          <h4 class="dispatch-title">过期的存档点</h4>
+          <p class="dispatch-summary">
+            想回去的那一天，印在一瓶过期可乐的瓶身上。喝了这瓶过期的可乐我能回到 25/9/21 吗？
+          </p>
+        </div>
+        <div class="dispatch-foot">
+          <span>399 字 · 1 分钟</span>
+          <span class="dispatch-read-link">调阅 →</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- 完整编年卷宗通道卡 -->
+    <div class="full-archive-route-card">
+      <div class="archive-route-info">
+        <b>完整编年卷宗已归档</b>：包含 2026 春夏《依恋的形状》《维权报告》及 2025 创刊号、DeepSeek 组件等共计 <b>13 篇全目</b>。
+      </div>
+      <a href="/archives" class="archive-route-btn">
+        调阅完整编年卷宗库 (13 篇) →
+      </a>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       5. 深度栏目门牌 (DELIBERATE PORTALS INTO DEEPER LAYERS)
+       内涵需要读者主动推门进入，首页只做尊严与克制的门牌
+       ========================================================================== -->
+  <section class="deep-portals-section" id="portals">
+    <div class="portals-header-bar">
+      <div>
+        <h3 class="portals-title">深度专栏 · 专题展室</h3>
+      </div>
+      <div class="portals-note">
+        SELECT TO ENTER DEEPER ROOMS
+      </div>
+    </div>
+
+    <div class="portals-three-grid">
+      
+      <!-- Portal 1: 依菲雅专栏 -->
+      <div class="portal-docket">
+        <div>
+          <div class="portal-label-tag">● MEMORIAL DOSSIER // EPHEIA</div>
+          <h4 class="portal-entry-heading">依菲雅常设特辑</h4>
+          <p class="portal-quote-blurb">
+            “我站在时间的列车上，她坐在远处 07/24 的地上，仰望着星空，向我挥手。”收录生前文字、项目、录音与回忆。
+          </p>
+        </div>
+        <div class="portal-action-cluster">
+          <a href="/epheia" class="portal-action-link">进入特辑页面 →</a>
+          <button class="portal-audio-subtrigger" id="quickPlayEpheiaTrack">
+            ▷ 试听原声音轨
+          </button>
+        </div>
+      </div>
+
+      <!-- Portal 2: 随笔桌面 -->
+      <div class="portal-docket">
+        <div>
+          <div class="portal-label-tag">● DESK NOTEBOOK // FRAGMENTS</div>
+          <h4 class="portal-entry-heading">随笔与桌面便签</h4>
+          <p class="portal-quote-blurb">
+            “记录让时间有了重量。”收录开发灵感、日常碎碎念、未成文的草稿与即时心境。
+          </p>
+        </div>
+        <div class="portal-action-cluster">
+          <a href="/notes" class="portal-action-link">翻开随笔桌面 →</a>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--ink-faint);">
+            最新: 🌤️ 5月2日
+          </span>
+        </div>
+      </div>
+
+      <!-- Portal 3: 光影相册 -->
+      <div class="portal-docket">
+        <div>
+          <div class="portal-label-tag">● DARKROOM GALLERY // 20 PLATES</div>
+          <h4 class="portal-entry-heading">光影相册与暗房印样</h4>
+          <p class="portal-quote-blurb">
+            生活切片与回忆坐标。合肥万象城、初秋晚风、过期可乐与深圳旧忆，收录 20 幅底片接触印样。
+          </p>
+        </div>
+        <div class="portal-action-cluster">
+          <a href="/photos" class="portal-action-link">推门进入展室 →</a>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--ink-faint);">
+            底片库 · 20 张
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       6. 头版结语与报社识 (BROADSIDE SIGN-OFF & COLOPHON)
+       ========================================================================== -->
+  <footer class="front-colophon-footer">
+    <div class="colophon-flex-row">
+      <div class="colophon-motto">
+        <b>曲線時報 // THE CURVE TIMES · VOL. XIII 丙午年秋卷</b><br>
+        “有些段落文字，会在今天失控。在这里留一盏灯，证明这个坐标真的存在过。”<br>
+        <span style="color: var(--ink-faint);">编者识：Sy · 不定期排印 · 落笔皆为实录</span>
+      </div>
+      <div class="colophon-deep-routes">
+        <a href="/archives">完整编年归档</a>
+        <a href="/notes">随笔桌面</a>
+        <a href="/photos">光影相册</a>
+        <a href="/about">联系编者</a>
+        <a href="/rss.xml">RSS 订阅</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- 滚动移交的常驻声学控制坞 -->
+<div class="fixed-acoustic-dock" id="floatingDock">
+  <div style="display: flex; flex-direction: column;">
+    <div style="font-family: var(--serif); font-size: 13.5px; font-weight: 700; color: var(--ink-strong);" id="dockTrackTitle">リリィ</div>
+    <div style="font-size: 10.5px; color: var(--ink-faint);" id="dockTimeCode">00:00 / 03:47</div>
+  </div>
+  <button class="dock-play-btn" id="dockPlayBtn" aria-label="播放或暂停">
+    <span id="dockPlayIcon">▶</span>
+  </button>
+</div>
+
+<!-- 独占单例 Audio 实体 -->
+<audio id="globalAudioEngine" preload="metadata"></audio>
+
+<!-- ==========================================================================
+     7. JAVASCRIPT: 示波曲线引擎 + 电传机械打字机 + 音频中枢
+     ========================================================================== -->
+<script>
+(function() {
+  'use strict';
+  window.__v4boot = true;
+
+  /* --------------------------------------------------------------------------
+     1. 贯穿报头的实时示波器 Canvas 曲线 (Live Oscilloscope Canvas)
+     -------------------------------------------------------------------------- */
+  var canvas = document.getElementById('curveWaveCanvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var wavePhase = 0;
+  var isAudioPlaying = false;
+
+  function resizeWaveCanvas() {
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+  }
+  window.addEventListener('resize', resizeWaveCanvas);
+  resizeWaveCanvas();
+
+  function renderOscilloscope() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var w = canvas.width / dpr;
+    var h = canvas.height / dpr;
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.lineWidth = isAudioPlaying ? 2.2 : 1.2;
+    var waveColor = getComputedStyle(document.documentElement).getPropertyValue('--curve-wave').trim() || '#e8331d';
+    ctx.strokeStyle = waveColor;
+    ctx.globalAlpha = isAudioPlaying ? 0.78 : 0.35;
+
+    ctx.beginPath();
+    var midY = h * 0.78;
+    var baseAmp = isAudioPlaying ? 24 : 9;
+    var speed = isAudioPlaying ? 0.055 : 0.02;
+
+    for (var x = 0; x < w; x += 4) {
+      var y = midY +
+        Math.sin(x * 0.012 + wavePhase) * baseAmp +
+        Math.sin(x * 0.028 - wavePhase * 1.4) * (baseAmp * 0.45) +
+        Math.cos(x * 0.005 + wavePhase * 0.8) * (baseAmp * 0.3);
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    wavePhase += speed;
+    requestAnimationFrame(renderOscilloscope);
+  }
+  requestAnimationFrame(renderOscilloscope);
+
+  /* --------------------------------------------------------------------------
+     2. 自由落体机械落字 + 电传打字机吐墨引擎 (Freefall & Teletype Engine)
+     -------------------------------------------------------------------------- */
+  var headline = document.getElementById('monographHeadline');
+  var cameraRecoilStage = document.getElementById('cameraRecoilStage');
+  var teletypeStream = document.getElementById('teletypeStream');
+  var replayBtn = document.getElementById('replayKineticBtn');
+  var isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var fullTitleText = headline.textContent.trim();
+  var fullTeletypeText = "“一个人去世了，然后别人发讣告，然后所有人齐刷刷在评论区留下晚安和 RIP，然后就什么都没有了。真正可怕的反而是后面那一大段安静——一个活生生的人，根本不是几个微调和量化就可以重现的。真正属于她的那些空白，就让它们保持为空白。不知道，就是不知道。”";
+
+  var glyphs = [];
+
+  function sliceHeadlineGlyphs() {
+    headline.textContent = '';
+    glyphs = [];
+    for (var i = 0; i < fullTitleText.length; i++) {
+      var s = document.createElement('span');
+      s.className = 'char-glyph';
+      s.textContent = fullTitleText[i];
+      s.setAttribute('aria-hidden', 'true');
+      headline.appendChild(s);
+      glyphs.push(s);
+    }
+  }
+  sliceHeadlineGlyphs();
+
+  var teletypeTimer = null;
+
+  function runTeletypePrint(speedMs) {
+    clearTimeout(teletypeTimer);
+    teletypeStream.textContent = '';
+    var idx = 0;
+
+    function step() {
+      if (idx < fullTeletypeText.length) {
+        teletypeStream.textContent += fullTeletypeText[idx];
+        idx++;
+        var ch = fullTeletypeText[idx - 1];
+        var pause = (ch === '，' || ch === '。' || ch === '—') ? 120 : (speedMs || 22);
+        teletypeTimer = setTimeout(step, pause);
+      }
+    }
+    step();
+  }
+
+  function triggerFullKineticSequence() {
+    if (isReduced) {
+      glyphs.forEach(function(g) { g.style.opacity = '1'; g.style.transform = 'none'; });
+      teletypeStream.textContent = fullTeletypeText;
+      return;
+    }
+
+    glyphs.forEach(function(g) {
+      g.style.opacity = '0';
+      g.style.transform = 'translateY(-60px)';
+      g.style.transition = 'none';
+    });
+
+    glyphs.forEach(function(g, i) {
+      setTimeout(function() {
+        g.style.transition = 'transform 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.25), opacity 0.16s ease';
+        g.style.opacity = '1';
+        g.style.transform = 'translateY(0)';
+      }, 60 + i * 40);
+    });
+
+    var hitDuration = 60 + glyphs.length * 40 + 80;
+    setTimeout(function() {
+      cameraRecoilStage.style.transition = 'transform 0.05s ease';
+      cameraRecoilStage.style.transform = 'translate(0, 3px)';
+      setTimeout(function() {
+        cameraRecoilStage.style.transform = 'translate(-1.5px, -1.5px)';
+        setTimeout(function() {
+          cameraRecoilStage.style.transform = 'none';
+          cameraRecoilStage.style.transition = '';
+        }, 40);
+      }, 40);
+
+      runTeletypePrint(20);
+    }, hitDuration);
+  }
+
+  triggerFullKineticSequence();
+
+  replayBtn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(triggerFullKineticSequence, 250);
+  });
+
+  /* --------------------------------------------------------------------------
+     3. 真实音频控制中枢 (Acoustic Singleton Engine)
+     -------------------------------------------------------------------------- */
+  var audio = document.getElementById('globalAudioEngine');
+  var panelPlayTrigger = document.getElementById('panelPlayTrigger');
+  var panelPlayIcon = document.getElementById('panelPlayIcon');
+  var panelPlayText = document.getElementById('panelPlayText');
+  var panelPrevBtn = document.getElementById('panelPrevBtn');
+  var panelNextBtn = document.getElementById('panelNextBtn');
+  var panelTrackName = document.getElementById('panelTrackName');
+  var panelTrackArtist = document.getElementById('panelTrackArtist');
+  var panelCurrentTime = document.getElementById('panelCurrentTime');
+  var panelTotalDuration = document.getElementById('panelTotalDuration');
+  var panelSeekBar = document.getElementById('panelSeekBar');
+  var panelSeekProgress = document.getElementById('panelSeekProgress');
+  var eqBars = Array.prototype.slice.call(document.querySelectorAll('.station-eq-bar'));
+
+  var floatingDock = document.getElementById('floatingDock');
+  var dockPlayBtn = document.getElementById('dockPlayBtn');
+  var dockPlayIcon = document.getElementById('dockPlayIcon');
+  var dockTrackTitle = document.getElementById('dockTrackTitle');
+  var dockTimeCode = document.getElementById('dockTimeCode');
+  var quickPlayEpheiaTrack = document.getElementById('quickPlayEpheiaTrack');
+
+  var playlist = [
+    {
+      name: "リリィ",
+      artist: "依菲雅 · 原声收录",
+      url: "../public/audio/epheia/lily.mp3"
+    },
+    {
+      name: "还愿",
+      artist: "草东没有派对 · 依菲雅特辑",
+      url: "../public/audio/epheia/huanyuan.mp3"
+    },
+    {
+      name: "Freefall (自由落体)",
+      artist: "文字 PV 伴奏 · 独占声轨",
+      url: "../public/audio/freefall/song.mp3"
+    }
+  ];
+
+  var currentIdx = 0;
+  var playing = false;
+  var timerRaf = null;
+
+  function setAudioTrack(idx) {
+    currentIdx = (idx + playlist.length) % playlist.length;
+    var track = playlist[currentIdx];
+    audio.src = track.url;
+    panelTrackName.textContent = track.name;
+    panelTrackArtist.textContent = track.artist;
+    dockTrackTitle.textContent = track.name;
+    panelSeekProgress.style.width = '0%';
+    panelCurrentTime.textContent = '00:00.00';
+  }
+
+  function fmtCentis(secs) {
+    if (!Number.isFinite(secs) || secs < 0) return "00:00.00";
+    var m = Math.floor(secs / 60);
+    var s = Math.floor(secs % 60);
+    var c = Math.floor((secs % 1) * 100);
+    return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s + "." + (c < 10 ? "0" : "") + c;
+  }
+
+  function fmtSecs(secs) {
+    if (!Number.isFinite(secs) || secs < 0) return "00:00";
+    var m = Math.floor(secs / 60);
+    var s = Math.floor(secs % 60);
+    return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function updateEqSpectrum(isLive) {
+    if (!isLive) {
+      eqBars.forEach(function(bar) {
+        bar.style.height = '3px';
+        bar.classList.remove('active');
+      });
+      return;
+    }
+    var t = performance.now() / 120;
+    eqBars.forEach(function(bar, i) {
+      var val = Math.abs(Math.sin(t + i * 0.75) * Math.cos(t * 0.8 + i * 0.5)) * 36 + 3;
+      bar.style.height = Math.round(val) + 'px';
+      if (val > 20) colLit(bar);
+      else bar.classList.remove('active');
+    });
+  }
+
+  function colLit(bar) {
+    bar.classList.add('active');
+  }
+
+  function loopAudioTimecode() {
+    if (!audio.paused && Number.isFinite(audio.duration) && audio.duration > 0) {
+      var cur = audio.currentTime;
+      var dur = audio.duration;
+      panelCurrentTime.textContent = fmtCentis(cur);
+      panelTotalDuration.textContent = fmtCentis(dur);
+      dockTimeCode.textContent = fmtSecs(cur) + ' / ' + fmtSecs(dur);
+      panelSeekProgress.style.width = (cur / dur * 100) + '%';
+      updateEqSpectrum(true);
+    }
+    if (playing) {
+      timerRaf = requestAnimationFrame(loopAudioTimecode);
+    }
+  }
+
+  function togglePlayState() {
+    if (audio.paused) {
+      audio.play().then(function() {
+        playing = true;
+        isAudioPlaying = true;
+        panelPlayIcon.textContent = '❚❚';
+        panelPlayText.textContent = '暂停声轨';
+        dockPlayIcon.textContent = '❚❚';
+        cancelAnimationFrame(timerRaf);
+        timerRaf = requestAnimationFrame(loopAudioTimecode);
+      }).catch(function() {
+        panelPlayText.textContent = '点击确认播放';
+      });
+    } else {
+      audio.pause();
+      playing = false;
+      isAudioPlaying = false;
+      panelPlayIcon.textContent = '▶';
+      panelPlayText.textContent = '启动声轨';
+      dockPlayIcon.textContent = '▶';
+      updateEqSpectrum(false);
+    }
+  }
+
+  audio.addEventListener('loadedmetadata', function() {
+    if (Number.isFinite(audio.duration)) {
+      panelTotalDuration.textContent = fmtCentis(audio.duration);
+      dockTimeCode.textContent = '00:00 / ' + fmtSecs(audio.duration);
+    }
+  });
+
+  audio.addEventListener('error', function() {
+    var cur = audio.getAttribute('src') || '';
+    if (cur.indexOf('../public/') === 0) {
+      audio.src = cur.replace('../public/', '/');
+    } else if (cur.indexOf('/') === 0) {
+      audio.src = '../public' + cur;
+    }
+  });
+
+  audio.addEventListener('ended', function() {
+    setAudioTrack(currentIdx + 1);
+    if (playing) audio.play();
+  });
+
+  panelPlayTrigger.addEventListener('click', togglePlayState);
+  dockPlayBtn.addEventListener('click', togglePlayState);
+
+  panelPrevBtn.addEventListener('click', function() {
+    setAudioTrack(currentIdx - 1);
+    if (playing) audio.play();
+  });
+  panelNextBtn.addEventListener('click', function() {
+    setAudioTrack(currentIdx + 1);
+    if (playing) audio.play();
+  });
+
+  quickPlayEpheiaTrack.addEventListener('click', function() {
+    setAudioTrack(0); // 《リリィ》
+    if (audio.paused) togglePlayState();
+    panelPlayTrigger.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  panelSeekBar.addEventListener('click', function(e) {
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    var rect = panelSeekBar.getBoundingClientRect();
+    var r = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = Math.max(0, Math.min(audio.duration, r * audio.duration));
+  });
+
+  setAudioTrack(0);
+
+  // 滚动感知常驻控制坞 (Observer)
+  var acousticBox = document.getElementById('acousticStationPanel');
+  var dockObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) floatingDock.classList.add('show');
+      else floatingDock.classList.remove('show');
+    });
+  }, { threshold: 0.1 });
+  dockObs.observe(acousticBox);
+
+  /* --------------------------------------------------------------------------
+     4. 暗房显影模式切换 (Darkroom Theme Toggle)
+     -------------------------------------------------------------------------- */
+  var themeBtn = document.getElementById('themeSwitchBtn');
+  var themeIcon = document.getElementById('themeBtnGlyph');
+
+  function setDarkroomState(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      themeIcon.textContent = '☼';
+    } else {
+      document.documentElement.classList.remove('dark');
+      themeIcon.textContent = '◐';
+    }
+  }
+
+  var isDarkStored = localStorage.getItem('curve-theme') === 'dark';
+  setDarkroomState(isDarkStored);
+
+  themeBtn.addEventListener('click', function() {
+    var willDark = !document.documentElement.classList.contains('dark');
+    setDarkroomState(willDark);
+    try { localStorage.setItem('curve-theme', willDark ? 'dark' : 'light'); } catch(e) {}
+  });
+
+})();
+</script>
+</body>
+</html>

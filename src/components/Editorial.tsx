@@ -16,7 +16,7 @@ export function Ornament({
   return (
     <div className={cn("flex items-center gap-3", className)} aria-hidden="true">
       <span className="h-px flex-1 bg-rule-soft/40" />
-      <span className="font-display text-[13px] text-stamp/85">
+      <span className="font-display text-[13px] text-stamp">
         {symbol.repeat(count).split("").join(" ")}
       </span>
       <span className="h-px flex-1 bg-rule-soft/40" />

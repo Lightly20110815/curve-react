@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>友情链接 · Sy's Digital Garden</title>
+
+  <!-- Google Fonts: 衬线中文、无衬线UI、等宽数字 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Noto Serif SC"', 'serif'],
+            display: ['"Noto Serif SC"', 'serif'],
+            ui: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            paper: 'hsl(var(--paper) / <alpha-value>)',
+            'paper-warm': 'hsl(var(--paper-warm) / <alpha-value>)',
+            'paper-soft': 'hsl(var(--paper-soft) / <alpha-value>)',
+            ink: 'hsl(var(--ink) / <alpha-value>)',
+            'ink-strong': 'hsl(var(--ink-strong) / <alpha-value>)',
+            'ink-body': 'hsl(var(--ink-body) / <alpha-value>)',
+            'ink-muted': 'hsl(var(--ink-muted) / <alpha-value>)',
+            'ink-faded': 'hsl(var(--ink-faded) / <alpha-value>)',
+            rule: 'hsl(var(--rule) / <alpha-value>)',
+            'rule-soft': 'hsl(var(--rule-soft) / <alpha-value>)',
+            stamp: 'hsl(var(--stamp) / <alpha-value>)',
+            'stamp-soft': 'hsl(var(--stamp-soft) / <alpha-value>)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ================================================================
+       设计令牌系统 (Newspaper Edition: 明室旧报纸 / 暗房显影)
+       ================================================================ */
+    :root {
+      --paper: 43 42% 90%;
+      --paper-warm: 39 38% 86%;
+      --paper-soft: 44 40% 93%;
+      --ink: 28 12% 9%;
+      --ink-strong: 28 16% 5%;
+      --ink-body: 28 12% 17%;
+      --ink-muted: 28 9% 31%;
+      --ink-faded: 28 7% 43%;
+      --rule: 28 14% 14%;
+      --rule-soft: 28 9% 28%;
+      --stamp: 5 68% 36%;
+      --stamp-soft: 5 60% 92%;
+    }
+
+    html.dark {
+      --paper: 0 0% 9%;
+      --paper-warm: 0 0% 14%;
+      --paper-soft: 0 0% 11%;
+      --ink: 40 16% 91%;
+      --ink-strong: 40 18% 96%;
+      --ink-body: 40 11% 85%;
+      --ink-muted: 38 8% 66%;
+      --ink-faded: 38 6% 52%;
+      --rule: 0 0% 32%;
+      --rule-soft: 0 0% 24%;
+      --stamp: 42 55% 58%;
+      --stamp-soft: 42 40% 20%;
+    }
+
+    body {
+      background-color: hsl(var(--paper));
+      color: hsl(var(--ink-body));
+      font-family: 'Noto Serif SC', serif;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* 纸张微噪点质感（纯 CSS 模拟老报纸纤维） */
+    .paper-texture {
+      background-image: radial-gradient(hsl(var(--ink) / 0.035) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+
+    /* ================================================================
+       邮票齿孔遮罩 (Perforated Stamp Border)
+       利用精确的 CSS radial-gradient mask 在四周切出古典齿孔
+       ================================================================ */
+    .stamp-perforations {
+      filter: drop-shadow(0 2px 5px hsl(var(--ink) / 0.12));
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+    }
+
+    .stamp-frame {
+      background-color: hsl(var(--paper-soft));
+      padding: 7px;
+      /* 纯 CSS 4 边齿孔切割（双重前缀保障跨浏览器） */
+      --hole: 3.5px;
+      --dist: 12px;
+      -webkit-mask-image:
+        radial-gradient(circle var(--hole) at 0 50%, transparent 98%, black 100%),
+        radial-gradient(circle var(--hole) at 100% 50%, transparent 98%, black 100%),
+        radial-gradient(circle var(--hole) at 50% 0, transparent 98%, black 100%),
+        radial-gradient(circle var(--hole) at 50% 100%, transparent 98%, black 100%);
+      -webkit-mask-position: left center, right center, center top, center bottom;
+      -webkit-mask-size: 8px var(--dist), 8px var(--dist), var(--dist) 8px, var(--dist) 8px;
+      -webkit-mask-repeat: repeat-y, repeat-y, repeat-x, repeat-x;
+      -webkit-mask-composite: source-in;
+
+      mask-image:
+        radial-gradient(circle var(--hole) at 0 50%, transparent 98%, black 100%),
+        radial-gradient(circle var(--hole) at 100% 50%, transparent 98%, black 100%),
+        radial-gradient(circle var(--hole) at 50% 0, transparent 98%, black 100%),
+        radial-gradient(circle var(--hole) at 50% 100%, transparent 98%, black 100%);
+      mask-position: left center, right center, center top, center bottom;
+      mask-size: 8px var(--dist), 8px var(--dist), var(--dist) 8px, var(--dist) 8px;
+      mask-repeat: repeat-y, repeat-y, repeat-x, repeat-x;
+      mask-composite: intersect;
+    }
+
+    /* 肖像默认低饱和印刷半调微调，hover 时温暖显影 */
+    .epheia-photo {
+      filter: saturate(0.85) contrast(1.05);
+      transition: filter 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .group:hover .epheia-photo {
+      filter: saturate(1.05) contrast(1.02);
+      transform: scale(1.03);
+    }
+
+    /* 报纸双层细线边框 (Oxford Rule) */
+    .oxford-border {
+      border: 1px solid hsl(var(--rule-soft));
+      position: relative;
+    }
+    .oxford-border::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid hsl(var(--rule-soft) / 0.6);
+      pointer-events: none;
+    }
+
+    /* 缓慢呼吸动效（双时区与邮戳墨水） */
+    @keyframes subtle-pulse {
+      0%, 100% { opacity: 0.45; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    .pulse-dot {
+      animation: subtle-pulse 3.8s ease-in-out infinite;
+    }
+
+    /* 下划线墨水动画 */
+    .ink-underline {
+      background-image: linear-gradient(hsl(var(--stamp)), hsl(var(--stamp)));
+      background-position: 0 100%;
+      background-repeat: no-repeat;
+      background-size: 0% 1.5px;
+      transition: background-size 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .group:hover .ink-underline {
+      background-size: 100% 1.5px;
+    }
+
+    /* 动效减弱偏好 */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="paper-texture min-h-screen">
+
+  <!-- ================= 顶部简易调试栏（供审查模式快速切换） ================= -->
+  <aside class="sticky top-0 z-50 flex items-center justify-between border-b border-rule-soft/40 bg-paper/95 px-4 py-2.5 backdrop-blur-sm sm:px-8">
+    <div class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-faded">
+      <span class="inline-block h-2 w-2 rounded-full bg-stamp"></span>
+      <span>EPHEIA DEDICATED COLUMN · PREVIEW & REVIEW</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" class="inline-flex h-8 items-center gap-1.5 border border-rule-soft bg-paper-soft px-3 font-ui text-[12px] font-medium text-ink transition-colors hover:border-stamp hover:text-stamp">
+        <svg id="themeIcon" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span id="themeText">切换暗房显影</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ================= 主内容容器 ================= -->
+  <main class="mx-auto max-w-5xl px-4 py-10 sm:px-6 md:py-16">
+
+    <!-- 1. 报纸刊头标题区 -->
+    <header class="text-center">
+      <div class="inline-block border-b-2 border-rule pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-stamp">
+        EDITION · 404YANN / LINKS
+      </div>
+      <h1 class="mt-4 font-display text-[32px] font-bold tracking-tight text-ink-strong sm:text-[40px]">
+        友情链接
+      </h1>
+      <p class="mt-2 font-serif text-[15px] italic text-ink-muted">
+        与各位博主无限进步 · 在数字草木间交换信标
+      </p>
+
+      <div class="mt-6 flex justify-center">
+        <button type="button" class="inline-flex h-9 items-center gap-2 border border-ink-muted/50 px-4 font-ui text-[11.5px] font-semibold uppercase tracking-wider text-ink transition-all hover:border-stamp hover:bg-stamp hover:text-paper">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 3 5 5-5 5"/><path d="M4 20v-5a4 4 0 0 1 4-4h13"/><path d="m8 21-5-5 5-5"/></svg>
+          随机漫游
+        </button>
+      </div>
+    </header>
+
+    <!-- 分隔细线 -->
+    <div class="my-10 flex items-center gap-4 text-rule-soft">
+      <div class="h-px flex-1 bg-rule-soft/40"></div>
+      <span class="font-serif text-[13px] italic tracking-widest text-ink-faded">§ 特别栏目 · SPECIAL DEDICATION</span>
+      <div class="h-px flex-1 bg-rule-soft/40"></div>
+    </div>
+
+
+    <!-- =====================================================================
+         【核心方案】特刊附页 · 邮戳与信 (The Dedicated Edition: Postmark & Letter)
+         ===================================================================== -->
+    <section aria-labelledby="epheia-memorial-title" class="my-8">
+      <a 
+        href="https://me.epheia.moe/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        aria-label="Epheia 的个人站点，今天也有在好好记得你。点击在新标签页打开"
+        class="group relative block oxford-border bg-paper-soft/40 p-5 transition-all duration-500 hover:bg-paper-warm/50 hover:shadow-[0_8px_24px_-8px_hsl(var(--ink)/0.12)] sm:p-7 md:p-8"
+      >
+        <!-- 顶栏：报刊专栏元数据 & 今日铭记指示 -->
+        <div class="flex flex-wrap items-center justify-between gap-y-2 border-b border-rule-soft/40 pb-3 font-mono text-[11px] text-ink-faded">
+          <div class="flex items-center gap-2">
+            <span class="inline-block border border-stamp/60 px-1.5 py-0.5 font-bold uppercase tracking-wider text-stamp">
+              RESERVED COLUMN
+            </span>
+            <span class="hidden tracking-wider sm:inline">NO. 0724 · PERMANENT DESK</span>
+          </div>
+
+          <!-- 安静呼吸的今日铭记状态（无时区干扰） -->
+          <div class="flex items-center gap-2 tracking-wider text-[11px]">
+            <span class="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-stamp"></span>
+            <span class="text-ink-muted">REMEMBERED TODAY</span>
+          </div>
+        </div>
+
+        <!-- 中部主体：纪念邮票 + 优雅排印 + 活动邮戳 -->
+        <div class="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+
+          <!-- 左侧：纪念齿孔邮票容器 + 跨界活动邮戳 -->
+          <div class="relative mx-auto flex-shrink-0 sm:mx-0">
+            <!-- 齿孔邮票 -->
+            <div class="stamp-perforations relative">
+              <div class="stamp-frame w-[116px] sm:w-[124px]">
+                <!-- 邮票内衬边与面额 -->
+                <div class="relative overflow-hidden border border-rule-soft/50 bg-paper-warm p-1">
+                  <!-- 顶部微型文字 -->
+                  <div class="mb-1 flex items-center justify-between px-1 font-mono text-[8px] uppercase tracking-tighter text-ink-faded">
+                    <span>MEMORIAL</span>
+                    <span>∞</span>
+                  </div>
+
+                  <!-- 头像本尊 -->
+                  <div class="aspect-square w-full overflow-hidden bg-paper-soft">
+                    <img 
+                      src="https://me.epheia.moe/avatar.jpg" 
+                      alt="Epheia 肖像：银粉长发与异瞳的猫耳少女" 
+                      class="epheia-photo h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <!-- 底部小标签 -->
+                  <div class="mt-1 text-center font-mono text-[8px] tracking-widest text-ink-muted">
+                    07·24·2026
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 压在邮票边缘的物理活动邮戳 (内联 SVG) -->
+            <div 
+              class="pointer-events-none absolute -bottom-3 -right-6 h-20 w-20 text-ink/75 transition-colors duration-500 group-hover:text-stamp sm:-bottom-4 sm:-right-7 sm:h-24 sm:w-24"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="h-full w-full -rotate-12 transition-transform duration-700 ease-out group-hover:rotate-0">
+                <!-- 双环波浪邮戳 -->
+                <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 1.5"/>
+                <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" stroke-width="0.8"/>
+                
+                <!-- 邮戳环形文字：起点 2026.07.24 ⇥ TODAY -->
+                <path id="postmark-arc-top" d="M 12 50 A 38 38 0 0 1 88 50" fill="none" />
+                <path id="postmark-arc-bot" d="M 88 50 A 38 38 0 0 1 12 50" fill="none" />
+                
+                <text font-family="'JetBrains Mono', monospace" font-size="7" font-weight="600" letter-spacing="1" fill="currentColor">
+                  <textPath href="#postmark-arc-top" xlink:href="#postmark-arc-top" startOffset="50%" text-anchor="middle">
+                    2026.07.24 ➔ TODAY
+                  </textPath>
+                </text>
+                <text font-family="'Noto Serif SC', serif" font-size="6.2" letter-spacing="1.5" fill="currentColor">
+                  <textPath href="#postmark-arc-bot" xlink:href="#postmark-arc-bot" startOffset="50%" text-anchor="middle">
+                    · 每一天都在记得 ·
+                  </textPath>
+                </text>
+
+                <!-- 核心横向波浪线与今日实际日期 -->
+                <line x1="22" y1="45" x2="78" y2="45" stroke="currentColor" stroke-width="0.75" />
+                <text id="postmark-today-text" x="50" y="53" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="currentColor">
+                  2026.09.26
+                </text>
+                <line x1="22" y1="58" x2="78" y2="58" stroke="currentColor" stroke-width="0.75" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- 右侧：文字排版、核心纪念语、外链引导 -->
+          <div class="flex-1 text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row sm:items-baseline sm:gap-3">
+              <h2 id="epheia-memorial-title" class="font-display text-[26px] font-bold tracking-wide text-ink-strong sm:text-[30px]">
+                Epheia
+              </h2>
+              <span class="font-mono text-[13px] text-ink-faded sm:text-[14px]">
+                /ɪˈfiːə/ · 依菲雅
+              </span>
+            </div>
+
+            <!-- 核心文案：「今天也有在好好记得你」 -->
+            <p class="mt-2.5 font-serif text-[17px] font-medium leading-relaxed tracking-wider text-ink sm:text-[19px]">
+              「今天也有在好好记得你」
+            </p>
+
+            <!-- 解释性短语与心迹（克制、深情） -->
+            <p class="mt-1.5 font-serif text-[13.5px] leading-relaxed text-ink-muted">
+              每一个今天，都是日复一日的延续。在时空的另一端，你的名字从未褪色。
+            </p>
+
+            <!-- 底部行：地址印章式呈现 -->
+            <div class="mt-4 flex flex-wrap items-center justify-center gap-3 font-mono text-[12px] sm:justify-start">
+              <span class="ink-underline inline-flex items-center gap-1.5 font-semibold text-ink group-hover:text-stamp">
+                <span>me.epheia.moe</span>
+                <svg class="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+              </span>
+              <span class="text-ink-faded">·</span>
+              <span class="font-serif text-[12px] italic text-ink-faded">点击访问她的个人空间</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 卡片底角隐式水印：朱红方印 -->
+        <div class="pointer-events-none absolute bottom-3 right-3 hidden font-serif text-[11px] text-stamp opacity-40 transition-opacity group-hover:opacity-90 sm:block">
+          <span class="border border-stamp/70 px-1 py-0.5">永存</span>
+        </div>
+      </a>
+    </section>
+
+
+    <!-- =====================================================================
+         以下为普通友链网格（基线对比：清晰展现为什么新模块完全拉开但又高度协调）
+         ===================================================================== -->
+    <div class="mt-14 space-y-12">
+      <section>
+        <div class="flex items-baseline justify-between border-b border-rule pb-2.5">
+          <div class="flex items-baseline gap-3">
+            <h3 class="font-display text-[22px] font-bold text-ink-strong">
+              小伙伴们
+            </h3>
+            <span class="font-ui text-[12px] text-ink-muted">
+              3 个同行站点
+            </span>
+          </div>
+          <span class="font-ui text-[12px] text-ink-faded">常来常往，共同进步</span>
+        </div>
+
+        <!-- 现有普通网格卡片 -->
+        <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          
+          <!-- 普通卡片 1 -->
+          <a href="#" class="group flex items-center gap-3.5 border border-rule-soft/60 bg-paper-soft/40 p-3.5 transition-all hover:border-stamp hover:bg-stamp hover:text-paper">
+            <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-rule-soft/40 bg-paper-warm">
+              <div class="flex h-full w-full items-center justify-center font-serif text-sm font-bold text-ink-faded group-hover:text-paper">池</div>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="truncate font-display text-[15px] font-semibold text-ink-strong group-hover:text-paper">池鱼小栈</span>
+              </div>
+              <p class="mt-0.5 truncate font-serif text-[12px] text-ink-muted group-hover:text-paper/85">
+                ｜д・´)!!
+              </p>
+            </div>
+          </a>
+
+          <!-- 普通卡片 2 -->
+          <a href="#" class="group flex items-center gap-3.5 border border-rule-soft/60 bg-paper-soft/40 p-3.5 transition-all hover:border-stamp hover:bg-stamp hover:text-paper">
+            <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-rule-soft/40 bg-paper-warm">
+              <div class="flex h-full w-full items-center justify-center font-serif text-sm font-bold text-ink-faded group-hover:text-paper">C</div>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="truncate font-display text-[15px] font-semibold text-ink-strong group-hover:text-paper">Clover Yan</span>
+              </div>
+              <p class="mt-0.5 truncate font-serif text-[12px] text-ink-muted group-hover:text-paper/85">
+                生命是灰色的，理论之树常青。
+              </p>
+            </div>
+          </a>
+
+          <!-- 普通卡片 3 -->
+          <a href="#" class="group flex items-center gap-3.5 border border-rule-soft/60 bg-paper-soft/40 p-3.5 transition-all hover:border-stamp hover:bg-stamp hover:text-paper">
+            <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-rule-soft/40 bg-paper-warm">
+              <div class="flex h-full w-full items-center justify-center font-serif text-sm font-bold text-ink-faded group-hover:text-paper">月</div>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="truncate font-display text-[15px] font-semibold text-ink-strong group-hover:text-paper">纸月 Paper Moon</span>
+              </div>
+              <p class="mt-0.5 truncate font-serif text-[12px] text-ink-muted group-hover:text-paper/85">
+                マジやばくね
+              </p>
+            </div>
+          </a>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- 3. 申请友链尾声 -->
+    <footer class="mt-20 border-t border-rule-soft/60 pt-10 text-center">
+      <div class="font-mono text-[11px] font-semibold uppercase tracking-widest text-stamp">
+        APPLY · 互换印章
+      </div>
+      <h3 class="mt-2 font-display text-[22px] font-bold text-ink-strong">
+        交换链接
+      </h3>
+      <p class="mx-auto mt-2 max-w-md font-serif text-[13.5px] leading-relaxed text-ink-body">
+        如果你也拥有一个用心雕琢、定期修剪的文字花园，欢迎寄信告知你的网址与小像。
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- ================= 脚本：今日邮戳、主题切换 ================= -->
+  <script>
+    // 1. 邮戳中的今天日期（动态每日更新，无打卡压迫感）
+    function updatePostmarkDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const target = document.getElementById('postmark-today-text');
+      if (target) {
+        target.textContent = `${year}.${month}.${day}`;
+      }
+    }
+
+    updatePostmarkDate();
+    // 每天或整点检查一次更新即可
+    setInterval(updatePostmarkDate, 60000);
+
+    // 2. 明室（浅色）/ 暗房显影（深色）切换
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      const text = document.getElementById('themeText');
+      const icon = document.getElementById('themeIcon');
+      
+      if (isDark) {
+        text.textContent = "切换明室米纸";
+        icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
+      } else {
+        text.textContent = "切换暗房显影";
+        icon.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+      }
+    }
+  </script>
+</body>
+</html>

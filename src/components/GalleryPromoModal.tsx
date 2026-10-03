@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Camera, MapPin, X } from "lucide-react";
 import { allPhotos, type Photo } from "@/lib/photos";
 import { formatArticleDateline } from "@/lib/han-date";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { imageSrcSet } from "@/lib/responsive-image";
 import { cn } from "@/lib/utils";
 
 const STORAGE_DISMISSED_KEY = "sdg_gallery_promo_dismissed";
@@ -18,7 +20,6 @@ export interface ColorScheme {
   subtitle: string;
   kickerText: string;
   kickerIcon: string;
-  excerptBorderL: string;
   excerptBorder: string;
   excerptBg: string;
   excerptKicker: string;
@@ -34,16 +35,15 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "sunset-blossom",
     name: "落日落霞",
-    title1: "bg-gradient-to-r from-amber-300 via-rose-400 to-pink-500 bg-clip-text text-transparent drop-shadow-[0_8px_25px_rgba(244,63,94,0.35)]",
-    title2: "bg-gradient-to-r from-pink-400 via-fuchsia-400 to-cyan-300 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(192,132,252,0.45)]",
+    title1: "text-amber-200",
+    title2: "text-rose-200 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]",
     titleUnderline: "decoration-cyan-400/50",
-    subtitle: "bg-gradient-to-r from-rose-200 via-amber-100 to-cyan-200 bg-clip-text text-transparent drop-shadow-sm",
-    kickerText: "bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent",
+    subtitle: "text-amber-100",
+    kickerText: "text-rose-200",
     kickerIcon: "text-pink-400",
-    excerptBorderL: "border-l-pink-500",
     excerptBorder: "border-cyan-400/30",
     excerptBg: "bg-gradient-to-r from-purple-950/40 via-pink-950/30 to-black/35",
-    excerptKicker: "bg-gradient-to-r from-pink-400 to-amber-300 bg-clip-text text-transparent",
+    excerptKicker: "text-amber-200",
     excerptCamera: "text-cyan-300",
     excerptLocation: "text-cyan-200/85",
     primaryBtn: "bg-rose-500 hover:bg-rose-600 border-rose-300/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_8px_25px_rgba(244,63,94,0.45)]",
@@ -54,16 +54,15 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "aurora-borealis",
     name: "极光夜幕",
-    title1: "bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_8px_25px_rgba(20,184,166,0.35)]",
-    title2: "bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-300 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(56,189,248,0.45)]",
+    title1: "text-emerald-200",
+    title2: "text-cyan-200 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]",
     titleUnderline: "decoration-emerald-400/50",
-    subtitle: "bg-gradient-to-r from-teal-100 via-cyan-100 to-sky-200 bg-clip-text text-transparent drop-shadow-sm",
-    kickerText: "bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent",
+    subtitle: "text-teal-100",
+    kickerText: "text-emerald-200",
     kickerIcon: "text-emerald-400",
-    excerptBorderL: "border-l-emerald-400",
     excerptBorder: "border-teal-400/30",
     excerptBg: "bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-black/35",
-    excerptKicker: "bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent",
+    excerptKicker: "text-cyan-200",
     excerptCamera: "text-emerald-300",
     excerptLocation: "text-teal-200/85",
     primaryBtn: "bg-teal-500 hover:bg-teal-600 border-teal-300/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_8px_25px_rgba(20,184,166,0.45)]",
@@ -74,16 +73,15 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "cyber-neon",
     name: "赛博霓虹",
-    title1: "bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-500 bg-clip-text text-transparent drop-shadow-[0_8px_25px_rgba(217,70,239,0.35)]",
-    title2: "bg-gradient-to-r from-fuchsia-400 via-purple-300 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(244,114,182,0.45)]",
+    title1: "text-fuchsia-200",
+    title2: "text-violet-200 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]",
     titleUnderline: "decoration-fuchsia-400/50",
-    subtitle: "bg-gradient-to-r from-purple-200 via-fuchsia-100 to-pink-200 bg-clip-text text-transparent drop-shadow-sm",
-    kickerText: "bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent",
+    subtitle: "text-purple-100",
+    kickerText: "text-fuchsia-200",
     kickerIcon: "text-fuchsia-400",
-    excerptBorderL: "border-l-fuchsia-500",
     excerptBorder: "border-violet-400/30",
     excerptBg: "bg-gradient-to-r from-violet-950/40 via-fuchsia-950/30 to-black/35",
-    excerptKicker: "bg-gradient-to-r from-violet-300 to-pink-300 bg-clip-text text-transparent",
+    excerptKicker: "text-violet-200",
     excerptCamera: "text-fuchsia-300",
     excerptLocation: "text-purple-200/85",
     primaryBtn: "bg-purple-600 hover:bg-purple-700 border-purple-300/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_8px_25px_rgba(147,51,234,0.45)]",
@@ -94,16 +92,15 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "citrus-mojito",
     name: "青柠气泡",
-    title1: "bg-gradient-to-r from-yellow-300 via-lime-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-[0_8px_25px_rgba(132,204,22,0.35)]",
-    title2: "bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-300 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(52,211,153,0.45)]",
+    title1: "text-lime-200",
+    title2: "text-emerald-200 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]",
     titleUnderline: "decoration-lime-400/50",
-    subtitle: "bg-gradient-to-r from-yellow-100 via-lime-100 to-teal-100 bg-clip-text text-transparent drop-shadow-sm",
-    kickerText: "bg-gradient-to-r from-yellow-300 via-lime-400 to-teal-400 bg-clip-text text-transparent",
+    subtitle: "text-lime-100",
+    kickerText: "text-lime-200",
     kickerIcon: "text-lime-400",
-    excerptBorderL: "border-l-lime-400",
     excerptBorder: "border-emerald-400/30",
     excerptBg: "bg-gradient-to-r from-lime-950/40 via-emerald-950/30 to-black/35",
-    excerptKicker: "bg-gradient-to-r from-yellow-300 to-emerald-300 bg-clip-text text-transparent",
+    excerptKicker: "text-emerald-200",
     excerptCamera: "text-lime-300",
     excerptLocation: "text-lime-200/85",
     primaryBtn: "bg-emerald-600 hover:bg-emerald-700 border-emerald-300/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_8px_25px_rgba(16,185,129,0.45)]",
@@ -114,16 +111,15 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "solar-fire",
     name: "曜金烈焰",
-    title1: "bg-gradient-to-r from-red-400 via-orange-400 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_8px_25px_rgba(249,115,22,0.35)]",
-    title2: "bg-gradient-to-r from-amber-300 via-yellow-400 to-rose-400 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(245,158,11,0.45)]",
+    title1: "text-orange-200",
+    title2: "text-amber-200 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]",
     titleUnderline: "decoration-amber-400/50",
-    subtitle: "bg-gradient-to-r from-orange-100 via-amber-100 to-rose-200 bg-clip-text text-transparent drop-shadow-sm",
-    kickerText: "bg-gradient-to-r from-red-400 via-orange-400 to-amber-300 bg-clip-text text-transparent",
+    subtitle: "text-amber-100",
+    kickerText: "text-orange-200",
     kickerIcon: "text-orange-400",
-    excerptBorderL: "border-l-orange-500",
     excerptBorder: "border-amber-400/30",
     excerptBg: "bg-gradient-to-r from-orange-950/40 via-red-950/30 to-black/35",
-    excerptKicker: "bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent",
+    excerptKicker: "text-amber-200",
     excerptCamera: "text-amber-300",
     excerptLocation: "text-amber-200/85",
     primaryBtn: "bg-orange-500 hover:bg-orange-600 border-orange-300/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_8px_25px_rgba(249,115,22,0.45)]",
@@ -134,16 +130,15 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "cosmic-candy",
     name: "星梦棉糖",
-    title1: "bg-gradient-to-r from-pink-300 via-fuchsia-300 to-purple-300 bg-clip-text text-transparent drop-shadow-[0_8px_25px_rgba(232,121,249,0.35)]",
-    title2: "bg-gradient-to-r from-purple-300 via-sky-300 to-teal-200 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(56,189,248,0.45)]",
+    title1: "text-pink-200",
+    title2: "text-sky-200 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]",
     titleUnderline: "decoration-pink-300/50",
-    subtitle: "bg-gradient-to-r from-pink-100 via-purple-100 to-sky-100 bg-clip-text text-transparent drop-shadow-sm",
-    kickerText: "bg-gradient-to-r from-pink-300 via-purple-300 to-sky-300 bg-clip-text text-transparent",
+    subtitle: "text-purple-100",
+    kickerText: "text-pink-200",
     kickerIcon: "text-pink-300",
-    excerptBorderL: "border-l-pink-400",
     excerptBorder: "border-purple-300/30",
     excerptBg: "bg-gradient-to-r from-pink-950/40 via-purple-950/30 to-black/35",
-    excerptKicker: "bg-gradient-to-r from-pink-300 to-sky-300 bg-clip-text text-transparent",
+    excerptKicker: "text-sky-200",
     excerptCamera: "text-sky-300",
     excerptLocation: "text-purple-200/85",
     primaryBtn: "bg-pink-500 hover:bg-pink-600 border-pink-300/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_8px_25px_rgba(236,72,153,0.45)]",
@@ -163,6 +158,10 @@ export function GalleryPromoModal() {
   const [hasMouse, setHasMouse] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const photoContainerRef = useRef<HTMLDivElement>(null);
+
+  // This promo opens itself on load, so without a trap the first Tab lands on a
+  // nav link behind the overlay and the dialog is ~60 stops away.
+  useFocusTrap(containerRef, isOpen);
 
   useEffect(() => {
     setMounted(true);
@@ -281,10 +280,18 @@ export function GalleryPromoModal() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="gallery-promo-title"
+      tabIndex={-1}
     >
-      {/* 1. Real Frosted Glass (毛玻璃) Backdrop Layer with dynamic Peep-Hole cutout */}
+      {/*
+        1. Frosted Glass (毛玻璃) Backdrop Layer with dynamic Peep-Hole cutout.
+
+        The scrim is deliberately heavy. At the old `bg-ink/35` the backdrop
+        composited to ~#aaa59b over newsprint, which put every headline tint at
+        1.7-2.4:1 — the promo's own text was effectively invisible on the light
+        themes. At `bg-ink/80` the same colours read at 6-8:1.
+      */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 bg-ink/35 backdrop-blur-[14px] backdrop-saturate-[150%] dark:bg-black/50"
+        className="pointer-events-none fixed inset-0 z-0 bg-ink/80 backdrop-blur-[14px] backdrop-saturate-[150%] dark:bg-black/75"
         style={
           hasMouse
             ? {
@@ -297,8 +304,8 @@ export function GalleryPromoModal() {
         }
       >
         {/* Frosted glass surface grain and soft specular reflection sheen */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/[0.04] to-transparent opacity-90" />
-        <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
+        <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.18)]" />
       </div>
 
       {/* 2. Interactive Peep-hole Lens Follower Ring (Desktop pointer only) */}
@@ -375,9 +382,8 @@ export function GalleryPromoModal() {
           {/* Photo Excerpt Box with dynamic color scheme (Desktop only to prevent redundant duplicate on mobile) */}
           <div
             className={cn(
-              "hidden lg:block mt-8 max-w-xl rounded-sm border border-l-4 p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_12px_28px_rgba(0,0,0,0.35)] backdrop-blur-md",
+              "hidden lg:block mt-8 max-w-xl rounded-sm border p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_12px_28px_rgba(0,0,0,0.35)] backdrop-blur-md",
               colorScheme.excerptBorder,
-              colorScheme.excerptBorderL,
               colorScheme.excerptBg,
             )}
           >
@@ -390,7 +396,7 @@ export function GalleryPromoModal() {
               </span>
             </div>
             <p className="mt-2 font-display text-[18px] font-bold sm:text-[20px]">
-              <span className="bg-gradient-to-r from-amber-100 via-white to-cyan-100 bg-clip-text text-transparent">
+              <span className="text-paper">
                 "{randomPhoto.title}"
               </span>
             </p>
@@ -548,7 +554,11 @@ function RingPhotoStack({
           <div className="relative aspect-[4/3] w-full overflow-hidden border border-black/15 bg-paper-warm shadow-inner">
             <img
               src={photo.src}
+              srcSet={imageSrcSet(photo.src)}
+              sizes="(min-width: 1024px) 46vw, 92vw"
               alt={photo.title}
+              loading="eager"
+              decoding="async"
               className="h-full w-full object-cover"
             />
             <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_12px_rgba(0,0,0,0.25)]" />
@@ -688,7 +698,10 @@ function RingPhotoStack({
         <div className="relative aspect-[4/3] w-full overflow-hidden border border-black/15 bg-paper-warm shadow-inner">
           <img
             src={photo.src}
+            srcSet={imageSrcSet(photo.src)}
+            sizes="(min-width: 1024px) 46vw, 92vw"
             alt={photo.title}
+            decoding="async"
             className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
           <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.25)]" />

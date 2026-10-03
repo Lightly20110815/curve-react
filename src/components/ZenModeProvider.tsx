@@ -8,6 +8,9 @@ import {
   type ReactNode,
 } from "react";
 import { useLocation } from "react-router-dom";
+import { getPostBySlug } from "@/content/posts";
+import { isBeforeAsOf } from "@/lib/as-of";
+import { useAsOf } from "@/hooks/useAsOf";
 
 interface ZenModeState {
   isZen: boolean;
@@ -24,15 +27,22 @@ const ZenModeContext = createContext<ZenModeState | null>(null);
  * Hides the masthead/nav/footer/music chrome so only the article body
  * (plus the reading progress bar and TOC) remains. Auto-exits whenever
  * the user navigates to a different route, so the state is always
- * scoped to "this one article".
+ * scoped to "this one article". 文章 frontmatter 里 zen: true 的篇目，
+ * 点进来时默认就是禅模式——由这里按目标路由裁决，
+ * 因为子组件的 effect 总先于 Provider 执行，交给页面自己进会被重置。
  */
 export function ZenModeProvider({ children }: { children: ReactNode }) {
   const [isZen, setIsZen] = useState(false);
   const { pathname } = useLocation();
+  const { asOf } = useAsOf();
 
   useEffect(() => {
-    setIsZen(false);
-  }, [pathname]);
+    const match = /^\/posts\/([^/]+)\/?$/.exec(pathname);
+    const post = match ? getPostBySlug(match[1]) : undefined;
+    // 时间旅行里尚未刊登的文章显示占位页，不默认进禅
+    const hidden = !!(post && asOf && !isBeforeAsOf(post.date, asOf));
+    setIsZen(Boolean(post?.zen) && !hidden);
+  }, [pathname, asOf]);
 
   useEffect(() => {
     if (!isZen) return;

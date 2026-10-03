@@ -4,17 +4,26 @@ import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
+/**
+ * Ten sections with two-line labels need ~1160px to sit on one row. Below that
+ * they overflowed the viewport — 294px of horizontal scroll at 768px, which cut
+ * off 倒计时 / 友链 / 编者 entirely. The strip now wraps into two rows from md
+ * and returns to a single row at xl.
+ *
+ * The `min-w` floors are xl-only for the same reason: they were what stopped
+ * the items shrinking, so with them applied at md the row could not compress.
+ */
 const links = [
-  { to: "/epheia", label: "EPHEIA", subLabel: "依菲雅", end: false, width: "min-w-[76px]" },
-  { to: "/", label: "FRONT", subLabel: "头版", end: true, width: "min-w-[68px]" },
-  { to: "/archives", label: "ARCHIVES", subLabel: "存档", end: false, width: "min-w-[82px]" },
-  { to: "/categories", label: "SECTIONS", subLabel: "版块", end: false, width: "min-w-[74px]" },
-  { to: "/tags", label: "INDEX", subLabel: "索引", end: false, width: "min-w-[72px]" },
-  { to: "/notes", label: "OPINION", subLabel: "随笔", end: false, width: "min-w-[78px]" },
-  { to: "/photos", label: "GALLERY", subLabel: "光影", end: false, width: "min-w-[76px]" },
-  { to: "/countdown", label: "COUNTDOWN", subLabel: "倒计时", end: false, width: "min-w-[84px]" },
-  { to: "/links", label: "LINKS", subLabel: "友链", end: false, width: "min-w-[68px]" },
-  { to: "/about", label: "MASTHEAD", subLabel: "编者", end: false, width: "min-w-[70px]" },
+  { to: "/epheia", label: "EPHEIA", subLabel: "依菲雅", end: false, width: "xl:min-w-[76px]" },
+  { to: "/", label: "FRONT", subLabel: "头版", end: true, width: "xl:min-w-[68px]" },
+  { to: "/archives", label: "ARCHIVES", subLabel: "存档", end: false, width: "xl:min-w-[82px]" },
+  { to: "/categories", label: "SECTIONS", subLabel: "版块", end: false, width: "xl:min-w-[74px]" },
+  { to: "/tags", label: "INDEX", subLabel: "索引", end: false, width: "xl:min-w-[72px]" },
+  { to: "/notes", label: "OPINION", subLabel: "随笔", end: false, width: "xl:min-w-[78px]" },
+  { to: "/photos", label: "GALLERY", subLabel: "光影", end: false, width: "xl:min-w-[76px]" },
+  { to: "/countdown", label: "COUNTDOWN", subLabel: "倒计时", end: false, width: "xl:min-w-[84px]" },
+  { to: "/links", label: "LINKS", subLabel: "友链", end: false, width: "xl:min-w-[68px]" },
+  { to: "/about", label: "MASTHEAD", subLabel: "编者", end: false, width: "xl:min-w-[70px]" },
 ] as const;
 
 /**
@@ -53,7 +62,7 @@ export function Nav() {
         </Link>
 
         {/* Desktop links */}
-        <ul className="hidden items-end gap-2 md:flex">
+        <ul className="hidden min-w-0 flex-wrap items-end justify-center gap-x-0.5 gap-y-0.5 md:flex xl:gap-x-2">
           {links.map((l) => (
             <li key={l.to}>
               <NavLink
@@ -61,7 +70,7 @@ export function Nav() {
                 end={l.end}
                 className={({ isActive }) =>
                   cn(
-                    "group flex flex-col items-center border-b-[3px] border-transparent px-3 py-1.5 transition-colors",
+                    "group flex flex-col items-center border-b-[3px] border-transparent px-1 py-1 transition-colors xl:px-3 xl:py-1.5",
                     l.width,
                     isActive ? "border-stamp text-stamp" : "text-ink hover:text-stamp",
                   )
@@ -71,7 +80,7 @@ export function Nav() {
                   <>
                     <span
                       className={cn(
-                        "font-ui text-[13px] tracking-[0.1em]",
+                        "font-ui text-[12px] tracking-[0.08em] xl:text-[13px] xl:tracking-[0.1em]",
                         isActive
                           ? "font-black text-stamp"
                           : "font-semibold text-ink-strong group-hover:text-stamp",
@@ -81,8 +90,8 @@ export function Nav() {
                     </span>
                     <span
                       className={cn(
-                        "mt-1 font-ui text-[11px] font-medium uppercase tracking-[0.14em]",
-                        isActive ? "text-stamp/85" : "text-ink-muted group-hover:text-stamp/70",
+                        "mt-0.5 font-ui text-[10px] font-medium uppercase tracking-[0.1em] xl:mt-1 xl:text-[11px] xl:tracking-[0.14em]",
+                        isActive ? "text-stamp" : "text-ink-muted group-hover:text-stamp",
                       )}
                     >
                       {l.label}

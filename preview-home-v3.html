@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曲線時報 · 首页概念 v3</title>
+<script>
+/* 早标记 js：无 JS 时一切静态可见；主脚本若未能启动，load 后 1.5s 摘除该类兜底 */
+document.documentElement.classList.add('js');
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    if (!window.__v3boot) document.documentElement.classList.remove('js');
+  }, 1500);
+});
+</script>
+<style>
+/* ============ 基调 ============ */
+:root {
+  --paper: #f1f2ee;
+  --paper-2: #e9eae4;
+  --ink: #14161a;
+  --ink-soft: #4a4e55;
+  --ink-faint: #71757c;
+  --red: #c8372d;
+  --hair: #d9dbd2;
+  --dark: #101216;
+  --song: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", serif;
+  --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, "Courier New", monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--paper);
+  /* 纸张纤维噪点：直接铺为背景（透明度烘焙进 SVG），不做 fixed 全屏混合层 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--red); color: #fff; }
+a { color: inherit; text-decoration: none; }
+
+/* ============ 头版（落字现场） ============ */
+.hero {
+  position: relative;
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  padding: clamp(18px, 3vw, 40px) clamp(20px, 4.5vw, 64px) 90px;
+}
+.dateline {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--ink-soft);
+  border-bottom: 1px solid var(--ink); padding-bottom: 10px;
+  max-width: 1240px; margin-left: auto; margin-right: auto;
+}
+.dateline .r { text-align: right; }
+.mastrow {
+  display: flex; align-items: stretch; justify-content: space-between;
+  border-bottom: 3px double var(--ink);
+  padding: 14px 0 18px; gap: 20px;
+  max-width: 1240px; margin-left: auto; margin-right: auto;
+}
+.mast {
+  font-family: var(--song); font-weight: 900;
+  font-size: clamp(38px, 6.4vw, 76px);
+  letter-spacing: .1em; line-height: 1;
+}
+.mast-en {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .5em;
+  color: var(--ink-faint); margin-top: 10px; text-transform: uppercase;
+}
+.mast-side {
+  writing-mode: vertical-rl; font-family: var(--song);
+  font-size: 12px; letter-spacing: .3em; color: var(--ink-soft);
+  border-left: 1px solid var(--hair); padding-left: 12px;
+  display: flex; align-items: center;
+}
+
+/* 落字区 */
+.stage {
+  position: relative; flex: 1;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 4vh 0;
+  overflow: hidden; /* 活字从报头双线后落下，穿出即裁剪 */
+}
+.stage .kicker, .stage .lead-wrap { width: 100%; max-width: 1240px; margin-left: auto; margin-right: auto; }
+.kicker {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .2em; color: var(--red);
+  margin-bottom: 3vh;
+  transition: opacity .5s, transform .5s;
+}
+html.js .kicker { opacity: 0; transform: translateY(8px); }
+.lead-wrap { position: relative; display: inline-block; }
+.lead-link { display: block; color: inherit; text-decoration: none; }
+.lead-link:focus-visible { outline: 2px solid var(--red); outline-offset: 4px; }
+.lead-title {
+  position: relative;
+  font-family: var(--song); font-weight: 900;
+  font-size: clamp(34px, 7vw, 92px);
+  line-height: 1.12; letter-spacing: .02em;
+  text-wrap: balance; /* 长标题允许折两行，JS 测量逐字落点天然兼容 */
+}
+html.js .lead-title { visibility: hidden; } /* 测量定位完成前藏起，杜绝首帧落定闪现 */
+html.js .lead-title.ready { visibility: visible; }
+.lead-title .ch { display: inline-block; will-change: transform; }
+.seal {
+  position: absolute; left: 0; top: 0; /* 实际位置由 JS 按标题末字计算 */
+  width: 76px; height: 76px;
+  display: grid; place-items: center;
+  border: 3px solid var(--red); color: var(--red);
+  font-family: var(--song); font-weight: 900; font-size: 25px; line-height: 1;
+  writing-mode: vertical-rl; letter-spacing: .18em; /* 竖排方章 */
+  transform: rotate(-7deg) scale(1.7); opacity: 0;
+  pointer-events: none;
+  transition: transform .28s cubic-bezier(.2, 1.6, .4, 1), opacity .2s;
+  /* 真印泥：不垫纸色，multiply 让红墨吃进黑字，feTurbulence 位移做崩边 */
+  mix-blend-mode: multiply;
+  filter: url(#sealRough);
+}
+.seal.on { transform: rotate(-7deg) scale(1); opacity: .94; }
+.after {
+  margin-top: 4.5vh; width: 100%; max-width: 1240px;
+  margin-left: auto; margin-right: auto;
+  padding-right: max(0px, calc(min(100%, 1240px) - 600px)); /* 文本行长仍限 600 */
+}
+.dek {
+  font-family: var(--song); font-size: clamp(15px, 1.6vw, 19px);
+  line-height: 1.9; color: var(--ink-soft);
+  transition: opacity .55s .05s, transform .55s .05s;
+}
+html.js .dek { opacity: 0; transform: translateY(10px); }
+.byline {
+  margin-top: 2.2vh; display: flex; flex-wrap: wrap; gap: 8px 18px;
+  font-family: var(--mono); font-size: 12px; color: var(--ink-faint); letter-spacing: .06em;
+  transition: opacity .5s .15s, transform .5s .15s;
+}
+html.js .byline { opacity: 0; transform: translateY(8px); }
+.byline b { color: var(--ink); font-weight: 600; }
+.byline .readmore { color: var(--ink-soft); transition: color .2s; }
+.byline .readmore:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+html.js .settled .kicker, html.js .settled .dek, html.js .settled .byline { opacity: 1; transform: none; }
+
+/* 重排按钮：内联在日期行 */
+.replay {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+  color: var(--ink-soft); background: none;
+  border: 1px solid var(--hair); padding: 4px 10px; margin-left: 14px; cursor: pointer;
+  vertical-align: baseline;
+  transition: border-color .2s, color .2s;
+}
+.replay:hover { border-color: var(--red); color: var(--red); }
+.replay:focus-visible, .vinyl:focus-visible, .wire-item:focus-visible,
+.np-disc:focus-visible, .np-close:focus-visible {
+  outline: 2px solid var(--red); outline-offset: 2px;
+}
+
+/* 黑胶：今日曲目 */
+.vinyl-scene {
+  position: absolute;
+  right: max(clamp(0px, 2vw, 32px), calc((100% - 1240px) / 2)); /* 贴版心右缘而非视口右缘 */
+  bottom: 5vh;
+  width: 300px; height: 168px; cursor: pointer;
+  transition: opacity .6s .3s, transform .6s .3s;
+}
+html.js .vinyl-scene { opacity: 0; transform: translateY(12px); }
+html.js .settled .vinyl-scene { opacity: 1; transform: none; }
+.sleeve {
+  position: absolute; left: 0; top: 0; width: 168px; height: 168px;
+  z-index: 2; pointer-events: none;
+}
+.sleeve::before { /* 封套面：冲孔真镂空，露出底下的盘心标签 */
+  content: ""; position: absolute; inset: 0;
+  background: var(--paper-2); border: 1px solid var(--hair);
+  box-shadow: 0 1px 0 rgba(20,22,26,.06);
+  -webkit-mask: radial-gradient(circle 30px at 50% 50%, transparent 96%, #000 100%);
+  mask: radial-gradient(circle 30px at 50% 50%, transparent 96%, #000 100%);
+}
+.sleeve::after { /* 孔缘厚度 */
+  content: ""; position: absolute; left: 50%; top: 50%; width: 60px; height: 60px;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.6);
+}
+.sleeve-meta {
+  position: absolute; left: 12px; top: 10px; z-index: 3;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--ink-faint);
+  line-height: 1.8;
+}
+.sleeve-meta b { font-family: var(--song); font-size: 15px; color: var(--ink); letter-spacing: .1em; }
+.sleeve-foot {
+  position: absolute; left: 12px; bottom: 10px; z-index: 3;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--ink-faint);
+}
+.vinyl {
+  position: absolute; left: 9px; top: 9px; width: 150px; height: 150px;
+  border-radius: 50%; border: none; cursor: pointer; padding: 0; z-index: 1;
+  background: repeating-radial-gradient(circle at 50% 50%, #0c0d10 0 1.5px, #191b1f 1.5px 3px);
+  box-shadow: 0 3px 10px rgba(16,18,22,.35);
+  transition: transform .55s cubic-bezier(.3, .9, .3, 1);
+  overflow: hidden;
+}
+.vinyl::after { /* 高光：唱机光源固定，不随盘旋转（画在不转的父层上） */
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 210deg, transparent 0deg, rgba(255,255,255,.13) 18deg, transparent 40deg, transparent 180deg, rgba(255,255,255,.08) 200deg, transparent 225deg);
+}
+.vinyl .disc {
+  position: absolute; inset: 0; border-radius: 50%;
+  display: grid; place-items: center;
+}
+.vinyl .disc i {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--red); color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--song); font-style: normal; font-weight: 900; font-size: 13px;
+  box-shadow: 0 0 0 3px #0c0d10, 0 0 0 4.5px rgba(255,255,255,.25);
+}
+.vinyl.out { transform: translateX(96px); }
+.vinyl .disc.spin { animation: spin 2.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.vinyl-hint {
+  position: absolute; right: 0; bottom: -26px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--ink-soft);
+}
+.vinyl-hint::before { content: "●"; color: var(--red); font-size: 7px; margin-right: 7px; vertical-align: 1px; }
+
+/* 滚动提示：锚在头版底部，不参与落字区布局 */
+.scrollhint {
+  position: absolute;
+  left: max(clamp(20px, 4.5vw, 64px), calc((100% - 1240px) / 2 + 20px));
+  bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: var(--ink-faint);
+  transition: opacity .6s .5s;
+}
+html.js .scrollhint { opacity: 0; }
+html.js .settled ~ .scrollhint, html.js .scrollhint.on { opacity: 1; }
+.scrollhint i {
+  width: 1px; height: 34px; background: var(--ink-faint); display: block;
+  transform-origin: top; animation: drip 1.8s ease-in-out infinite;
+}
+@keyframes drip { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+
+/* ============ 常驻 NowPlaying ============ */
+.np {
+  position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 50;
+  transform: translate(-50%, 140%);
+  display: flex; align-items: center; gap: 12px;
+  background: #15181d; color: #e8e9e4;
+  border: 1px solid rgba(232,233,228,.22);
+  padding: 8px 12px 8px 8px; border-radius: 999px;
+  box-shadow: 0 6px 24px rgba(16,18,22,.3);
+  transition: transform .45s cubic-bezier(.3, .9, .3, 1);
+  max-width: min(92vw, 480px);
+}
+.np.on { transform: translate(-50%, 0); }
+.np-disc {
+  width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; flex: none;
+  background: repeating-radial-gradient(circle at 50% 50%, #0c0d10 0 1.5px, #23252a 1.5px 3px);
+  display: grid; place-items: center;
+}
+.np-disc i {
+  width: 11px; height: 11px; border-radius: 50%; background: var(--red);
+}
+.np.playing .np-disc { animation: spin 2.6s linear infinite; }
+.np-meta { display: flex; flex-direction: column; line-height: 1.35; white-space: nowrap; }
+.np-meta b { font-family: var(--song); font-size: 13px; letter-spacing: .08em; }
+.np-meta span { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: #9a9da2; }
+.np-line { width: 90px; height: 2px; background: #34373d; flex: none; }
+.np-line i { display: block; height: 100%; width: 0%; background: var(--red); transition: width .3s linear; }
+.np-time { font-family: var(--mono); font-size: 10px; color: #9a9da2; letter-spacing: .06em; white-space: nowrap; }
+.np-close {
+  font-family: var(--mono); font-size: 13px; line-height: 1;
+  color: #9a9da2; background: none; border: none; cursor: pointer;
+  padding: 2px 4px; flex: none; transition: color .2s;
+}
+.np-close:hover { color: var(--red); }
+
+/* ============ 内页场景通用 ============ */
+/* 默认静态可见；仅 html.js 下隐藏待入场（无 JS / 脚本失败时内容完整可读） */
+.scene { padding: clamp(48px, 8vh, 96px) clamp(20px, 4.5vw, 64px); }
+html.js .scene { opacity: 0; transform: translateY(14px); transition: opacity .5s, transform .5s; }
+html.js .scene.in { opacity: 1; transform: none; }
+html.js #colophonScene { transform: none; } /* 版权页纯淡入 */
+/* 快讯与检字盘不走整幕淡入，改逐件印刷语义入场（JS 按索引写 transition-delay） */
+html.js #wireScene, html.js #caseScene { opacity: 1; transform: none; transition: none; }
+html.js #wireScene .scene-head, html.js #caseScene .scene-head {
+  opacity: 0; transform: translateY(10px); transition: opacity .45s, transform .45s;
+}
+html.js #wireScene.in .scene-head, html.js #caseScene.in .scene-head { opacity: 1; transform: none; }
+.scene-head {
+  display: flex; align-items: baseline; gap: 16px;
+  border-bottom: 1px solid var(--ink); padding-bottom: 10px; margin-bottom: 0;
+  max-width: 1240px; margin-left: auto; margin-right: auto;
+}
+.scene-head h2 { font-family: var(--song); font-weight: 900; font-size: clamp(22px, 3vw, 32px); letter-spacing: .12em; }
+.scene-head .r { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); letter-spacing: .1em; }
+
+/* 快讯：电报条 */
+.wire-item {
+  display: grid; grid-template-columns: 150px 92px 1fr; gap: 18px; align-items: baseline;
+  padding: 22px 0; border-bottom: 1px solid var(--hair);
+  position: relative; transition: padding-left .25s;
+  max-width: 1240px; margin-left: auto; margin-right: auto;
+}
+html.js #wireScene .wire-item {
+  opacity: 0; transform: translateX(-18px); /* 电报条从左印入 */
+  transition: opacity .5s, transform .5s, padding-left .25s;
+}
+html.js #wireScene.in .wire-item { opacity: 1; transform: none; }
+.wire-item::before {
+  content: ""; position: absolute; left: 0; top: 26px; bottom: 26px; width: 3px;
+  background: var(--red); transform: scaleY(0); transition: transform .25s;
+}
+.wire-time { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); letter-spacing: .06em; }
+.wire-cat { font-family: var(--sans); font-weight: 700; font-size: 12px; letter-spacing: .1em; color: var(--red); }
+.wire-body h3 { font-family: var(--song); font-weight: 900; font-size: clamp(19px, 2.2vw, 25px); letter-spacing: .04em; }
+.wire-body p { margin-top: 6px; font-size: 15px; line-height: 1.8; color: var(--ink-soft); }
+
+/* 简讯 */
+.briefs {
+  display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--hair);
+  max-width: 1240px; margin-left: auto; margin-right: auto;
+}
+.brief {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: 15px 0; border-top: 1px solid var(--hair);
+  font-size: 14px; transition: color .2s;
+}
+html.js #wireScene .brief {
+  opacity: 0; transform: translateX(-14px);
+  transition: opacity .5s, transform .5s, color .2s;
+}
+html.js #wireScene.in .brief { opacity: 1; transform: none; }
+.brief:nth-child(odd) { border-right: 1px solid var(--hair); padding-right: 22px; }
+.brief:nth-child(even) { padding-left: 22px; }
+.brief .d { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); flex: none; }
+.brief:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ============ 检字盘 ============ */
+.case-wrap { background: var(--paper-2); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+.case {
+  display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px;
+  gap: 1px; background: var(--hair); border: 1px solid var(--hair);
+  margin: 34px auto 0; max-width: 1240px;
+}
+.cell {
+  background: var(--paper); position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 14px 16px; cursor: pointer; text-align: left; border: none; font-family: inherit;
+  transition: background .22s;
+}
+html.js #caseScene .cell {
+  opacity: 0; transform: scale(.96); /* 逐格压印入场 */
+  transition: opacity .4s, transform .4s, background .22s;
+}
+html.js #caseScene.in .cell { opacity: 1; transform: none; }
+html.js #caseScene.in .cell:active { transform: translateY(1px); }
+.cell .ch-big {
+  font-family: var(--song); font-weight: 900; line-height: 1;
+  font-size: 54px; align-self: flex-end;
+  transition: transform .25s, color .22s;
+}
+.cell .meta { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: var(--ink-faint); transition: color .22s; }
+.cell .meta b { display: block; font-family: var(--sans); font-weight: 700; font-size: 13px; letter-spacing: .2em; color: var(--ink); margin-bottom: 4px; transition: color .22s; }
+.cell:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.cell:active { transform: translateY(1px); }
+.cell.big { grid-row: span 2; grid-column: span 2; }
+.cell.big .ch-big { font-size: clamp(90px, 12vw, 150px); }
+.cell.wide { grid-column: span 2; }
+.cell.pressed { background: var(--dark); }
+.cell.pressed .ch-big { color: var(--paper); }
+.cell.pressed .meta, .cell.pressed .meta b { color: #9a9da2; }
+
+/* ============ 版权页（夜间印刷间） ============ */
+.colophon {
+  background: var(--dark); color: #d7d9d2;
+  padding: clamp(56px, 9vh, 110px) clamp(20px, 4.5vw, 64px) 140px;
+}
+.colophon .quote {
+  font-family: var(--song); font-weight: 700;
+  font-size: clamp(20px, 3vw, 30px); line-height: 2; letter-spacing: .04em;
+  width: 100%; max-width: 1240px; margin-left: auto; margin-right: auto;
+  padding-right: max(0px, calc(min(100%, 1240px) - 760px)); /* 行长仍限 760，左缘齐版心 */
+}
+.colophon .quote em { color: var(--red); font-style: normal; }
+.colophon .who {
+  margin-top: 20px; font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: #7e8288;
+  max-width: 1240px; margin-left: auto; margin-right: auto;
+}
+.colophon .links {
+  margin: 7vh auto 0; display: flex; flex-wrap: wrap; gap: 0;
+  border-top: 1px solid #2a2d33; border-bottom: 1px solid #2a2d33;
+  max-width: 1240px;
+}
+.colophon .links a {
+  padding: 16px 26px 16px 0; margin-right: 26px;
+  font-family: var(--song); font-size: 15px; letter-spacing: .14em;
+  border-right: 1px solid #2a2d33; padding-right: 26px;
+  transition: color .2s;
+}
+.colophon .links a:last-child { border-right: none; }
+.colophon .links a:hover { color: var(--red); text-decoration: underline; text-underline-offset: 4px; }
+.colophon .links a:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.colophon .fineline {
+  margin: 34px auto 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: #8f939a;
+  max-width: 1240px;
+}
+
+/* ============ 悬停：仅在有指针的设备上启用，触屏给静态线索 ============ */
+@media (hover: hover) {
+  .replay:hover { border-color: var(--red); color: var(--red); }
+  .byline .readmore:hover { color: var(--red); text-decoration: underline; text-underline-offset: 4px; }
+  .wire-item:hover { padding-left: 16px; }
+  .wire-item:hover::before { transform: scaleY(1); }
+  .brief:hover { color: var(--red); text-decoration: underline; text-underline-offset: 4px; }
+  .cell:hover { background: var(--ink); }
+  .cell:hover .ch-big { color: var(--paper); transform: translateY(-4px); }
+  .cell:hover .meta, .cell:hover .meta b { color: #b9bcb0; }
+  .cell.pressed:hover { background: #000; }
+  .colophon .links a:hover { color: var(--red); text-decoration: underline; text-underline-offset: 4px; }
+  .np-close:hover { color: var(--red); }
+}
+@media (hover: none) {
+  /* 触屏无 hover：电报条红标尺常显（半透明），给出可点线索 */
+  .wire-item::before { transform: scaleY(1); opacity: .35; }
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 1100px) {
+  .vinyl-scene { position: relative; right: auto; bottom: auto; margin-top: 5vh; align-self: flex-end; }
+}
+@media (max-width: 860px) {
+  .hero { padding-left: 14px; padding-right: 14px; } /* 给章与末字让出咬合空间 */
+  .mast-side { display: none; } /* 竖排行留在桌面，手机上不再撑高报头 */
+  .seal { width: 48px; height: 48px; font-size: 16px; border-width: 2.5px; }
+  .dateline { flex-wrap: wrap; gap: 4px 12px; }
+  .dateline span { white-space: nowrap; }
+  .replay { margin-left: 8px; padding: 3px 8px; }
+  .scrollhint { position: static; margin-top: 4vh; }
+  .wire-item { grid-template-columns: 1fr; gap: 6px; }
+  .briefs { grid-template-columns: 1fr; }
+  .brief:nth-child(odd) { border-right: none; padding-right: 0; }
+  .brief:nth-child(even) { padding-left: 0; }
+  .case { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 130px; }
+  .cell.big { grid-column: span 2; }
+  .np-line { width: 50px; }
+}
+@media (max-width: 360px) {
+  .scene-head { flex-wrap: wrap; gap: 4px 12px; }
+  .vinyl-scene { transform: scale(.68); transform-origin: bottom right; }
+  html.js .vinyl-scene { transform: translateY(12px) scale(.68); }
+  html.js .settled .vinyl-scene { transform: scale(.68); }
+  .case { grid-auto-rows: 110px; }
+  .cell .ch-big { font-size: 44px; }
+  .cell.big .ch-big { font-size: 72px; }
+}
+/* 矮视口压实：保证首屏一屏放下，滚动提示落在折叠线内 */
+@media (max-height: 680px) {
+  .hero { padding-bottom: 64px; }
+  .mast { font-size: clamp(34px, 5vw, 52px); }
+  .mastrow { padding: 8px 0 10px; }
+  .mast-en { margin-top: 6px; }
+  .stage { padding: 2vh 0; }
+  .kicker { margin-bottom: 1.6vh; }
+  .after { margin-top: 2.6vh; }
+  .byline { margin-top: 1.4vh; }
+  .vinyl-scene { transform: scale(.82); transform-origin: bottom right; }
+  html.js .vinyl-scene { transform: translateY(12px) scale(.82); }
+  html.js .settled .vinyl-scene { transform: scale(.82); }
+}
+/* bottom 偏移只在黑胶绝对定位时（宽屏）有意义，relative 下会把它顶飞 */
+@media (max-height: 680px) and (min-width: 1101px) {
+  .vinyl-scene { bottom: 3vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  html.js .kicker, html.js .dek, html.js .byline, html.js .vinyl-scene, html.js .scrollhint,
+  html.js .scene, html.js .scene-head, html.js .wire-item, html.js .brief, html.js .cell {
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
+  .seal { transition: none; }
+  .vinyl { transition: none; }
+  .vinyl .disc.spin, .np.playing .np-disc, .scrollhint i { animation: none; }
+}
+
+/* ============ 打印：自称付印的报纸必须能付印 ============ */
+@media print {
+  html.js .kicker, html.js .dek, html.js .byline, html.js .vinyl-scene,
+  html.js .scene, html.js .scene-head, html.js .wire-item, html.js .brief, html.js .cell,
+  .lead-title, .seal {
+    opacity: 1 !important; transform: none !important; visibility: visible !important; transition: none !important;
+  }
+  .lead-title .ch { position: static !important; transform: none !important; } /* 字面意义地收字付印 */
+  .seal { filter: none; }
+  .np, .replay, .scrollhint { display: none !important; }
+  body { background-image: none; }
+  .colophon { background: #fff; color: #14161a; }
+  .colophon .quote em, .colophon .links a { color: #14161a; }
+  .colophon .who, .colophon .fineline { color: #555; }
+  .colophon .links { border-color: #ccc; }
+  .colophon .links a { border-color: #ccc; }
+}
+</style>
+</head>
+<body>
+
+<!-- 付印章崩边滤镜（feTurbulence 位移，轻微不规则边） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="sealRough" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<!-- ================= 头版 ================= -->
+<header class="hero" id="hero">
+  <div class="dateline">
+    <span>2026年9月24日 · 星期四</span>
+    <span class="r">第 24 期 · 今日四版<button class="replay" id="replay">↻ 重排</button></span>
+  </div>
+
+  <div class="mastrow">
+    <div>
+      <div class="mast">曲線時報</div>
+      <div class="mast-en">The Curve Times</div>
+    </div>
+    <div class="mast-side">岁次丙午 · 九月号</div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="kicker">本报头条 · 随笔</div>
+    <div class="lead-wrap">
+      <a class="lead-link" href="#"><h1 class="lead-title" id="leadTitle" aria-label="她不只是一个用户名">她不只是一个用户名</h1></a>
+      <div class="seal" id="seal">付印</div>
+    </div>
+    <div class="after">
+      <p class="dek">关于一个人留下的记录、公开的悼念，<br>以及 AI 能否补全那些从未被记录的空白。</p>
+      <div class="byline">
+        <span>本报记者 <b>Sy</b></span>
+        <span>随笔</span>
+        <span>约 4300 字</span>
+        <span>阅读约 12 分钟</span>
+        <a class="readmore" href="#">阅读全文</a>
+      </div>
+    </div>
+
+    <!-- 黑胶：今日曲目 -->
+    <div class="vinyl-scene" id="vinylScene">
+      <div class="sleeve">
+        <div class="sleeve-meta">今日曲目<br><b>依菲雅</b></div>
+        <div class="sleeve-foot">03:47 · 依菲雅页音轨</div>
+      </div>
+      <button class="vinyl" id="vinyl" aria-label="播放或暂停今日曲目">
+        <span class="disc" id="disc"><i>曲線</i></span>
+      </button>
+      <div class="vinyl-hint" id="vinylHint">点击唱片 · 播放</div>
+    </div>
+  </div>
+
+  <div class="scrollhint" id="scrollhint"><i></i>内页 · 向下滚动</div>
+</header>
+
+<!-- ================= 今晨快讯 ================= -->
+<section class="scene" id="wireScene">
+  <div class="scene-head">
+    <h2>电讯 · 近三日</h2>
+    <span class="r">二版 · 截稿 06:00</span>
+  </div>
+
+  <a class="wire-item" href="#">
+    <span class="wire-time">09-22 23:47</span>
+    <span class="wire-cat">【纪念】</span>
+    <div class="wire-body">
+      <h3>晚安喵</h3>
+      <p>一只猫的离去，和一场迟到了很久的告别。</p>
+    </div>
+  </a>
+  <a class="wire-item" href="#">
+    <span class="wire-time">09-19 08:12</span>
+    <span class="wire-cat">【随笔】</span>
+    <div class="wire-body">
+      <h3>没有下一版</h3>
+      <p>有些软件停在最终版，有些人停在最后一面。</p>
+    </div>
+  </a>
+  <a class="wire-item" href="#">
+    <span class="wire-time">09-15 22:03</span>
+    <span class="wire-cat">【随笔】</span>
+    <div class="wire-body">
+      <h3>过期的存档点</h3>
+      <p>游戏存档会过期，记忆不会——但它会改变格式。</p>
+    </div>
+  </a>
+
+  <div class="briefs" style="margin-top: 0;">
+    <a class="brief" href="#"><span class="d">09-11</span>六月没有主线任务</a>
+    <a class="brief" href="#"><span class="d">09-06</span>依恋的形状</a>
+    <a class="brief" href="#"><span class="d">08-30</span>维权报告：一次成功</a>
+    <a class="brief" href="#"><span class="d">08-24</span>DeepSeek 问候</a>
+  </div>
+</section>
+
+<!-- ================= 检字盘 ================= -->
+<section class="case-wrap">
+  <div class="scene" id="caseScene">
+    <div class="scene-head">
+      <h2>栏目 · 检字盘</h2>
+      <span class="r">三版 · 七格 · 按需取字</span>
+    </div>
+    <div class="case">
+      <button class="cell big">
+        <span class="meta"><b>随笔</b>十四篇 · 不定时更新</span>
+        <span class="ch-big">随</span>
+      </button>
+      <button class="cell">
+        <span class="meta"><b>纪念</b>三篇</span>
+        <span class="ch-big">念</span>
+      </button>
+      <button class="cell">
+        <span class="meta"><b>教程</b>四篇</span>
+        <span class="ch-big">教</span>
+      </button>
+      <button class="cell">
+        <span class="meta"><b>维权</b>二篇</span>
+        <span class="ch-big">权</span>
+      </button>
+      <button class="cell">
+        <span class="meta"><b>工具箱</b>一篇</span>
+        <span class="ch-big">具</span>
+      </button>
+      <button class="cell wide">
+        <span class="meta"><b>光影</b>不定期 · 相册</span>
+        <span class="ch-big">影</span>
+      </button>
+      <button class="cell wide pressed">
+        <span class="meta"><b>依菲雅</b>专题页 · 常设</span>
+        <span class="ch-big">依</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 版权页 ================= -->
+<footer class="colophon scene" id="colophonScene">
+  <p class="quote"><em>「</em>我总希望能给别人带来欢乐，<br>但最终带来的几乎只是烦恼。<em>」</em></p>
+  <div class="who">—— 编者识 · SY · 四版</div>
+  <nav class="links">
+    <a href="#">存档</a><a href="#">索引</a><a href="#">友链</a><a href="#">关于编者</a><a href="#">RSS 订阅</a>
+  </nav>
+  <div class="fineline">
+    <span>曲線時報 · 2026-09-24 06:00 开印 · 今日已付印</span>
+    <span>概念预览 v3 · 落字动画与唱片为演示</span>
+  </div>
+</footer>
+
+<!-- ================= 常驻 NowPlaying ================= -->
+<div class="np" id="np">
+  <button class="np-disc" id="npToggle" aria-label="播放或暂停"><i></i></button>
+  <div class="np-meta"><b>依菲雅</b><span id="npState">已暂停</span></div>
+  <div class="np-line"><i id="npProg"></i></div>
+  <div class="np-time" id="npTime">00:00 / 03:47</div>
+  <button class="np-close" id="npClose" aria-label="关闭播放条">×</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  window.__v3boot = 1; // 告知 head 内联脚本：主脚本已启动，别摘 js 类
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- 落字排版 ---------- */
+  var title = document.getElementById('leadTitle');
+  var stage = document.getElementById('stage');
+  var seal = document.getElementById('seal');
+  var scrollhint = document.getElementById('scrollhint');
+  var chars = [], targets = [], states = [], rafId = null, done = false;
+
+  function splitChars() {
+    if (chars.length) return;
+    var text = title.textContent;
+    title.textContent = '';
+    for (var i = 0; i < text.length; i++) {
+      var s = document.createElement('span');
+      s.className = 'ch';
+      s.setAttribute('aria-hidden', 'true'); // 读屏走 h1 的 aria-label，不逐字拼读
+      s.textContent = text[i];
+      title.appendChild(s);
+      chars.push(s);
+    }
+  }
+
+  function measure() {
+    splitChars();
+    chars.forEach(function (s) {
+      s.style.position = ''; s.style.left = ''; s.style.top = ''; s.style.transform = '';
+    });
+    title.style.height = '';
+    title.style.fontSize = '';
+    // 自适应字号：折行过多 / 不可断行溢出时逐档降，下限 30px
+    var n = chars.length, stageW = stage.clientWidth, guard = 0;
+    while (guard++ < 12) {
+      var cs = parseFloat(getComputedStyle(title).fontSize);
+      var lh = parseFloat(getComputedStyle(title).lineHeight);
+      var r0 = title.getBoundingClientRect();
+      var lines = Math.max(1, Math.round(r0.height / lh));
+      var overflowX = title.scrollWidth > title.clientWidth + 1;
+      // 短标题优先保住单行（一行放得下才收缩）；长标题允许两行
+      var oneLineFeasible = n * cs * 1.04 <= stageW;
+      var tooManyLines = lines > 2 || (n <= 10 && lines > 1 && oneLineFeasible);
+      if ((!tooManyLines && !overflowX) || cs <= 30) break;
+      title.style.fontSize = Math.max(30, cs - 4) + 'px';
+    }
+    var tr = title.getBoundingClientRect();
+    targets = chars.map(function (s) {
+      var r = s.getBoundingClientRect();
+      return { x: r.left - tr.left, y: r.top - tr.top, w: r.width, h: r.height };
+    });
+    title.style.height = tr.height + 'px';
+    chars.forEach(function (s, i) {
+      s.style.position = 'absolute';
+      s.style.left = targets[i].x + 'px';
+      s.style.top = '0px';
+      s.style.transform = 'translateY(' + targets[i].y + 'px)';
+    });
+    // 付印章：盖在标题末字右下腹，咬纸深度 ≤ 末字宽 35%（咬角不盖脸）；
+    // 右界不足时先尝试整个探到末字右侧，再退化到界内咬合；界取标题盒与舞台的较窄者
+    var last = targets[targets.length - 1];
+    var sw = seal.offsetWidth;
+    var stageRect = stage.getBoundingClientRect();
+    var bound = Math.min(stageRect.right, tr.right) - 4 - tr.left; // 章右缘上限（相对 title 左缘）
+    var maxSx = bound - sw;
+    var bite = Math.min(44, last.w * 0.35);
+    var sx;
+    if (last.x > 70) {
+      sx = last.x + last.w - bite;
+      if (sx > maxSx) {
+        var rightSx = last.x + last.w + 12;
+        sx = (rightSx + sw <= bound) ? rightSx : maxSx;
+      }
+    } else {
+      sx = last.x + last.w + 12;
+      if (sx > maxSx) sx = maxSx;
+    }
+    seal.style.left = Math.max(4, sx) + 'px';
+    seal.style.top = (last.y + last.h - sw * 0.85) + 'px';
+    title.classList.add('ready'); // 定位完成，允许显示（此前 html.js 下隐藏防 FOUC）
+  }
+
+  function placeFinal() {
+    chars.forEach(function (s, i) {
+      s.style.transform = 'translateY(' + targets[i].y + 'px) rotate(0deg)';
+    });
+    settle();
+  }
+
+  function fall() {
+    if (rafId) cancelAnimationFrame(rafId);
+    done = false;
+    stage.classList.remove('settled');
+    seal.classList.remove('on');
+    scrollhint.classList.remove('on');
+    // 起点：报头双线之上（落字区 overflow:hidden，字从线后落下）
+    var titleTopInStage = title.getBoundingClientRect().top - stage.getBoundingClientRect().top;
+    states = chars.map(function (s, i) {
+      return {
+        y: targets[i].y - titleTopInStage - 130 - Math.random() * 260,
+        vy: 0,
+        rot: (Math.random() - 0.5) * 60,
+        vr: (Math.random() - 0.5) * 150,
+        delay: 120 + i * 85 + Math.random() * 90,
+        rest: false, done: false
+      };
+    });
+    // 立刻写入初始位置，避免延迟期内字停留在落点造成"瞬移"
+    chars.forEach(function (s, i) {
+      s.style.transform = 'translateY(' + states[i].y + 'px) rotate(' + states[i].rot + 'deg)';
+    });
+    var t0 = performance.now(), last = t0;
+    function tick(now) {
+      var dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      var elapsed = now - t0, allRest = true;
+      for (var i = 0; i < chars.length; i++) {
+        var st = states[i], ty = targets[i].y;
+        if (st.done) continue;
+        if (!st.rest) {
+          if (elapsed < st.delay) { allRest = false; continue; }
+          st.vy += 2600 * dt;               // 重力
+          st.y += st.vy * dt;
+          st.rot += st.vr * dt;
+          st.vr *= Math.pow(0.05, dt);      // 角速度衰减
+          if (st.y >= ty && st.vy > 0) {
+            st.y = ty;
+            st.vy = -st.vy * 0.34;          // 落地弹跳
+            st.vr = -st.vr * 0.4;
+            if (Math.abs(st.vy) < 110) { st.vy = 0; st.rest = true; } // 垂直静止，旋转不清零
+          }
+        } else {
+          // 落地后旋转继续指数衰减到 0，不再瞬间吸平
+          st.rot *= Math.pow(0.001, dt);
+          if (Math.abs(st.rot) < 0.4) { st.rot = 0; st.done = true; }
+        }
+        if (!st.done) allRest = false;
+        chars[i].style.transform = 'translateY(' + st.y + 'px) rotate(' + st.rot + 'deg)';
+      }
+      if (allRest) { settle(); return; }
+      rafId = requestAnimationFrame(tick);
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function settle() {
+    if (done) return;
+    done = true;
+    stage.classList.add('settled');
+    scrollhint.classList.add('on');
+    setTimeout(function () { seal.classList.add('on'); }, 320);
+  }
+
+  // 「付印」是一日一次的仪式：当天首访看完整落字，当日回访直接见落定盖章态（↻重排仍可复玩）
+  var firstToday = true;
+  try {
+    var dayKey = new Date().toDateString();
+    if (localStorage.getItem('v3-press-date') === dayKey) firstToday = false;
+    else localStorage.setItem('v3-press-date', dayKey);
+  } catch (e) { /* 隐私模式等场景：每次都当首访 */ }
+
+  function start(force) {
+    measure();
+    if (reduced || (!force && !firstToday)) { placeFinal(); return; }
+    fall();
+  }
+
+  // 字体就绪后再测量，避免宋体加载导致落点偏移
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { start(false); });
+  } else {
+    window.addEventListener('load', function () { start(false); });
+  }
+
+  // 重排：瞬时回顶再测量（平滑滚动中测量会拿到滚动中的坐标）
+  document.getElementById('replay').addEventListener('click', function () {
+    window.scrollTo(0, 0);
+    requestAnimationFrame(function () { start(true); });
+  });
+
+  // 尺寸变化：已落定则直接重排定位，不做动画
+  var rzT = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(rzT);
+    rzT = setTimeout(function () {
+      if (rafId) cancelAnimationFrame(rafId);
+      measure();
+      if (done) placeFinal(); else fall();
+    }, 220);
+  });
+
+  /* ---------- 黑胶 + NowPlaying ---------- */
+  var DURATION = 227; // 03:47
+  var vinyl = document.getElementById('vinyl');
+  var disc = document.getElementById('disc');
+  var vinylHint = document.getElementById('vinylHint');
+  var np = document.getElementById('np');
+  var npToggle = document.getElementById('npToggle');
+  var npProg = document.getElementById('npProg');
+  var npTime = document.getElementById('npTime');
+  var npState = document.getElementById('npState');
+  var npClose = document.getElementById('npClose');
+  var playing = false, cur = 0, timer = null;
+  var npOn = false, npDismissed = false;
+
+  function syncNp() {
+    np.classList.toggle('on', npOn && !npDismissed);
+  }
+
+  function fmt(s) {
+    var m = Math.floor(s / 60), ss = Math.floor(s % 60);
+    return (m < 10 ? '0' : '') + m + ':' + (ss < 10 ? '0' : '') + ss;
+  }
+  function render() {
+    npProg.style.width = (cur / DURATION * 100) + '%';
+    npTime.textContent = fmt(cur) + ' / ' + fmt(DURATION);
+  }
+  function setPlaying(p) {
+    playing = p;
+    vinyl.classList.toggle('out', p);
+    disc.classList.toggle('spin', p && !reduced);
+    np.classList.toggle('playing', p && !reduced);
+    vinylHint.textContent = p ? '播放中 · 再按暂停' : '点击唱片 · 播放';
+    npState.textContent = p ? '播放中' : '已暂停';
+    if (p) npDismissed = false; // 再次开播时召回被关闭的胶囊
+    syncNp();
+    clearInterval(timer);
+    if (p) {
+      timer = setInterval(function () {
+        cur += 0.25;
+        if (cur >= DURATION) { cur = 0; setPlaying(false); }
+        render();
+      }, 250);
+    }
+  }
+  // 整个唱片场景都可点（按钮本体只留键盘可达性，点击统一走场景，避免冒泡双触发）
+  document.getElementById('vinylScene').addEventListener('click', function () { setPlaying(!playing); });
+  npToggle.addEventListener('click', function () { setPlaying(!playing); });
+  npClose.addEventListener('click', function () {
+    npDismissed = true;
+    syncNp();
+  });
+  render();
+
+  // 黑胶场景离屏即浮出常驻条（与头版实际高度无关，避免同框）
+  var npIO = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      npOn = !e.isIntersecting;
+      syncNp();
+    });
+  }, { threshold: 0 });
+  npIO.observe(document.getElementById('vinylScene'));
+
+  /* ---------- 内页场景进入：逐件错峰入场 ---------- */
+  // 预先按索引写 transition-delay（入场完成后清除，避免拖累 hover 过渡）
+  function stagger(sel, step, base) {
+    return Array.prototype.slice.call(document.querySelectorAll(sel)).map(function (el, i) {
+      el.style.transitionDelay = ((base || 0) + i * step) + 'ms';
+      return el;
+    });
+  }
+  var stWire = stagger('#wireScene .wire-item', 110).concat(stagger('#wireScene .brief', 60, 340));
+  var stCase = stagger('#caseScene .cell', 70);
+  function clearDelays(els) {
+    els.forEach(function (el) { el.style.transitionDelay = ''; });
+  }
+
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+      if (e.target.id === 'wireScene') setTimeout(function () { clearDelays(stWire); }, 1300);
+      if (e.target.id === 'caseScene') setTimeout(function () { clearDelays(stCase); }, 1000);
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.scene').forEach(function (s) { io.observe(s); });
+})();
+</script>
+</body>
+</html>

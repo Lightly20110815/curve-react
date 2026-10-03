@@ -10,7 +10,8 @@ tags:
   - 数字复现
   - AI 对话
 description: 关于一个人留下的记录、公开的悼念，以及 AI 能否补全那些从未被记录的空白。
-articleGPT: true
+articleGPT: false
+zen: true
 ---
 
 <blockquote aria-label="引言" style="border: 1px solid hsl(var(--rule-soft) / 0.7); border-left: 3px solid hsl(var(--stamp));">

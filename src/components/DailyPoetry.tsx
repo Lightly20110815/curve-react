@@ -265,7 +265,7 @@ export function DailyPoetry() {
           <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
             Daily Poetry
           </p>
-          <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-stamp/85">
+          <p className="font-ui text-[11px] font-medium uppercase tracking-[0.12em] text-stamp">
             {timeThemeInfo.label}版
           </p>
         </div>

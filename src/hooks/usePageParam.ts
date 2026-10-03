@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { scrollBehavior } from "@/lib/utils";
 
 /**
  * Page index synced to the `?page=N` URL search param.
@@ -21,7 +22,7 @@ export function usePageParam(totalPages: number, defaultPage = 1) {
       if (clamped <= 1) next.delete("page");
       else next.set("page", String(clamped));
       setParams(next, { replace: false });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     },
     [params, setParams, totalPages],
   );

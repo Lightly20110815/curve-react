@@ -83,7 +83,7 @@ export function NowPlaying() {
           onClick={() => nowPlaying.togglePlay()}
           className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-[hsl(var(--rule-soft)/0.48)] bg-[hsl(var(--paper-warm))] transition-colors ${
             nowPlaying.isPlaying
-              ? "animate-[spin_12s_linear_infinite] border-[hsl(var(--stamp))]"
+              ? "animate-[spin_12s_linear_infinite] motion-reduce:animate-none border-[hsl(var(--stamp))]"
               : ""
           }`}
           aria-label={nowPlaying.isPlaying ? "暂停" : "播放"}
@@ -127,7 +127,7 @@ export function NowPlaying() {
             <div
               className={`text-[0.9rem] font-semibold leading-snug text-[hsl(var(--ink-body))] ${
                 needsMarquee
-                  ? "inline-flex w-max animate-[marquee-scroll_8s_linear_infinite]"
+                  ? "inline-flex w-max animate-[marquee-scroll_8s_linear_infinite] motion-reduce:animate-none"
                   : "block truncate"
               }`}
               title={track?.name}
@@ -189,7 +189,7 @@ export function NowPlaying() {
             {[0, 1, 2, 3].map((i) => (
               <span
                 key={i}
-                className="w-[3px] rounded-sm bg-[hsl(var(--stamp))] opacity-60"
+                className="w-[3px] rounded-sm bg-[hsl(var(--stamp))] opacity-60 motion-reduce:!animate-none"
                 style={{
                   animation: "visualizer-bounce 0.8s ease-in-out infinite alternate",
                   animationDelay: `${(i + 1) * 0.15}s`,

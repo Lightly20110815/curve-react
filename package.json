@@ -7,12 +7,13 @@
   "scripts": {
     "content": "tsx scripts/build-content.ts",
     "manifest": "tsx scripts/generate-music-manifest.ts",
-    "dev": "pnpm run content && pnpm run manifest && vite",
-    "build": "pnpm run content && pnpm run manifest && vite build",
+    "images": "tsx scripts/build-images.ts",
+    "dev": "pnpm run content && pnpm run manifest && pnpm run images && vite",
+    "build": "pnpm run content && pnpm run manifest && pnpm run images && vite build",
     "check": "pnpm run typecheck && pnpm run build",
     "test:deepseek": "tsx scripts/test-deepseek.ts",
     "preview": "vite preview",
-    "typecheck": "pnpm run content && pnpm run manifest && tsc --noEmit"
+    "typecheck": "pnpm run content && pnpm run manifest && pnpm run images && tsc --noEmit"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

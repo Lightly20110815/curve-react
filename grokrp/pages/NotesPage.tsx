@@ -1,0 +1,103 @@
+import { useState } from "react";
+import { Pin } from "lucide-react";
+import { TwikooCommentsPanel } from "@/components/TwikooComments";
+import { PageHeader } from "@/components/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { Kicker } from "@/components/Editorial";
+import { notes } from "@/content/notes";
+import { useAsOf } from "@/hooks/useAsOf";
+import { filterByAsOf } from "@/lib/as-of";
+import { formatArticleDateline } from "@/lib/han-date";
+import { comments } from "@/lib/site";
+import { cn } from "@/lib/utils";
+
+export default function NotesPage() {
+  const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+  const { asOf } = useAsOf();
+  const visibleNotes = filterByAsOf(notes, asOf);
+
+  function toggleComments(noteSlug: string) {
+    setOpenComments((prev) => ({ ...prev, [noteSlug]: !prev[noteSlug] }));
+  }
+
+  return (
+    <div className="container py-10 md:py-14">
+      <PageHeader
+        kicker="OPINION · 随笔"
+        title="编者的便签本"
+        description="没想清楚的、即时的、碎碎念。不打磨，不归类，写完就贴。"
+      />
+
+      <ol className="mx-auto mt-12 max-w-2xl space-y-12">
+        {visibleNotes.map((n, i) => (
+          <li key={n.slug}>
+            <article className="relative">
+              {n.top && (
+                <Pin
+                  className="absolute -left-7 top-2 h-3.5 w-3.5 text-stamp"
+                  aria-label="置顶"
+                />
+              )}
+              <div className="flex items-baseline justify-between border-b-2 border-rule pb-2">
+                <div className="flex items-center gap-2">
+                  <Kicker variant="stamp">№ {String(i + 1).padStart(2, "0")}</Kicker>
+                  {n.mood && (
+                    <span className="text-[18px] leading-none" aria-hidden>
+                      {n.mood}
+                    </span>
+                  )}
+                </div>
+                <time className="font-ui text-[12px] font-medium uppercase text-ink-muted">
+                  {formatArticleDateline(n.date)}
+                </time>
+              </div>
+              <h2 className="mt-4 font-display text-[30px] font-bold leading-[1.25] text-ink-strong">
+                {n.title}
+              </h2>
+              <div
+                className="prose-news mt-4 text-[17px]"
+                dangerouslySetInnerHTML={{ __html: n.html }}
+              />
+              {n.tags.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-1.5">
+                  {n.tags.map((t) => (
+                    <Badge key={t} variant="soft" size="sm">
+                      #{t}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {comments.enabled && comments.twikoo.envId ? (
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => toggleComments(n.slug)}
+                    className={cn(
+                      "inline-flex items-center gap-2 border-b border-rule pb-1 font-ui text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-muted transition-colors hover:border-stamp hover:text-stamp",
+                      openComments[n.slug] ? "border-stamp text-stamp" : "",
+                    )}
+                  >
+                    {openComments[n.slug] ? "收起评论" : "展开评论"}
+                  </button>
+
+                  {openComments[n.slug] ? (
+                    <TwikooCommentsPanel
+                      key={n.slug}
+                      pageKey={`/notes/${n.slug}`}
+                      variant="note"
+                    />
+                  ) : null}
+                </div>
+              ) : null}
+            </article>
+
+          </li>
+        ))}
+        {visibleNotes.length === 0 && (
+          <p className="text-center font-serif italic text-ink-muted">还没写过随笔。</p>
+        )}
+      </ol>
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { createDystopiaRenderer } from "./dystopia/renderer";
 import { acts, getActAt } from "./dystopia/score";
 import "./dystopia/dystopia.css";
@@ -27,6 +28,10 @@ export default function DystopiaDarkroom({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const closeRef = useRef(onClose);
   const exitingRef = useRef(false);
+
+  // Focus in/out is handled by the mount effect below; this only adds the
+  // Tab cycle and takes the covered page out of the accessibility tree.
+  useFocusTrap(dialogRef, true, { manageFocus: false });
   const hideTimer = useRef<ReturnType<typeof setTimeout>>();
   const exitTimer = useRef<ReturnType<typeof setTimeout>>();
   const transientTimer = useRef<ReturnType<typeof setTimeout>>();

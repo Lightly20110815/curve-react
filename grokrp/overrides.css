@@ -1,0 +1,33 @@
+.prose-news-article > p:first-of-type::first-letter {
+  float: none;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+.prose-news blockquote {
+  margin: 1.35em 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-style: italic;
+}
+
+.dark .prose-news blockquote {
+  background: transparent;
+  border-left-color: transparent;
+}
+
+.prose-news hr::after {
+  content: none;
+}
+
+.prose-news ul li::marker,
+.prose-news ol li::marker {
+  color: hsl(var(--ink-muted));
+  font-family: inherit;
+  font-size: inherit;
+}

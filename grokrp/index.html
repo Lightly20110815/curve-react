@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#e3d3ab" />
+    <title>The Curve Times · 曲線時報</title>
+    <meta name="description" content="一份个人早报。没有发刊周期，想写才出刊。" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("curve-theme");
+          var pref =
+            stored === "auto" || stored === "light" || stored === "dark"
+              ? stored
+              : "auto";
+          var dark =
+            pref === "dark" ||
+            (pref === "auto" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var hour = new Date().getHours();
+          var timeTheme =
+            hour >= 5 && hour < 8 ? "dawn" :
+            hour >= 17 && hour < 20 ? "dusk" :
+            (hour >= 22 || hour < 5) ? "deep-night" :
+            "day";
+          var lightChrome =
+            timeTheme === "dawn" ? "#efe1be" :
+            timeTheme === "dusk" ? "#dcc197" :
+            timeTheme === "deep-night" ? "#d8dbdf" :
+            "#e3d3ab";
+          var darkChrome =
+            timeTheme === "dawn" ? "#241b14" :
+            timeTheme === "dusk" ? "#21160f" :
+            timeTheme === "deep-night" ? "#10191d" :
+            "#1a1a1a";
+
+          document.documentElement.dataset.timeTheme = timeTheme;
+
+          if (dark) {
+            document.documentElement.classList.add("dark");
+            document.documentElement.style.colorScheme = "dark";
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", darkChrome);
+          } else {
+            document.documentElement.classList.remove("dark");
+            document.documentElement.style.colorScheme = "light";
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", lightChrome);
+          }
+        } catch (_) {
+          document.documentElement.style.colorScheme = "light";
+        }
+      })();
+    </script>
+
+    <style>
+      html, body, * {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      ::-webkit-scrollbar,
+      *::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+      }
+      html { background-color: #e3d3ab; }
+      html[data-time-theme="dawn"] { background-color: #efe1be; }
+      html[data-time-theme="dusk"] { background-color: #dcc197; }
+      html[data-time-theme="deep-night"] { background-color: #d8dbdf; }
+      html.dark { background-color: #1a1a1a; }
+      html.dark[data-time-theme="dawn"] { background-color: #241b14; }
+      html.dark[data-time-theme="dusk"] { background-color: #21160f; }
+      html.dark[data-time-theme="deep-night"] { background-color: #10191d; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/main.tsx"></script>
+  </body>
+</html>

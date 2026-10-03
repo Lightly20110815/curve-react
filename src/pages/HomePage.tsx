@@ -4,6 +4,7 @@ import { DailyPoetry } from "@/components/DailyPoetry";
 import { HomeTerminalEasterEgg } from "@/components/HomeTerminalEasterEgg";
 import { PostCard } from "@/components/PostCard";
 import { Kicker, Ornament } from "@/components/Editorial";
+import { BroadcastWave } from "@/components/BroadcastWave";
 import { Badge } from "@/components/ui/badge";
 import { posts, getAllCategories, getAllTags } from "@/content/posts";
 import { notes } from "@/content/notes";
@@ -94,6 +95,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 播出记录 — 全部期目铺在一条时间轴上 */}
+      {visiblePosts.length > 0 && (
+        <section className="mt-14 md:mt-16">
+          <BroadcastWave posts={visiblePosts} asOf={asOf} />
+        </section>
+      )}
+
       {/* MORE HEADLINES + EDITOR'S DESK side-by-side */}
       <section className="mt-14 grid items-start gap-12 md:grid-cols-[1.45fr_0.95fr] md:gap-14">
         <div>
@@ -126,7 +134,7 @@ export default function HomePage() {
             <p className="mt-4 font-ui text-[11px] text-ink-muted">
               —— Sy，偶尔把这里当草稿纸。
             </p>
-            <p className="mt-3 max-w-sm font-serif text-[15px] italic leading-[1.8] text-stamp/80">
+            <p className="mt-3 max-w-sm font-serif text-[15px] italic leading-[1.8] text-stamp">
               有些段落文字，会在今天失控。
             </p>
           </div>

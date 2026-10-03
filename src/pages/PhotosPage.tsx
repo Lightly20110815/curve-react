@@ -5,6 +5,8 @@ import { TwikooComments } from "@/components/TwikooComments";
 import { Kicker, Ornament } from "@/components/Editorial";
 import { photoAlbums, allPhotos, type Photo } from "@/lib/photos";
 import { formatArticleDateline } from "@/lib/han-date";
+import { imageSrcSet } from "@/lib/responsive-image";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 function PhotoCard({
   photo,
@@ -23,8 +25,13 @@ function PhotoCard({
       >
         <img
           src={photo.src}
+          srcSet={imageSrcSet(photo.src)}
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           alt={photo.title}
           loading="lazy"
+          decoding="async"
+          width={photo.width}
+          height={photo.height}
           className="w-full transition-transform duration-700 sm:group-hover:scale-105"
           style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
         />
@@ -99,8 +106,11 @@ function Lightbox({
   const [loaded, setLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+
+  useFocusTrap(dialogRef, true);
 
   useEffect(() => {
     setLoaded(false);
@@ -160,12 +170,15 @@ function Lightbox({
 
   return (
     <div
+      ref={dialogRef}
       className="hidden sm:flex fixed inset-0 z-[100] items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in select-none px-3 py-10 sm:p-6"
       onClick={onClose}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       role="dialog"
       aria-modal="true"
+      aria-label={`照片查看器：${photo.title}`}
+      tabIndex={-1}
     >
       {/* Top Bar: Counter & Close Button (Safe-Area Aware) */}
       <div
@@ -255,6 +268,8 @@ function Lightbox({
                 key={photo.src}
                 ref={imgRef}
                 src={photo.src}
+                srcSet={imageSrcSet(photo.src)}
+                sizes="100vw"
                 alt={photo.title}
                 loading="eager"
                 decoding="async"
